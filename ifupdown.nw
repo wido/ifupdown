@@ -11,7 +11,7 @@
 \let\nwdocspar=\relax
 
 \title{ Interface Tools\thanks{
-Copyright \copyright\ 1999,2000 Anthony Towns. This program is free
+Copyright \copyright\ 1999--2005 Anthony Towns. This program is free
 software; you can redistribute it and/or modify it under the terms of
 the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any
@@ -222,7 +222,7 @@ conservative, so we'll encourage it to use a more entertaining method
 of compiling source code.
 
 <<make options>>=
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.4"'
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.5"'
 CC := gcc
 @ 
 
@@ -3059,7 +3059,7 @@ static void usage(char *execname) {
 <<main functions>>=
 static void version(char *execname) {
 	printf("%s version " IFUPDOWN_VERSION "\n", execname);
-	printf("Copyright (c) 1999,2000 Anthony Towns\n\n");
+	printf("Copyright (c) 1999-2005 Anthony Towns\n\n");
 	printf(
 
 "This program is free software; you can redistribute it and/or modify\n"
