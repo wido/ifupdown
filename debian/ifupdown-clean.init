@@ -21,6 +21,7 @@ case "$1" in
     if [ -f $IFSTATE -a ! -L $IFSTATE ]; then
       rm -f "$IFSTATE"
     elif [ -f $IFSTATE ]; then
+      # This is kinda bad :(
       >$IFSTATE
     fi
     echo "done."

@@ -17,6 +17,7 @@ then
   db_get ifupdown/convert-interfaces;    ATTEMPT_CONVERSION="$RET"
 fi
 
+# Update /etc/network/interfaces from "noauto" to "auto"
 if [ "$ATTEMPT_CONVERSION" = "true" ]; then
   echo
   echo -n "Automatically converting /etc/network/interfaces"
@@ -79,11 +80,13 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
   fi
 fi 
 
+# Move /etc/network/ifstate to /etc/network/run/ifstate
 if [ "$1" = configure -a "$2" != "" -a -e /etc/network/ifstate ] &&
      dpkg --compare-versions "$2" lt "0.6.5"
 then
   if [ ! -e /etc/network/run/ifstate ] || ! diff /etc/network/ifstate /etc/network/run/ifstate >/dev/null
   then
+    echo "Moving /etc/network/ifstate to /etc/network/run/ifstate"
     if [ ! -L /etc/network/ifstate ]; then
       mv /etc/network/ifstate /etc/network/run/ifstate
     fi
