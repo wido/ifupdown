@@ -15,7 +15,6 @@ Easy/standalone:
      * #282740: ifupdown: Please keep dhclient's leases file in /var/lib/
        [unmerge from 246621]
      * #127786: ifup should wait for ppp interface to appear [also 287173]
-    ** #153222: Wish for ifstate documentation or a status command
 
 Vars for scripts:
      . #88946: please add --verbose for if.d scripts
@@ -104,6 +103,7 @@ Other script enhancements:
 
 Include options in ifstate:
      * #81219: `ifdown -a' doesn't work if default route changed
+     * #153222: Wish for ifstate documentation or a status command
      * #253628: Please allow /e/n/i to be modified while ifaces are up
      * #266175: Changing from dhcp to static IP: dhclient still running
 
