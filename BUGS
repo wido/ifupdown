@@ -19,7 +19,7 @@ Easy/standalone:
 
 Vars for scripts:
      . #88946: please add --verbose for if.d scripts
-     * #286155: please export hook name to environment
+     . #286155: please export hook name to environment
 
 Example scripts:
      * #106798: ifupdown: More support for ip-package  [unmerge with 87862]

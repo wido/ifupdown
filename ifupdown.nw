@@ -2164,16 +2164,16 @@ static char **environ = NULL;
 that is, a [[NULL]]-terminated array of strings of the form [[foo=bar]].
 
 <<execute function declarations>>=
-static void set_environ(interface_defn *iface, char *mode);
+static void set_environ(interface_defn *iface, char *mode, char *phase);
 @
 
 Our function then will be:
 
 <<execute functions>>=
-static void set_environ(interface_defn *iface, char *mode) {
+static void set_environ(interface_defn *iface, char *mode, char *phase) {
 	<<variables local to set environ>>
 	int i;
-	const int n_env_entries = iface->n_options + 7;
+	const int n_env_entries = iface->n_options + 8;
 
 	<<initialise environ [[n_env_entries]]>>
 
@@ -2187,9 +2187,10 @@ static void set_environ(interface_defn *iface, char *mode) {
 	<<add [[LOGICAL]] to environment>>
 	<<add [[ADDRFAM]] to environment>>
 	<<add [[METHOD]] to environment>>
-	<<add [[MODE]] to environment>>
-	<<add [[VERBOSITY]] to environment>>
 
+	<<add [[MODE]] to environment>>
+	<<add [[PHASE]] to environment>>
+	<<add [[VERBOSITY]] to environment>>
 	<<add [[PATH]] to environment>>
 }
 @
@@ -2266,6 +2267,11 @@ We can then go ahead and fill in the environment.
 
 <<add [[MODE]] to environment>>=
 *(environend++) = setlocalenv("%s=%s", "MODE", mode);
+*environend = NULL;
+@
+
+<<add [[PHASE]] to environment>>=
+*(environend++) = setlocalenv("%s=%s", "PHASE", phase); 
 *environend = NULL;
 @
 
@@ -2434,9 +2440,12 @@ int iface_down(interface_defn *iface);
 int iface_up(interface_defn *iface) {
 	if (!iface->method->up(iface,check)) return -1;
 
-	set_environ(iface, "start");
+	set_environ(iface, "start", "pre-up");
 	if (!execute_all(iface,doit,"pre-up")) return 0;
+
 	if (!iface->method->up(iface,doit)) return 0;
+
+	set_environ(iface, "start", "post-up");
 	if (!execute_all(iface,doit,"up")) return 0;
 
 	return 1;
@@ -2447,9 +2456,12 @@ int iface_up(interface_defn *iface) {
 int iface_down(interface_defn *iface) {
 	if (!iface->method->down(iface,check)) return -1;
 
-	set_environ(iface, "stop");
+	set_environ(iface, "stop", "pre-down");
 	if (!execute_all(iface,doit,"down")) return 0;
+
 	if (!iface->method->down(iface,doit)) return 0;
+
+	set_environ(iface, "stop", "post-down");
 	if (!execute_all(iface,doit,"post-down")) return 0;
 
 	return 1;

@@ -36,6 +36,8 @@ ifupdown (0.6.5) unstable; urgency=low
     Thanks to Michael Weber. (Closes: Bug#88946)
   * Add LOGICAL variable for scripts. (Doesn't work for mapping scripts yet
     though)
+  * Add PHASE variable for scripts, same as MODE but more detailed;
+    pre-up, post-down, etc. (Closes: Bug#286155)
 
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
