@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 4.1.68), nowebm
 
 Package: ifupdown
 Architecture: any
-Depends: net-tools, ${shlibs:Depends}, ${misc:Depends}, ${debconf-depends}
+Depends: net-tools, ${shlibs:Depends}, ${debconf-depends}
 Suggests: iproute, dhcp3-client | dhcp-client, ppp
 Replaces: netbase (<< 4.00)
 Conflicts: dhcp-client (= 3.0.1betaRC4-1)
