@@ -9,6 +9,7 @@ ifdown \- take a network interface down
 [\fB\-\-no\-act\fR]
 [\fB\-\-verbose\fR]
 [\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
+[\fB\-\-allow\fR \fICLASS\fR]
 \fB\-a\fR|\fIIFACE\fR...
 .br
 .B ifup 
@@ -22,6 +23,7 @@ ifdown \- take a network interface down
 [\fB\-\-no\-act\fR]
 [\fB\-\-verbose\fR]
 [\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
+[\fB\-\-allow\fR \fICLASS\fR]
 \fB\-a\fR|\fIIFACE\fR...
 .SH DESCRIPTION
 The
@@ -46,6 +48,11 @@ Force configuration or deconfiguration of the interface.
 .TP
 .BR \-h ", " \-\-help
 Show summary of options.
+.TP
+\fB\-\-allow=\fR\fICLASS\fR
+Only allow interfaces listed in an
+.I allow\-CLASS
+line in /etc/network/interfaces to be acted upon.
 .TP
 \fB\-i\fR \fIFILE\fR, \fB\-\-interfaces=\fR\fIFILE\fR
 Read interface definitions from 
@@ -83,13 +90,8 @@ Bring up interface
 as logical interface
 .B home
 .TP
-.B ifdown -e lo -a
-Bring down all the interfaces defined with
-.I auto
-in 
-.I /etc/network/interfaces
-except for those that begin with 
-.I lo
+.B ifdown -a
+Bring down all interfaces that are currently up.
 .SH NOTES
 .BR ifup " and " ifdown
 are actually the same program called by different names.
