@@ -13,36 +13,33 @@ ATTEMPT_CONVERSION=false
 if [ "$1" = "configure" ] && [ "$2" != "" ] &&
         dpkg --compare-versions "$2" le "0.6.2pr-3"
 then
-    # Get answers to questions
-    db_get ifupdown/convert-interfaces;    ATTEMPT_CONVERSION="$RET"
+  # Get answers to questions
+  db_get ifupdown/convert-interfaces;    ATTEMPT_CONVERSION="$RET"
 fi
 
 if [ "$ATTEMPT_CONVERSION" = "true" ]; then
-    echo
-    echo -n "Automatically converting /etc/network/interfaces"
-    (
-        cd /etc/network;
-        if /usr/share/ifupdown/upgrade-from-0.5.x.pl \
-                < interfaces > interfaces.dpkg-new 2>/dev/null
-        then
-            echo " succeeded."
-            mv interfaces interfaces.dpkg-old
-            mv interfaces.dpkg-new interfaces
-            echo "Old interfaces file saved as interfaces.dpkg-old."
-        else
-            echo " failed."
-            echo
-            echo "If you wish to reattempt the conversion you may run"
-            echo "    cat /etc/network/interfaces |"
-            echo "         /usr/share/ifupdown/upgrade-from-0.5.x.pl"
-            echo
-        fi
-    )
+  echo
+  echo -n "Automatically converting /etc/network/interfaces"
+  (
+    cd /etc/network;
+    if /usr/share/ifupdown/upgrade-from-0.5.x.pl \
+      < interfaces > interfaces.dpkg-new 2>/dev/null
+    then
+      echo " succeeded."
+      mv interfaces interfaces.dpkg-old
+      mv interfaces.dpkg-new interfaces
+      echo "Old interfaces file saved as interfaces.dpkg-old."
+    else
+      echo " failed."
+      echo
+      echo "If you wish to reattempt the conversion you may run"
+      echo "    cat /etc/network/interfaces |"
+      echo "         /usr/share/ifupdown/upgrade-from-0.5.x.pl"
+      echo
+    fi
+  )
 fi
  
-    
-    
-
 if [ "$1" = configure -a ! -d /etc/network/run -a ! -L /etc/network/run ]
 then
   if [ -e /etc/network/run ]; then
