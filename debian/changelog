@@ -1,10 +1,13 @@
 ifupdown (0.6.5) unstable; urgency=low
 
   * The Gernot Heiser release -- aged like a fine South Australian wine.
+  * Switch to Debian-native versioning / source packaging for the time being.
+    (Closes: Bug#84697)
 
-  * Thanks to Michael Weber, Javier Fernandez-Sanguino Pena, Marc Haber, and
-    Thomas Hood. (Closes: Bug#150773, Bug#151465, Bug#152893, Bug#208726,
-    Bug#209006, Bug#242314, Bug#263913, Bug#266282, Bug#297762)
+  * Thanks to Michael Weber, Javier Fernandez-Sanguino Pena, Marc
+    Haber, and Thomas Hood for NMUs. (Closes: Bug#150773, Bug#151465,
+    Bug#152893, Bug#208726, Bug#209006, Bug#242314, Bug#263913,
+    Bug#266282, Bug#297762)
 
   * debian/rules: Don't re-build unnecessarily. Thanks to Michael Banck
     (Closes: Bug#296273)
