@@ -89,6 +89,9 @@ then
     echo "Moving /etc/network/ifstate to /etc/network/run/ifstate"
     if [ ! -L /etc/network/ifstate ]; then
       mv /etc/network/ifstate /etc/network/run/ifstate
+    else
+      cat /etc/network/ifstate >/etc/network/run/ifstate
+      mv /etc/network/ifstate /etc/network/ifstate.dpkg-old
     fi
   fi
 fi
