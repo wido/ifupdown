@@ -2212,16 +2212,14 @@ environend = environ;
 @
 
 <<clear environ if necessary>>=
-{
+if (environ != NULL) {
 	char **ppch;
-	if (environ != NULL) {
-		for (ppch = environ; *ppch; ppch++) {
-			free(*ppch);
-			*ppch = NULL;
-		}
-		free(environ);
-		environ = NULL;
+	for (ppch = environ; *ppch; ppch++) {
+		free(*ppch);
+		*ppch = NULL;
 	}
+	free(environ);
+	environ = NULL;
 }
 @
 
