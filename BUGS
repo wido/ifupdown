@@ -7,8 +7,8 @@ Easy/standalone:
        build unnecessarily
      . #294970: ifupdown: makenwdep.sh output is garbled if /bin/sh is a
        POSIX sh like /bin/dash
+     . #283649: ifupdown: [PATCH] cross build
 
-     * #283649: ifupdown: [PATCH] cross build
      * #255222: wvdial pidfiles have non-FHS names
      * #84074: ifupdown: --force should work even when ifstate is not
        writable

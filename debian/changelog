@@ -28,6 +28,9 @@ ifupdown (0.6.5) unstable; urgency=low
     with that. Use myreadlink function instead of /lib/init/readlink.
     (Closes: Bug#302519)
 
+  * Make debian/rules test always succeed when cross-building. Thanks
+    to NIIBE Yutaka. (Closes: Bug#283649)
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
