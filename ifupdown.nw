@@ -3456,30 +3456,6 @@ Bringing an interface up or taking it down can be done thusly:
 	currif->iface = oldiface;
 }
 @ 
-<<run commands for [[currif]]>>=
-{
-	char *oldiface = currif->iface;
-	currif->iface = iface;
-
-	if (verbose) {
-		fprintf(stderr, "Configuring interface %s=%s (%s)\n", 
-			iface, liface, currif->address_family->name);
-	}
-
-	switch(cmds(currif)) {
-	    case -1:
-		printf("Don't seem to be have all the variables for %s/%s.\n", 
-			liface, currif->address_family->name);
-		break;
-	    case 0:
-		/* not entirely successful */
-		 */
-	    case 1:
-		/* successful */
-	}
-	currif->iface = oldiface;
-}
-@ 
 
 \subsection{Target Interfaces}
 
