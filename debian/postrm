@@ -1,16 +1,16 @@
 #!/bin/sh
 
 case "$1" in
-purge)
-	if [ -L /etc/network/run ] ; then
-		rm -f /etc/network/run
-	elif [ -d /etc/network/run ] ; then
-		rm -f /etc/network/run/ifstate
-		rmdir --ignore-fail-on-non-empty /etc/network/run
-	fi
-	rm -f /etc/network/ifstate
-	# Note: We don't remove /etc/network/interfaces
-	;;
+  purge)
+    # Note: We don't remove /etc/network/interfaces
+    rm -f /etc/network/run/ifstate
+
+    if [ -L /etc/network/run ] ; then
+      rm -f /etc/network/run
+    elif [ -d /etc/network/run ] ; then
+      rmdir --ignore-fail-on-non-empty /etc/network/run
+    fi
+    ;;
 esac
 
 #DEBHELPER#

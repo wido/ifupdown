@@ -23,6 +23,11 @@ ifupdown (0.6.5) unstable; urgency=low
   * Satiate the POSIX sh monkeys, makenwdep.sh now uses printf for \t's,
     not echo -e. (Closes: Bug#294970)
 
+  * Switch to using "/etc/network/run/ifstate" instead of
+    "/etc/network/ifstate". Simplify all the complicated hackery dealing
+    with that. Use myreadlink function instead of /lib/init/readlink.
+    (Closes: Bug#302519)
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
@@ -543,6 +548,3 @@ ifupdown (0.5.5-1) unstable; urgency=low
 
  -- Anthony Towns <ajt@debian.org>  Mon, 17 Jul 2000 08:24:56 +1000
 
-Local variables:
-mode: debian-changelog
-End:

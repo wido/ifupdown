@@ -12,7 +12,7 @@
 # similar functionality (but more featureful) out of the box.
 
 # TODO:
-# Improve it so it can find out (eg from /etc/network/ifstate)
+# Improve it so it can find out (eg from /etc/network/run/ifstate)
 # whether an interface was brought down
 # unexpectedly, or if a clean "ifdown" was issued.
 

@@ -3143,7 +3143,7 @@ int run_mappings = 1;
 int force = 0;
 char *allow_class = NULL;
 char *interfaces = "/etc/network/interfaces";
-char *statefile = "/etc/network/ifstate";
+char *statefile = "/etc/network/run/ifstate";
 char *excludeint = NULL ;
 @ 
 
@@ -3543,7 +3543,7 @@ statefile between invocations to keep track of which physical interfaces
 were mapped to which logical ones. We ought to use 
 [[/var/run/ifupdown.state]] or something similar for this, but [[/var]]
 isn't guaranteed to be available until the network's up, so we'll use
-[[/etc/network/ifstate]] instead.
+[[/etc/network/run/ifstate]] instead.
 
 <<variables local to main>>=
 char **state = NULL; /* list of iface=liface */
