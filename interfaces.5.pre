@@ -134,7 +134,9 @@ prints an error message,
 and exits with status 0.
 This behavior may change in the future.
 .TP
-.BI up " command"
+.BI up " command" 
+.TP
+.BI post\-up " command"
 Run
 .I command
 after bringing the interface up.
@@ -148,6 +150,8 @@ and exits with status 0.
 This behavior may change in the future.
 .TP
 .BI down " command"
+.TP
+.BI pre\-down " command"
 Run
 .I command
 before taking the interface down.

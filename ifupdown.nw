@@ -1796,9 +1796,19 @@ Dealing with the per-interface options is the next thing to deal
 with. 
 
 <<process iface option line>>=
+<<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>
 <<check for duplicate options>>
 <<add option>>
-@ 
+@
+
+<<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>=
+if (strcmp(firstword, "post-up") == 0) {
+	strcpy(firstword, "up");
+}
+if (strcmp(firstword, "pre-down") == 0) {
+	strcpy(firstword, "down");
+} 
+@
 
 <<check for duplicate options>>=
 {
@@ -1808,9 +1818,9 @@ with.
 		<<report empty option and die>>
 	}
 
-	if (strcmp(firstword, "up") != 0
+	if (strcmp(firstword, "pre-up") != 0 
+	    && strcmp(firstword, "up") != 0
 	    && strcmp(firstword, "down") != 0
-	    && strcmp(firstword, "pre-up") != 0
 	    && strcmp(firstword, "post-down") != 0)
         {
 		for (i = 0; i < currif->n_options; i++) {
@@ -2128,9 +2138,9 @@ environend = environ;
 Our continue chunk is also fairly straight forward:
 
 <<[[continue]] if option is a command>>=
-if (strcmp(iface->option[i].name, "up") == 0
+if (strcmp(iface->option[i].name, "pre-up") == 0
+    || strcmp(iface->option[i].name, "up") == 0
     || strcmp(iface->option[i].name, "down") == 0
-    || strcmp(iface->option[i].name, "pre-up") == 0
     || strcmp(iface->option[i].name, "post-down") == 0)
 {
 	continue;

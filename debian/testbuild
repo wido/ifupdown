@@ -8,6 +8,8 @@ auto eth0
 iface eth0 inet static
   address 1.2.3.4
   netmask 255.255.255.0
+  up echo hi
+  post-up echo hello
 EOF
 cat >tests/up.1 <<EOF
 ====stdout====
@@ -17,6 +19,8 @@ run-parts /etc/network/if-pre-up.d
 
 ifconfig eth0 1.2.3.4 netmask 255.255.255.0  	 up
 
+echo hi
+echo hello
 run-parts /etc/network/if-up.d
 EOF
 

@@ -9,6 +9,8 @@ ifupdown (0.6.4-5) unstable; urgency=low
   * debian/rules: Don't re-build unnecessarily. Thanks to Michael Banck
     (Closes: Bug#296273)
 
+  * Add post-up, pre-down as aliases for "up" and "down". (Closes: Bug#62633)
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
