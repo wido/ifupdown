@@ -20,7 +20,7 @@ ifupdown (0.6.5) unstable; urgency=low
     Usage is "ifup --allow=hotplug <interfaces>"; only the allowed interfaces
     whill actually be tried. (Closes: Bug#300937)
 
-  * Satiate the POSIX sh monkeys, makenwdep.sh uses printf for \t's,
+  * Satiate the POSIX sh monkeys, makenwdep.sh now uses printf for \t's,
     not echo -e. (Closes: Bug#294970)
 
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
