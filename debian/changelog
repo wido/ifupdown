@@ -42,6 +42,8 @@ ifupdown (0.6.5) unstable; urgency=low
   * Document lack of support for end-of-line comments in interfaces(5).
     (Closes: Bug#79683)
 
+  * Remove conflict with old, experimental-only version of dhcp-client.
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
