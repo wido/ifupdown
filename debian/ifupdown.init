@@ -57,7 +57,7 @@ case "$1" in
       runmkdir="$(myreadlink "$RUN_DIR")
       if [ ! "$runmkdir" ] ; then
         echo "failed."
-        report_err "Cannot create target of /etc/network/run (confusing symlink)"
+        report_err "Cannot create target of /etc/network/run"
         exit 1
       fi
       if ! mkdir -p "$realrundir"; then
