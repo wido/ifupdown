@@ -20,56 +20,10 @@ Vars for scripts:
      . #88946: please add --verbose for if.d scripts
      . #286155: please export hook name to environment
 
-Example scripts:
-     * #106798: ifupdown: More support for ip-package  [unmerge with 87862]
-     * #120382: ifupdown: ifup should (optionally) check for link before
-       configuring the interface. [also 237155]
-     * #191644: ifupdown: please add support for user-definable static
-       routes
-     * #192235: ifupdown: What goes up must be put down, so I wrote this
-       little script.
-     * #294044: ifupdown: Would be nice to set MTU even with DHCP
-       interfaces
-     * #296071: ifupdown: feature request: for inet interfaces, support
-       config for diald / dial-on-demand
-     * #300214: Wifi map script.
-
 Syntax:
      . #62633: netbase: Suggestion - rules for creating & destroying
        interfaces
     ** #300987: Please allow passing of values via dhclient3's -e option
-
-Ifconfig-ish:
-     * #251559: ifupdown: Wrong broadcast address is calculated for
-       aliased ifaces (but works correctly for physical iface)
-     * #253472: ifupdown: dhclient stops running after cable modem
-       connection outage
-     * #263749: manual "ifdown" needed after DHCP_NAK brings down
-       interface
-     * #96727: [PATCH] default route should not be set when %gateway is
-       specified
-     * #152895: ifupdown: The gateway option in /etc/network/interfaces
-       is confusing.
-     * #111006: Support for pump's --win-client-ident feature
-     * #143053: pptp interface support (patch)
-     * #152479: Please add support for CIPE interfaces
-     * #158089: GRE and IPIP tunnel support
-     * #160571: slattach and ifup problem
-     * #168776: ifupdown: Should accept more than one IPv6 address in
-       /etc/network/interfaces
-     * #176903: ifupdown doesn't support supersedes properly on DHCP
-       interfaces
-     * #181988: Bringing up arp-less interfaces
-     * #196877: ifupdown: Please support passing additional arguments to
-       pon
-     * #204641: ifupdown: Please include zeroconf support
-     * #205583: ifupdown: option to define an inet6 interface without
-       address [also 266021]
-     * #235993: New option "metric" for gateway routing metric
-     * #246621: ifupdown: Please (optionally) stop DHCP clients in such a
-       way that they do not relinquish leases
-     * #247050: no txqueuelen setting
-     * #256240: Please include standard way to set speed and duplex
 
 Interface dependencies: [see 170030 log!]
      * #87862: Please handle virtual network devices
@@ -98,6 +52,32 @@ Other script enhancements:
        (or, in general, environment variables)
 
 ---- 0.7 features ----
+
+Ifconfig-ish:
+     * #111006: Support for pump's --win-client-ident feature
+     * #143053: pptp interface support (patch)
+     * #152479: Please add support for CIPE interfaces
+     * #158089: GRE and IPIP tunnel support
+     * #160571: slattach and ifup problem
+     * #168776: ifupdown: Should accept more than one IPv6 address in
+       /etc/network/interfaces
+     * #176903: ifupdown doesn't support supersedes properly on DHCP
+       interfaces
+     * #181988: Bringing up arp-less interfaces
+     * #196877: ifupdown: Please support passing additional arguments to
+       pon
+     * #204641: ifupdown: Please include zeroconf support
+     * #205583: ifupdown: option to define an inet6 interface without
+       address [also 266021]
+     * #235993: New option "metric" for gateway routing metric
+     * #246621: ifupdown: Please (optionally) stop DHCP clients in such a
+       way that they do not relinquish leases
+     * #247050: no txqueuelen setting
+     * #256240: Please include standard way to set speed and duplex
+    ** #253472: ifupdown: dhclient stops running after cable modem
+       connection outage
+    ** #263749: manual "ifdown" needed after DHCP_NAK brings down
+       interface
 
 Include options in ifstate:
      * #81219: `ifdown -a' doesn't work if default route changed
@@ -140,6 +120,26 @@ Crazy:
        behavior
      * #275326: Please add a "fail" interface type, that aborts
        configuration. [crazy, but intriguing...]
+
+Reassign me:
+     * #251559: ifupdown: Wrong broadcast address is calculated for
+       aliased ifaces (but works correctly for physical iface)
+
+Example scripts:
+     * #96727: [PATCH] default route should not be set when %gateway is
+       specified [also, 152895]
+     * #106798: ifupdown: More support for ip-package  [unmerge with 87862]
+     * #120382: ifupdown: ifup should (optionally) check for link before
+       configuring the interface. [also 237155]
+     * #191644: ifupdown: please add support for user-definable static
+       routes
+     * #192235: ifupdown: What goes up must be put down, so I wrote this
+       little script.
+     * #294044: ifupdown: Would be nice to set MTU even with DHCP
+       interfaces
+     * #296071: ifupdown: feature request: for inet interfaces, support
+       config for diald / dial-on-demand
+     * #300214: Wifi map script.
 
 NMU miscellania:
      * #150773: ifupdown: patches from NMU (0.6.4-4.1)
