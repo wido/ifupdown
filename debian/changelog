@@ -13,6 +13,10 @@ ifupdown (0.6.5) unstable; urgency=low
 
   * Deprecate (undocument) "--exclude" option.
 
+  * Add support for "allow-*" lines for systems such as hotplug or ifplugd.
+    Usage is "ifup --allow=hotplug <interfaces>"; only the allowed interfaces
+    whill actually be tried. (Closes: Bug#300937)
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low

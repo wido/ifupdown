@@ -1074,19 +1074,34 @@ typedef struct interfaces_file interfaces_file;
 
 <<structure definitions>>=
 struct interfaces_file {
-	int max_autointerfaces;
-	int n_autointerfaces;
-	char **autointerfaces;
-
+	allowup_defn *allowups;
 	interface_defn *ifaces;
 	mapping_defn *mappings;
 };
+@
+
+So, at run-time, we first need a way of dealing with the [[auto]] and
+[[allow-*]] lines. We'll treat [[allow-auto]] and [[auto]] as equivalent,
+making that pretty straightforward:
+
+<<type definitions>>=
+typedef struct allowup_defn allowup_defn;
+@
+
+<<structure definitions>>=
+struct allowup_defn {
+	allowup_defn *next;
+
+	char *when;
+	int max_interfaces;
+	int n_interfaces;
+	char **interfaces;
+};
 @ 
 
-So, at run-time, we require a way of representing each interface
-listed in the configuration file. This naturally needs to reference an
-address family and method, and all the options a user may specify
-about an interface.
+We also require a way of representing each interface listed in the
+configuration file. This naturally needs to reference an address family
+and method, and all the options a user may specify about an interface.
 
 <<type definitions>>=
 typedef struct interface_defn interface_defn;
@@ -1182,8 +1197,7 @@ defn = malloc(sizeof(interfaces_file));
 if (defn == NULL) {
 	return NULL;
 }
-defn->max_autointerfaces = defn->n_autointerfaces = 0;
-defn->autointerfaces = NULL;
+defn->allowups = NULL;
 defn->mappings = NULL;
 defn->ifaces = NULL;
 @ 
@@ -1489,6 +1503,9 @@ if (strcmp(firstword, "mapping") == 0) {
 	currently_processing = IFACE;
 } else if (strcmp(firstword, "auto") == 0) {
 	<<process [[auto]] line>>
+	currently_processing = NONE;
+} else if (strncmp(firstword, "allow-", 6) == 0 && strlen(firstword) > 6) {
+	<<process [[allow-]] line>>
 	currently_processing = NONE;
 } else {
 	<<process option line>>
@@ -1871,45 +1888,114 @@ rather than doubling or anything smart like that.
 }
 @ 
 
-\subsubsection{Auto Line}
+\subsubsection{Auto and Allow Lines}
 
-Processing an [[auto]] line is pretty straightforward after the above,
-we just need to add each parameter to the list and check for duplicates.
+Processing the [[auto]] and [[allow-]] lines is pretty straightforward
+after the above, we just need to add each parameter to the list and
+check for duplicates. Since we're doing essentially the same thing twice,
+we'll break the common part out into a function.
 
 <<process [[auto]] line>>=
+allowup_defn *auto_ups = get_allowup(&defn->allowups, "auto");
+if (!auto_ups) {
+	<<report internal error and die>>
+}
 while((rest = next_word(rest, firstword, 80))) {
-	<<check [[firstword]] isn't already an auto interface or die>>
-	<<add [[firstword]] as an auto interface or die>>
+	if (!add_allow_up(filename, line, auto_ups, firstword))
+		return NULL;
+}
+@ 
+<<process [[allow-]] line>>=
+allowup_defn *allow_ups = get_allowup(&defn->allowups, firstword + 6);
+if (!allow_ups) {
+	<<report internal error and die>>
+}
+while((rest = next_word(rest, firstword, 80))) {
+	if (!add_allow_up(filename, line, allow_ups, firstword))
+		return NULL;
 }
 @ 
 
-<<check [[firstword]] isn't already an auto interface or die>>=
+<<config function declarations>>=
+allowup_defn *get_allowup(allowup_defn **allowups, char *name);
+
+<<config functions>>=
+allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
+	for (; *allowups; allowups = &(*allowups)->next) {
+		if (strcmp((*allowups)->when, name) == 0) break;
+	}
+	if (*allowups == NULL) {
+		*allowups = malloc(sizeof(allowup_defn));
+		if (*allowups == NULL) return NULL;
+		(*allowups)->when = strdup(name);
+		(*allowups)->next = NULL;
+		(*allowups)->max_interfaces = 0;
+		(*allowups)->n_interfaces = 0;
+		(*allowups)->interfaces = NULL;
+	}
+	return *allowups;
+}
+@
+
+We'll want to export a little helper function to make finding the appropriate
+allowup easier too:
+
+<<exported symbols>>=
+allowup_defn *find_allowup(interfaces_file *defn, char *name);
+@
+
+<<config functions>>=
+allowup_defn *find_allowup(interfaces_file *defn, char *name) {
+	allowup_defn *allowups = defn->allowups;
+	for (; allowups; allowups = allowups->next) {
+		if (strcmp(allowups->when, name) == 0) break;
+	}
+	return allowups;
+}
+@
+
+<<config function declarations>>=
+allowup_defn *add_allow_up(char *filename, int line,
+	 allowup_defn *allow_up, char *iface_name);
+@
+
+<<config functions>>=
+allowup_defn *add_allow_up(char *filename, int line,
+	allowup_defn *allow_up, char *iface_name)
+{
+	<<check [[iface_name]] isn't already an [[allow_up]] interface or die>>
+	<<add [[iface_name]] as an [[allow_up]] interface or die>>
+	return allow_up;
+}
+@
+
+<<check [[iface_name]] isn't already an [[allow_up]] interface or die>>=
 {
 	int i;
 
-	for (i = 0; i < defn->n_autointerfaces; i++) {
-		if (strcmp(firstword, defn->autointerfaces[i]) == 0) {
-			<<report duplicate auto interface and die>>
+	for (i = 0; i < allow_up->n_interfaces; i++) {
+		if (strcmp(iface_name, allow_up->interfaces[i]) == 0) {
+			<<report [[iface_name]] as [[allow_up]] duplicate, die>>
 		}
 	}
 }
 @
 
-<<add [[firstword]] as an auto interface or die>>=
-if (defn->n_autointerfaces == defn->max_autointerfaces) {
+<<add [[iface_name]] as an [[allow_up]] interface or die>>=
+if (allow_up->n_interfaces == allow_up->max_interfaces) {
 	char **tmp;
-	defn->max_autointerfaces *= 2;
-	defn->max_autointerfaces++;
-	tmp = realloc(defn->autointerfaces, 
-		sizeof(*tmp) * defn->max_autointerfaces);
+	allow_up->max_interfaces *= 2;
+	allow_up->max_interfaces++;
+	tmp = realloc(allow_up->interfaces, 
+		sizeof(*tmp) * allow_up->max_interfaces);
 	if (tmp == NULL) {
 		<<report internal error and die>>
 	}
-	defn->autointerfaces = tmp;
+	allow_up->interfaces = tmp;
 }
 
-defn->autointerfaces[defn->n_autointerfaces] = strdup(firstword);
-defn->n_autointerfaces++;
+allow_up->interfaces[allow_up->n_interfaces] = strdup(iface_name);
+allow_up->n_interfaces++;
 @
 
 \subsection{Error Handling}
@@ -1949,8 +2035,9 @@ fprintf(stderr, "%s:%d: duplicate interface\n", filename, line);
 return NULL;
 @
 
-<<report duplicate auto interface and die>>=
-fprintf(stderr, "%s:%d: interface declared auto twice\n", filename, line);
+<<report [[iface_name]] as [[allow_up]] duplicate, die>>=
+fprintf(stderr, "%s:%d: interface %s declared allow-%s twice\n", 
+	filename, line, iface_name, allow_up->when);
 return NULL;
 @
 
@@ -2980,13 +3067,34 @@ with this, namely:
 (cmds == iface_down)
 @
 
-Finally, since the behaviour might vary depending on whether we are 
-excluding this interface or not we'll define it. Notice that
+XXX
+
+<<we're limiting to [[--allow]]ed interfaces>>=
+(allow_class != NULL)
+
+<<find [[iface]] in [[allow_class]] or [[continue]]>>=
+{
+	int i;
+	allowup_defn *allowup = find_allowup(defn, allow_class);
+	if (allowup == NULL)
+		continue;
+
+	for (i = 0; i < allowup->n_interfaces; i++) {
+		if (strcmp(allowup->interfaces[i], iface) == 0)
+			break;
+	}
+	if (i >= allowup->n_interfaces)
+		continue;
+}
+@
+
+Finally, the behaviour might vary depending on whether we are 
+excluding this interface or not. Notice that
 the exclude option can use a full interface name or substrings that
 match interfaces. A user could easily have unexpected behaviour
 if he uses a small string to do the match:
 
-<<we exclude this interface>>=
+<<we're [[--exclude]]ing this interface>>=
 (excludeint != NULL && strstr(iface,excludeint) != NULL)
 @
 
@@ -3008,6 +3116,7 @@ struct option long_opts[] = {
 	{"version",     no_argument,       NULL, 'V'},
 	{"verbose",     no_argument,       NULL, 'v'},
 	{"all",         no_argument,       NULL, 'a'},
+	{"allow",	required_argument, NULL,  3 },
 	{"interfaces",  required_argument, NULL, 'i'},
 	{"exclude",     required_argument, NULL, 'e'},
 	{"no-act",      no_argument,       NULL, 'n'},
@@ -3035,6 +3144,7 @@ int verbose = 0;
 int do_all = 0;
 int run_mappings = 1;
 int force = 0;
+char *allow_class = NULL;
 char *interfaces = "/etc/network/interfaces";
 char *statefile = "/etc/network/ifstate";
 char *excludeint = NULL ;
@@ -3079,6 +3189,7 @@ static void help(char *execname) {
 	printf("\t-h, --help\t\tthis help\n");
 	printf("\t-V, --version\t\tcopyright and version information\n");
 	printf("\t-a, --all\t\tde/configure all interfaces marked \"auto\"\n");
+	printf("\t--allow CLASS\t\tignore non-\"allow-CLASS\" interfaces\n");
 	printf("\t-i, --interfaces FILE\tuse FILE for interface definitions\n");
 	printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
 	printf("\t\t\t\t(note that this option doesn't disable mappings)\n");
@@ -3123,6 +3234,11 @@ case 'v':
 <<[[getopt]] possibilities>>=
 case 'a':
 	do_all = 1;
+	break;
+@ 
+<<[[getopt]] possibilities>>=
+case 3:
+	allow_class = strdup(optarg);
 	break;
 @ 
 <<[[getopt]] possibilities>>=
@@ -3221,7 +3337,11 @@ A broad overview of what we'll actually be doing is as follows:
 			<<check ifupdown state (possibly [[continue]])>>
 		}
 
-		if (<<we exclude this interface>>)  
+		if (<<we're limiting to [[--allow]]ed interfaces>>) {
+			<<find [[iface]] in [[allow_class]] or [[continue]]>>
+		}
+
+		if (<<we're [[--exclude]]ing this interface>>)  
 			continue;
 
 		if (<<we're bringing interfaces up>> && run_mappings) {
@@ -3385,8 +3505,9 @@ We initialise this based on our command line arguments.
 <<determine target interfaces>>=
 if (do_all) {
 	if (<<we're bringing interfaces up>>) {
-		target_iface = defn->autointerfaces;
-		n_target_ifaces = defn->n_autointerfaces;
+		allowup_defn *autos = find_allowup(defn, "auto");
+		target_iface = autos ? autos->interfaces : NULL;
+		n_target_ifaces = autos ? autos->n_interfaces : 0;
 	} else if (<<we're taking interfaces down>>) {
 		target_iface = state;
 		n_target_ifaces = n_state;
