@@ -287,24 +287,21 @@ to have the dependency information for our C files (which are dealt with
 next) included at some point.
 
 <<output dependency info for [[$chunk]]>>=
+printf "%s : %s\n" "$chunk" "$FILE"
 case $chunk in
 	*.pl|*.sh)
-		echo -e "$chunk : $FILE"
-		echo -e "\tnotangle -R\$@ $< >\$@"
-		echo -e "\tchmod 755 $chunk"
+		printf "\tnotangle -R\$@ \$< >\$@\n"
+		printf "\tchmod 755 %s\n" "$chunk"
 		;;
 	*.c)
-		echo -e "$chunk : $FILE"
-		echo -e "\tnotangle -L -R\$@ $< | cpif \$@"
-		echo -e "include ${chunk%.c}.d"
+		printf "\tnotangle -L -R\$@ \$< | cpif \$@\n"
+		printf "include ${chunk%.c}.d\n"
 		;;
 	*.h)
-		echo -e "$chunk : $FILE"
-		echo -e "\tnotangle -L -R\$@ $< | cpif \$@"
+		printf "\tnotangle -L -R\$@ \$< | cpif \$@\n"
 		;;
 	*)
-		echo -e "$chunk : $FILE"
-		echo -e "\tnotangle -t8 -R\$@ $< >\$@"
+		printf "\tnotangle -t8 -R\$@ $< >\$@\n"
 		;;
 esac
 @ 
