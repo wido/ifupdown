@@ -4,6 +4,7 @@ ifupdown (0.6.5) unstable; urgency=low
 
   * Switch to Debian-native versioning / source packaging for the time being.
     (Closes: Bug#84697)
+  * Change Section: to base, to match overrides.
 
   * Thanks to Michael Weber, Javier Fernandez-Sanguino Pena, Marc
     Haber, and Thomas Hood for NMUs. (Closes: Bug#150773, Bug#151465,

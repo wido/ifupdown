@@ -1,5 +1,5 @@
 Source: ifupdown
-Section: net
+Section: base
 Priority: important
 Maintainer: Anthony Towns <ajt@debian.org>
 Standards-Version: 3.6.1.0
