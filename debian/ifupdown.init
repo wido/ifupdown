@@ -54,7 +54,7 @@ case "$1" in
     # create it.
 
     if [ -L "$RUN_DIR" ] && [ ! -d "$RUN_DIR" ] ; then
-      runmkdir="$(myreadlink "$RUN_DIR")
+      runmkdir="$(myreadlink "$RUN_DIR")"
       if [ ! "$runmkdir" ] ; then
         echo "failed."
         report_err "Cannot create target of /etc/network/run"
