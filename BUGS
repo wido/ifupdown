@@ -17,11 +17,6 @@ Easy/standalone:
      * #127786: ifup should wait for ppp interface to appear [also 287173]
     ** #153222: Wish for ifstate documentation or a status command
 
-Other script enhancements:
-     * #139383: ifupdown: No way to pass commandline options to mapping
-       script [aslo 239150, 286332]
-     * #149395: Please add 'include' directive [also 159884]
-
 Vars for scripts:
      * #88946: please add --verbose for if.d scripts
      * #154442: Provide intermediate interface name to nested mapper
@@ -98,6 +93,11 @@ Hotplug issues:
        plugged interfaces
      * #231197: Please prevent ifup A -> hotplug -> ifup A deadlock
      * #245028: /etc/init.d/ifupdown should run earlier in /etc/rcS.d/
+
+Other script enhancements:
+     * #139383: ifupdown: No way to pass commandline options to mapping
+       script [aslo 239150, 286332]
+     * #149395: Please add 'include' directive [also 159884]
 
 ---- 0.7 features ----
 
