@@ -9,7 +9,6 @@ ifdown \- take a network interface down
 [\fB\-\-no\-act\fR]
 [\fB\-\-verbose\fR]
 [\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
-[\fB\-e\fR \fIFILE\fR|\fB\-\-exclude=\fR\fIIFACE\fR]
 \fB\-a\fR|\fIIFACE\fR...
 .br
 .B ifup 
@@ -23,7 +22,6 @@ ifdown \- take a network interface down
 [\fB\-\-no\-act\fR]
 [\fB\-\-verbose\fR]
 [\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
-[\fB\-e\fR \fIFILE\fR|\fB\-\-exclude=\fR\fIIFACE\fR]
 \fB\-a\fR|\fIIFACE\fR...
 .SH DESCRIPTION
 The
@@ -42,9 +40,6 @@ If given to \fBifdown\fP, affect all defined interfaces.
 Interfaces are brought down in the order in which they are
 currently listed in the state file. Only interfaces defined
 in /etc/network/interfaces will be brought down.
-Note that you can exclude some interfaces from being handled in this
-by using 
-.I --exclude
 .TP
 .B \-\-force
 Force configuration or deconfiguration of the interface.
@@ -56,20 +51,6 @@ Show summary of options.
 Read interface definitions from 
 .I FILE
 instead of from /etc/network/interfaces.
-.TP
-\fB\-e\fR \fIIFACE\fR, \fB\-\-exclude=\fR\fIIFACE\fR
-Exclude a given interface
-.I IFACE
-from being managed when doing an operation
-that involves a number of interfaces. It can only be given one 
-string which is supposed to be an interface name. You can
-exclude more than one interface if the name
-given is a substring shared by all of them (for example
-.I eth
-will exclude all ethernet interfaces)
-This option is useful to avoid running "up" or "down" 
-commands for some interfaces when using
-.I --all
 .TP
 .BR \-n ", " \-\-no\-act
 Don't configure any interfaces or run any "up" or "down" commands.

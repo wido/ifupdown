@@ -3080,7 +3080,6 @@ static void help(char *execname) {
 	printf("\t-V, --version\t\tcopyright and version information\n");
 	printf("\t-a, --all\t\tde/configure all interfaces marked \"auto\"\n");
 	printf("\t-i, --interfaces FILE\tuse FILE for interface definitions\n");
-	printf("\t-e, --exclude IFACE\texclude a given interface from the operation\n");
 	printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
 	printf("\t\t\t\t(note that this option doesn't disable mappings)\n");
 	printf("\t-v, --verbose\t\tprint out what would happen before doing it\n");

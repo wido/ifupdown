@@ -11,6 +11,8 @@ ifupdown (0.6.5) unstable; urgency=low
 
   * Add post-up, pre-down as aliases for "up" and "down". (Closes: Bug#62633)
 
+  * Deprecate (undocument) "--exclude" option.
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
