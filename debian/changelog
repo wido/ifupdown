@@ -5,6 +5,9 @@ ifupdown (0.6.6) unstable; urgency=low
     the first to spot it once the BTS was working again. Also add a test
     case. (Closes: Bug#303148)
 
+  * Fix brown paper bag bug where "test -e" doesn't actually identify a
+    dangling /etc/network/run symlink on upgrade. (Closes: Bug#303225)
+
  -- Anthony Towns <aj@localhost.localdomain>  Tue,  5 Apr 2005 14:19:21 +1000
 
 ifupdown (0.6.5) unstable; urgency=low
