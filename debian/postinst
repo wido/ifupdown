@@ -58,7 +58,7 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
 
   if [ ! -d /dev/shm -o ! -w /dev/shm -o ! -r /proc/mounts ]; then
     WHAT_TO_USE=owndir
-  elif grep -qs "^tmpfs[[:space:]]\+/dev/shm[[:space:]]\+tmpfs[[:space:]]\+\([^[:space:]]\+,\)\?rw" /proc/mounts
+  elif ! grep -qs "^tmpfs[[:space:]]\+/dev/shm[[:space:]]\+tmpfs[[:space:]]\+\([^[:space:]]\+,\)\?rw" /proc/mounts
   then
     WHAT_TO_USE=owndir
   elif grep -qs '[[:space:]]/dev[[:space:]]devfs[[:space:]]' /proc/mounts; then
