@@ -60,9 +60,9 @@ case "$1" in
         report_err "Cannot create target of /etc/network/run"
         exit 1
       fi
-      if ! mkdir -p "$realrundir"; then
+      if ! mkdir -p "$runmkdir"; then
         echo "failed."
-        report_err "Failure creating directory $realrundir"
+        report_err "Failure creating directory $runmkdir"
         exit 1
       fi
     fi
