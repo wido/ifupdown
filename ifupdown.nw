@@ -3464,7 +3464,7 @@ Bringing an interface up or taking it down can be done thusly:
 		break;
 		/* successful */
 	    default:
-	    	printf("Unexpected value when configuring interface %s/%s considering it failed.\n", 
+	    	printf("Internal error while configuring interface %s/%s (assuming it failed)\n", 
 			liface, currif->address_family->name);
 	    	failed = 1;
 		/* what happened here? */
