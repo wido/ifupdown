@@ -6,6 +6,9 @@ ifupdown (0.6.4-5) unstable; urgency=low
     Thomas Hood. (Closes: Bug#150773, Bug#151465, Bug#152893, Bug#208726,
     Bug#209006, Bug#242314, Bug#263913, Bug#266282, Bug#297762)
 
+  * debian/rules: Don't re-build unnecessarily. Thanks to Michael Banck
+    (Closes: Bug#296273)
+
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low

@@ -56,8 +56,8 @@ configure:
 	dh_testdir
 	# Add here commands to configure the package.
 
-build-stamp: build
-build: configure
+build: build-stamp
+build-stamp: configure
 	dh_testdir
 
 	# Add here commands to compile the package.
@@ -109,7 +109,7 @@ ifeq ($(PO2DEBCONF),yes)
 endif
 
 install-stamp: install
-install: build-stamp test
+install: build test
 	dh_testdir
 	dh_testroot
 	dh_clean -k
@@ -169,4 +169,4 @@ endif
 	dh_builddeb
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+.PHONY: build clean binary-indep binary-arch binary install configure test
