@@ -19,7 +19,6 @@ Easy/standalone:
 
 Vars for scripts:
      . #88946: please add --verbose for if.d scripts
-     * #154442: Provide intermediate interface name to nested mapper
      * #286155: please export hook name to environment
 
 Example scripts:
@@ -98,6 +97,8 @@ Other script enhancements:
      * #139383: ifupdown: No way to pass commandline options to mapping
        script [aslo 239150, 286332]
      * #149395: Please add 'include' directive [also 159884]
+     * #154442: Provide intermediate interface name to nested mapper
+       (or, in general, environment variables)
 
 ---- 0.7 features ----
 
