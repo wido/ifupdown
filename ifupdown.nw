@@ -2986,7 +2986,7 @@ the exclude option can use a full interface name or substrings that
 match interfaces. A user could easily have unexpected behaviour
 if he uses a small string to do the match:
 
-<<check if we exclude this interface>>=
+<<we exclude this interface>>=
 (excludeint != NULL && strstr(iface,excludeint) != NULL)
 @
 
@@ -3221,7 +3221,7 @@ A broad overview of what we'll actually be doing is as follows:
 			<<check ifupdown state (possibly [[continue]])>>
 		}
 
-		if (<<check if we exclude this interface>>)  
+		if (<<we exclude this interface>>)  
 			continue;
 
 		if (<<we're bringing interfaces up>> && run_mappings) {
