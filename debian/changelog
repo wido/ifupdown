@@ -59,7 +59,7 @@ ifupdown (0.6.5) unstable; urgency=low
 
   * Remove conflict with old, experimental-only version of dhcp-client.
 
- -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
+ -- Anthony Towns <ajt@debian.org>  Mon,  4 Apr 2005 23:41:06 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
 
