@@ -45,9 +45,10 @@ Hotplug issues:
      * #245028: /etc/init.d/ifupdown should run earlier in /etc/rcS.d/
 
 Other script enhancements:
+     * #149395: Please add 'include' directive [also 159884]
+
      * #139383: ifupdown: No way to pass commandline options to mapping
        script [aslo 239150, 286332]
-     * #149395: Please add 'include' directive [also 159884]
      * #154442: Provide intermediate interface name to nested mapper
        (or, in general, environment variables)
 
