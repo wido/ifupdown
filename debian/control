@@ -1,0 +1,17 @@
+Source: ifupdown
+Section: net
+Priority: important
+Maintainer: Anthony Towns <ajt@debian.org>
+Standards-Version: 3.6.1.0
+Build-Depends: debhelper (>= 4.1.68), nowebm
+
+Package: ifupdown
+Architecture: any
+Depends: net-tools, ${shlibs:Depends}, ${misc:Depends}, ${debconf-depends}
+Suggests: iproute, dhcp3-client | dhcp-client, ppp
+Replaces: netbase (<< 4.00)
+Conflicts: dhcp-client (= 3.0.1betaRC4-1)
+Description: high level tools to configure network interfaces
+ This package provides the tools ifup and ifdown which may be used to
+ configure (or, respectively, deconfigure) network interfaces based on
+ interface definitions in the file /etc/network/interfaces.

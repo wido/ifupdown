@@ -1,0 +1,36 @@
+# ifupdown po-debconf translation to italian
+# Copyright (C) 2004 Software in the Public Interest
+# This file is distributed under the same license as the ifupdown package.
+# Luca Monducci, 2004.
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: ifupdown 0.6.4-4.10\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-08-04 17:16+0200\n"
+"PO-Revision-Date: 2004-11-21 16:02+0100\n"
+"Last-Translator: Luca Monducci <luca.mo@tiscali.it>\n"
+"Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates.master:4
+msgid "Update /etc/network/interfaces?"
+msgstr "Aggiornare /etc/network/interfaces?"
+
+#. Type: boolean
+#. Description
+#: ../templates.master:4
+msgid ""
+"The format of /etc/network/interfaces has had a minor but incompatible "
+"change made between version 0.5.x and 0.6.x of ifupdown. It is however "
+"possible to automatically convert from the old format to the new in almost "
+"all cases."
+msgstr ""
+"Il formato del file /etc/network/interfaces ha subito un piccolo cambiamento "
+"che lo rende incompatibile fra le versioni 0.5.x e 0.6.x di ifupdown. "
+"Comunque, nella maggior parte dei casi, è possibile convertire "
+"automaticamente il file dal vecchio formato al nuovo."

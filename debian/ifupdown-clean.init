@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# ifupdown-clean
+#
+
+set -e
+
+MYNAME="${0##*/}"
+PATH=/sbin:/bin
+RUN_DIR=/etc/network/run
+[ -r /etc/default/ifupdown ] && . /etc/default/ifupdown
+
+# Note: The state file location is hardcoded in ifup|ifdown
+# it is used as a variable in this script order to ease transitions
+# to other locations by the package (not by the sysadmin), if you want
+# to setup an alternate location please use a symlink
+IFSTATE=/etc/network/ifstate
+
+report_err() { echo "${MYNAME}: Error: $*" >&2 ; }
+
+case "$1" in
+start)
+	echo -n "Cleaning up ifupdown..."
+	if [ -f $IFSTATE ] ; then
+		# Delete the state file
+		# This signals that ifupdown is no longer available for use
+		if IFSTATE_CANONICALFILE="$(readlink -f $IFSTATE)" && [ "$IFSTATE_CANONICALFILE" ] ; then 
+			rm -f "$IFSTATE_CANONICALFILE"
+		else
+			echo "failed."
+			report_err "The canonical path of the state file $IFSTATE could not be determined"
+			exit 1
+		fi
+	fi
+	echo "done."
+	exit 0
+	;;
+stop|restart|force-reload)
+	exit 0
+	;;
+*)
+	echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+	exit 3
+	;;
+esac
+

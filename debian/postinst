@@ -1,0 +1,174 @@
+#!/bin/sh
+set -e
+
+MYNAME="${0##*/}"
+
+# Once the improved readlink program has made it into coreutils,
+# /lib/init/ can be removed from the PATH.
+PATH=/lib/init:/sbin:/bin:/usr/sbin:/usr/bin
+
+report() { echo "${MYNAME}: $*" ; }
+report_warn() { report "Warning: $*" >&2 ; }
+report_err() { report "Error: $*" >&2 ; }
+
+if [ "$1" = "configure" ] && [ -e /usr/share/debconf/confmodule ] ; then
+    . /usr/share/debconf/confmodule
+    # Get answers to questions
+    db_get ifupdown/convert-interfaces;    ATTEMPT_CONVERSION="$RET"
+
+elif [ "$1" = "configure" ] && [ "$2" != "" ] && dpkg --compare-versions "$2" le "0.6.2pr-3"
+then
+    echo
+    cat <<EOF
+The format of /etc/network/interfaces has had a minor but incompatible
+change made between version 0.5.x and 0.6.x of ifupdown. It is however
+possible to automatically convert from the old format to the new in
+most cases.
+EOF
+    echo
+    echo "Should I attempt to automatically update /etc/network/interfaces? [Y/n] "
+    read upg
+    if [ "$upg" = "N" ] || [ "$upg" = "n" ]; then
+        ATTEMPT_CONVERSION="false"
+    else
+        ATTEMPT_CONVERSION="true"
+    fi
+fi
+
+
+if [ "$1" = "configure" ] && [ "$2" != "" ] &&
+        dpkg --compare-versions "$2" le "0.6.2pr-3" &&
+        [ "$ATTEMPT_CONVERSION" = "true" ]
+then
+    echo
+    echo -n "Automatically converting /etc/network/interfaces"
+    (
+        cd /etc/network;
+        if /usr/share/ifupdown/upgrade-from-0.5.x.pl \
+                < interfaces > interfaces.dpkg-new 2>/dev/null
+        then
+            echo " succeeded."
+            mv interfaces interfaces.dpkg-old
+            mv interfaces.dpkg-new interfaces
+            echo "Old interfaces file saved as interfaces.dpkg-old."
+        else
+            echo " failed."
+            echo
+            echo "If you wish to reattempt the conversion you may run"
+            echo "    cat /etc/network/interfaces |"
+            echo "         /usr/share/ifupdown/upgrade-from-0.5.x.pl"
+            echo
+	    if [ ! -e /usr/share/debconf/confmodule ]; then
+	        echo -n "Press enter to continue:"
+	        read blah
+	    fi # debconf users can't be prompted. stupid program.
+        fi
+    )
+fi
+
+if [ "$1" = configure ] ; then
+
+  # Set up run dir if required
+  if [ ! -d /etc/network/run ] && [ ! -L /etc/network/run ]; then
+	[ -e /etc/network/run ] && rm -f /etc/network/run
+	# Use /dev/shm if possible
+	if \
+		[ -d /dev/shm ] \
+		&& [ -w /dev/shm ] \
+		&& [ -r /proc/mounts ] \
+		&& grep -qs "^tmpfs[[:space:]]\+/dev/shm[[:space:]]\+tmpfs[[:space:]]\+\([^[:space:]]\+,\)\?rw" /proc/mounts \
+		&& ! grep -qs '[[:space:]]/dev[[:space:]]devfs[[:space:]]' /proc/mounts \
+		&& { [ -d /dev/shm/network ] || mkdir -v /dev/shm/network ; }
+	then
+		ln -s /dev/shm/network /etc/network/run
+	else
+		mkdir -v /etc/network/run
+	fi
+  fi
+
+  # Create run dir if required
+  if [ -L /etc/network/run ] && [ ! -d /etc/network/run ] ; then
+	# Create directory at the target
+	if RUN_CANONICALDIR="$(readlink -f /etc/network/run)" && [ "$RUN_CANONICALDIR" ] ; then
+		if ! mkdir "$RUN_CANONICALDIR" ; then
+			report_err "Failure creating directory ${RUN_CANONICALDIR}. Aborting."
+			exit 1
+		fi
+	else
+		report_err "The canonical path of /etc/network/run could not be determined. Aborting."
+		exit 1
+	fi
+  fi
+
+  # Set up ifstate file if it does not exist
+  if [ ! -e /etc/network/ifstate ] ; then
+      if [ ! -L /etc/network/ifstate ] && [ -d /etc/network/run ] ; then
+           ln -s run/ifstate /etc/network/ifstate
+      fi
+      if [ ! -e /etc/network/ifstate ] ; then
+           if [ -e /var/run/ifupdown.state ] ; then
+              cat /var/run/ifupdown.state > /etc/network/ifstate
+              rm -f /var/run/ifupdown.state
+           else
+              : > /etc/network/ifstate
+           fi
+      fi
+  fi
+
+fi 
+
+if [ "$1" = "configure" ] && [ "$2" != "" ] \
+     && dpkg --compare-versions "$2" le "0.6.4-4.1" \
+     && [ -f /etc/network/ifstate ] \
+     && [ -x /sbin/dhclient ]
+then
+    # for every[1] active ifupdown-controlled dhclient interface, copy
+    # /var/run/dhclient.pid, so that the new ifdown is able to kill
+    # dhclient.
+    #
+    # [1] old version has a bug with more than one DHCP iface anyway,
+    #     just we don't know which one made it if there are several.
+    sed -e 's/^.*=//' /etc/network/ifstate |
+        while read iface
+        do
+            # handle \<newline>-continued lines
+            sed -e '/^[[:space:]]*#/b;:g /\\$/{N;s/\\\n//;bg;}' /etc/network/interfaces |\
+                if grep -e "^[[:space:]]*iface[[:space:]]*\\b${iface}\\b[[:space:]]*.*\\bdhcp\\b.*" >/dev/null 2>&1 \
+                        && [ -f "/var/run/dhclient.pid" ] \
+                        && [ ! -f "/var/run/dhclient.${iface}.pid" ]
+                then
+                    # copy original file.  If dhclient was started
+                    # manually, one can still use dhclient.pid, if started
+                    # by ifupdown, the new ifupdown can take it down with 
+                    # dhclient.${iface}.pid.  Obsolete files are removed during
+                    # next boot (bootmisc.sh).
+                    cp /var/run/dhclient.pid "/var/run/dhclient.${iface}.pid"
+                fi
+        done
+fi
+
+# Generic stuff done on all configurations
+if [ "$1" = "configure" ] ; then
+
+# Check /e/n/i
+  if [ -f /etc/network/interfaces ] ; then
+    # TODO: This should be handled with debconf and the script
+    # could introduce the line there directly
+    if ! grep -q "^[[:space:]]*auto[[:space:]].*\<lo\>" /etc/network/interfaces ; then
+          report_warn "No 'auto lo' statement found in /etc/network/interfaces"
+    fi
+    if ! grep -q "^[[:space:]]*iface[[:space:]]\+lo[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces ; then
+          report_warn "No 'iface lo' definition found in /etc/network/interfaces"
+    fi
+  else  # ! -f /etc/network/interfaces
+    echo "Creating /etc/network/interfaces."
+    echo "# interfaces(5) file used by ifup(8) and ifdown(8)" > /etc/network/interfaces
+    echo "auto lo" >> /etc/network/interfaces
+    echo "iface lo inet loopback" >> /etc/network/interfaces
+  fi
+
+fi
+
+[ -e /usr/share/debconf/confmodule ] && db_stop
+
+#DEBHELPER#

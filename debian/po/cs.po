@@ -1,0 +1,43 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ifupdown\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-08-04 17:16+0200\n"
+"PO-Revision-Date: 2004-02-09 20:09+0100\n"
+"Last-Translator: Miroslav Kure <kurem@debian.cz>\n"
+"Language-Team: Czech <provoz@debian.cz>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates.master:4
+msgid "Update /etc/network/interfaces?"
+msgstr "Aktualizovat /etc/network/interfaces?"
+
+#. Type: boolean
+#. Description
+#: ../templates.master:4
+msgid ""
+"The format of /etc/network/interfaces has had a minor but incompatible "
+"change made between version 0.5.x and 0.6.x of ifupdown. It is however "
+"possible to automatically convert from the old format to the new in almost "
+"all cases."
+msgstr ""
+"Mezi verzemi 0.5.x a 0.6 programu ifupdown do¹lo k malé, ale nekompatibilní "
+"zmìnì formátu souboru /etc/network/interfaces. V témìø v¹ech pøípadech lze "
+"pøevést data ze starého formátu do nového zcela automaticky."

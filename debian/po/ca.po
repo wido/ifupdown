@@ -1,0 +1,36 @@
+# ifupdown (debconf) translation to Catalan.
+# Copyright (C) 2004 Free Software Foundation, Inc.
+# Aleix Badia i Bosch <abadia@ica.es>, 2004
+# Matt Bonner <mateubonet@yahoo.com>, 2004
+# Jordi Mallach <jordi@debian.org>, 2004
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ifupdown-0.6.4-4.6_templates\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2004-08-04 17:16+0200\n"
+"PO-Revision-Date: 2004-02-28 19:46GMT\n"
+"Last-Translator: Aleix Badia i Bosch <abadia@ica.es>\n"
+"Language-Team: Debian L10n Catalan <debian-l10n-catalan@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates.master:4
+msgid "Update /etc/network/interfaces?"
+msgstr "Voleu actualitzar el fitxer /etc/network/interfaces?"
+
+#. Type: boolean
+#. Description
+#: ../templates.master:4
+msgid ""
+"The format of /etc/network/interfaces has had a minor but incompatible "
+"change made between version 0.5.x and 0.6.x of ifupdown. It is however "
+"possible to automatically convert from the old format to the new in almost "
+"all cases."
+msgstr ""
+"El format del fitxer /etc/network/interfaces de l'ifupdown s'ha modificat "
+"entre les versions 0.5.x i 0.6.x. Tot i això, en la majoria dels casos es "
+"pot actualitzar automàticament del format vell al nou."
