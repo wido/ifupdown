@@ -18,7 +18,7 @@ Easy/standalone:
     ** #153222: Wish for ifstate documentation or a status command
 
 Vars for scripts:
-     * #88946: please add --verbose for if.d scripts
+     . #88946: please add --verbose for if.d scripts
      * #154442: Provide intermediate interface name to nested mapper
      * #286155: please export hook name to environment
 

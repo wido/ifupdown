@@ -1,6 +1,7 @@
 ifupdown (0.6.5) unstable; urgency=low
 
   * The Gernot Heiser release -- aged like a fine South Australian wine.
+
   * Switch to Debian-native versioning / source packaging for the time being.
     (Closes: Bug#84697)
 
@@ -30,6 +31,9 @@ ifupdown (0.6.5) unstable; urgency=low
 
   * Make debian/rules test always succeed when cross-building. Thanks
     to NIIBE Yutaka. (Closes: Bug#283649)
+
+  * Add VERBOSITY variable for scripts, invoke run-parts with --verbose.
+    Thanks to Michael Weber. (Closes: Bug#88946)
 
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 

@@ -2171,7 +2171,7 @@ Our function then will be:
 static void set_environ(interface_defn *iface, char *mode) {
 	<<variables local to set environ>>
 	int i;
-	const int n_env_entries = iface->n_options + 5;
+	const int n_env_entries = iface->n_options + 6;
 
 	<<initialise environ [[n_env_entries]]>>
 
@@ -2185,6 +2185,8 @@ static void set_environ(interface_defn *iface, char *mode) {
 	<<add [[ADDRFAM]] to environment>>
 	<<add [[METHOD]] to environment>>
 	<<add [[MODE]] to environment>>
+	<<add [[VERBOSITY]] to environment>>
+
 	<<add [[PATH]] to environment>>
 }
 @
@@ -2261,6 +2263,11 @@ We can then go ahead and fill in the environment.
 
 <<add [[PATH]] to environment>>=
 *(environend++) = setlocalenv("%s=%s", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
+*environend = NULL;
+@
+
+<<add [[VERBOSITY]] to environment>>=
+*(environend++) = setlocalenv("%s=%s", "VERBOSITY", verbose ? "1" : "0");
 *environend = NULL;
 @
 
@@ -2397,7 +2404,9 @@ int execute_all(interface_defn *ifd, execfn *exec, char *opt) {
 		}
 	}
 
-	sprintf(buf, "run-parts /etc/network/if-%s.d", opt);
+	snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d",
+		verbose ? "--verbose" : "", opt);
+
 	(*exec)(buf); 
 
 	return 1;
