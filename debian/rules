@@ -58,13 +58,11 @@ endif
 
 configure:
 	dh_testdir
-	# Add here commands to configure the package.
 
 build: build-stamp
-build-stamp: configure
+build-stamp: # configure
 	dh_testdir
 
-	# Add here commands to compile the package.
 	if [ -x /usr/bin/noweb ]; then \
 	  $(MAKE) clobber; \
 	else \
