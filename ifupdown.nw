@@ -2801,7 +2801,7 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	int i;
 
 	if (strncmpz(id, "iface", idlen) == 0) {
-		return ifd->logical_iface;
+		return ifd->real_iface;
 	} else {
 		for (i = 0; i < ifd->n_options; i++) {
 			if (strncmpz(id, ifd->option[i].name, idlen) == 0) {

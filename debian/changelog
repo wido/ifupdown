@@ -1,3 +1,12 @@
+ifupdown (0.6.6) unstable; urgency=low
+
+  * Fix brown paper bag bug where %iface% maps to the logical interface
+    name rather than the hardware one. Thanks to Paul Hampson for being
+    the first to spot it once the BTS was working again. Also add a test
+    case. (Closes: Bug#303148)
+
+ -- Anthony Towns <aj@localhost.localdomain>  Tue,  5 Apr 2005 14:19:21 +1000
+
 ifupdown (0.6.5) unstable; urgency=low
 
   * The Gernot Heiser release -- aged like a fine South Australian wine.

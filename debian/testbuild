@@ -4,6 +4,7 @@ rm -rf tests/
 mkdir tests
 
 cat >tests/testcase.1 <<EOF
+# RUN: -a
 auto eth0
 iface eth0 inet static
   address 1.2.3.4
@@ -25,6 +26,7 @@ run-parts --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.2 <<EOF
+# RUN: -a
 auto eth0 eth1 eth2
 auto eth3 eth4 eth5
 allow-hotplug eth6
@@ -94,6 +96,7 @@ ifconfig eth5 1.8.9.10 netmask 255.255.255.0  	 up
 run-parts --verbose /etc/network/if-up.d
 EOF
 cat >tests/testcase.3 <<EOF
+# RUN: -a
 auto eth0
 iface eth0 inet static
   address 1.2.3.4
@@ -119,16 +122,40 @@ ifconfig eth0 add 3ffe:ffff:100:f101::1/64
 run-parts --verbose /etc/network/if-up.d
 EOF
 
+cat >tests/testcase.4 <<EOF
+# RUN: eth0=work
+mapping eth0
+  script tests/map.eth0.work
+iface work inet static
+  address 1.2.3.4
+  netmask 255.255.255.0
+  up echo hi
+  post-up echo hello
+EOF
+cat >tests/up.4 <<EOF
+====stdout====
+====stderr====
+Configuring interface eth0=work (inet)
+run-parts --verbose /etc/network/if-pre-up.d
+
+ifconfig eth0 1.2.3.4 netmask 255.255.255.0  	 up
+
+echo hi
+echo hello
+run-parts --verbose /etc/network/if-up.d
+EOF
+
 
 result=true
-for test in 1 2 3; do
-	./ifup -nv --force -a -i tests/testcase.$test \
+for test in 1 2 3 4; do
+	args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
+	./ifup -nv --force -i tests/testcase.$test $args \
 		>tests/up-res-out.$test 2>tests/up-res-err.$test || 
 		true
 	(echo "====stdout===="; cat tests/up-res-out.$test
 	 echo "====stderr===="; cat tests/up-res-err.$test) > tests/up-res.$test
 
-	echo "Testcase $test:"
+	echo "Testcase $test: $args"
 	
 	if diff -ub tests/up.$test tests/up-res.$test; then
 		echo "(okay)"
