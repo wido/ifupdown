@@ -34,6 +34,8 @@ ifupdown (0.6.5) unstable; urgency=low
 
   * Add VERBOSITY variable for scripts, invoke run-parts with --verbose.
     Thanks to Michael Weber. (Closes: Bug#88946)
+  * Add LOGICAL variable for scripts. (Doesn't work for mapping scripts yet
+    though)
 
  -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 

@@ -1108,7 +1108,9 @@ typedef struct interface_defn interface_defn;
 struct interface_defn {
 	interface_defn *next;
 
-	char *iface;
+	char *logical_iface;
+	char *real_iface;
+
 	address_family *address_family;
 	method *method;
 
@@ -1685,8 +1687,8 @@ if (rest[0] != '\0') {
 We then want to store the interface name.
 
 <<set iface name>>=
-currif->iface = strdup(iface_name);
-if (!currif->iface) {
+currif->logical_iface = strdup(iface_name);
+if (!currif->logical_iface) {
 	<<report internal error and die>>
 }
 @ 
@@ -1800,7 +1802,7 @@ static int duplicate_if(interface_defn *ifa, interface_defn *ifb);
 
 <<config functions>>=
 static int duplicate_if(interface_defn *ifa, interface_defn *ifb) {
-	if (strcmp(ifa->iface, ifb->iface) != 0) return 0;
+	if (strcmp(ifa->logical_iface, ifb->logical_iface) != 0) return 0;
 	if (ifa->address_family != ifb->address_family) return 0;
 	return 1;
 }
@@ -2171,7 +2173,7 @@ Our function then will be:
 static void set_environ(interface_defn *iface, char *mode) {
 	<<variables local to set environ>>
 	int i;
-	const int n_env_entries = iface->n_options + 6;
+	const int n_env_entries = iface->n_options + 7;
 
 	<<initialise environ [[n_env_entries]]>>
 
@@ -2182,6 +2184,7 @@ static void set_environ(interface_defn *iface, char *mode) {
 	}
 
 	<<add [[IFACE]] to environment>>
+	<<add [[LOGICAL]] to environment>>
 	<<add [[ADDRFAM]] to environment>>
 	<<add [[METHOD]] to environment>>
 	<<add [[MODE]] to environment>>
@@ -2252,7 +2255,12 @@ We can then go ahead and fill in the environment.
 @
 
 <<add [[IFACE]] to environment>>=
-*(environend++) = setlocalenv("%s=%s", "IFACE", iface->iface);
+*(environend++) = setlocalenv("%s=%s", "IFACE", iface->real_iface);
+*environend = NULL;
+@
+
+<<add [[LOGICAL]] to environment>>=
+*(environend++) = setlocalenv("%s=%s", "LOGICAL", iface->logical_iface);
 *environend = NULL;
 @
 
@@ -2783,7 +2791,7 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	int i;
 
 	if (strncmpz(id, "iface", idlen) == 0) {
-		return ifd->iface;
+		return ifd->logical_iface;
 	} else {
 		for (i = 0; i < ifd->n_options; i++) {
 			if (strncmpz(id, ifd->option[i].name, idlen) == 0) {
@@ -3412,7 +3420,7 @@ Bringing an interface up or taking it down can be done thusly:
 	int okay = 0;
 	int failed = 0; 
 	for (currif = defn->ifaces; currif; currif = currif->next) {
-		if (strcmp(liface, currif->iface) == 0) {
+		if (strcmp(liface, currif->logical_iface) == 0) {
 			okay = 1;
 
 			<<run commands for [[currif]]; set [[failed]] on error>>
@@ -3434,8 +3442,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 <<run commands for [[currif]]; set [[failed]] on error>>=
 {
-	char *oldiface = currif->iface;
-	currif->iface = iface;
+	currif->real_iface = iface;
 
 	if (verbose) {
 		fprintf(stderr, "Configuring interface %s=%s (%s)\n", 
@@ -3462,7 +3469,7 @@ Bringing an interface up or taking it down can be done thusly:
 	    	failed = 1;
 		/* what happened here? */
 	}
-	currif->iface = oldiface;
+	currif->real_iface = NULL;
 }
 @ 
 
