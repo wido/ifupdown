@@ -167,7 +167,6 @@ ifeq ($(PO2DEBCONF),yes)
 	po2debconf -e utf8 debian/templates.master > debian/templates
 endif
 	dh_gencontrol -- -V'debconf-depends=debconf (>= $(MINDEBCONFVER))'
-	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
 
