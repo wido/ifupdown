@@ -37,8 +37,6 @@ Example scripts:
 Syntax:
      . #62633: netbase: Suggestion - rules for creating & destroying
        interfaces
-     * #79683: /etc/network/interfaces hash '#' doesn't work at end of
-       line
     ** #300987: Please allow passing of values via dhclient3's -e option
 
 Ifconfig-ish:
@@ -131,6 +129,8 @@ Hurd:
      * #296115: ifupdown: [patch] Port to non-linux
 
 Crazy:
+     . #79683: /etc/network/interfaces hash '#' doesn't work at end of
+       line
      * #119401: default gateway network route should be default to a host
        route
      * #150876: ifupdown: defn2c generalization

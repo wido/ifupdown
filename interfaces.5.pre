@@ -23,8 +23,11 @@ and
 commands.
 This is where you configure how your system is connected to the network.
 .P
-Lines starting with `#' are ignored.
-A line may be extended across multiple lines by making the last character a backslash.
+Lines starting with `#' are ignored. Note that end-of-line comments are
+NOT supported, comments must be on a line of their own.
+.P
+A line may be extended across multiple lines by making the last character
+a backslash.
 .P
 The file consists of zero or more "iface", "mapping" and "auto" stanzas.
 Here is an example.
