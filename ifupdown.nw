@@ -3091,7 +3091,10 @@ with this, namely:
 (cmds == iface_down)
 @
 
-XXX
+The [[--allow]] option lets us limit the interfaces ifupdown will act on.
+It's implemented by having an [[allow_class]] that tells us which class
+of interfaces we're working with, and skipping interfaces that aren't
+in that class, like so:
 
 <<we're limiting to [[--allow]]ed interfaces>>=
 (allow_class != NULL)
