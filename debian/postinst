@@ -39,11 +39,12 @@ if [ "$ATTEMPT_CONVERSION" = "true" ]; then
     fi
   )
 fi
- 
-if [ "$1" = configure -a ! -d /etc/network/run -a ! -L /etc/network/run ]
-then
+
+# Create /etc/network/run 
+if [ "$1" = configure -a ! -d /etc/network/run ]; then
   if [ -e /etc/network/run ]; then
-    rm -f /etc/network/run
+    echo "Renaming non-directory /etc/network/run to run.dpkg-old..."
+    mv /etc/network/run /etc/network/run.dpkg-old
   fi
 
   # The best choice is to use /dev/shm/network
@@ -83,7 +84,9 @@ if [ "$1" = configure -a "$2" != "" -a -e /etc/network/ifstate ] &&
 then
   if [ ! -e /etc/network/run/ifstate ] || ! diff /etc/network/ifstate /etc/network/run/ifstate >/dev/null
   then
-    mv /etc/network/ifstate /etc/network/run/ifstate
+    if [ ! -L /etc/network/ifstate ]; then
+      mv /etc/network/ifstate /etc/network/run/ifstate
+    fi
   fi
 fi
    
