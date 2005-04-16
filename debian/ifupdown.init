@@ -13,7 +13,7 @@ RUN_DIR=/etc/network/run
 IFSTATE=/etc/network/run/ifstate
 
 myreadlink () {
-  dest="$1"
+  dest="${1%/}"
   extras=""
 
   while [ "$dest" != "" ]; do
@@ -33,9 +33,11 @@ myreadlink () {
     fi
 
     while [ ! -e "$dest" ]; do
-      extras="$(basename "$dest")/$extras"
+      extras="${dest##*/}/$extras"
       if [ "${extras%%/*}" = ".." ]; then return 1; fi
-      dest="$(dirname "$dest")"
+      destx="${dest%/*}"
+      if [ "$destx" = "$dest" ]; then destx=""; fi
+      dest="$destx"
     done
   done
   dest="$dest/$extras"
