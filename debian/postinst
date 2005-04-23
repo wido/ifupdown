@@ -65,6 +65,14 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
     WHAT_TO_USE=owndir
   fi
 
+  # Check for available space if we are using devshm
+  if [ "$WHAT_TO_USE" = devshm ]; then
+    SPACE=`df -k /dev/shm | tail -1 | awk '{if ($4 ~ /%/) { print $3 } else { print $4 } }'`
+    if [ "$SPACE" -le 0 ]; then
+      WHAT_TO_USE=owndir
+    fi
+  fi
+
   if [ "$WHAT_TO_USE" = owndir -a -e /etc/network/ifstate ]; then
     WHAT_TO_USE=etcnetwork
   fi

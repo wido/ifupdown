@@ -3,6 +3,10 @@ ifupdown (0.6.7) unstable; urgency=low
   * Don't use dirname/basename in ifupdown init script; they're in /usr/bin.
     (Closes: Bug#304188)
 
+  * Check for free space on /dev/shm when working out where to link
+    /e/n/run. Thanks to Jose Manuel Delgado Mendinueta. (Closes:
+    Bug#303656)
+
  -- Anthony Towns <ajt@debian.org>  Sun, 17 Apr 2005 00:22:11 +1000
 
 ifupdown (0.6.6) unstable; urgency=low
