@@ -7,7 +7,7 @@ ifupdown (0.6.7) unstable; urgency=low
     /e/n/run. Thanks to Jose Manuel Delgado Mendinueta. (Closes:
     Bug#303656)
 
- -- Anthony Towns <ajt@debian.org>  Sun, 17 Apr 2005 00:22:11 +1000
+ -- Anthony Towns <ajt@debian.org>  Mon,  2 May 2005 23:57:25 +1000
 
 ifupdown (0.6.6) unstable; urgency=low
 
