@@ -24,7 +24,7 @@ done
 
 cat <<EOF
 result=true
-for test in 1 2 3 4; do
+for test in 1 2 3 4 5 6; do
         args="\$(cat tests/testcase.\$test | sed -n 's/^# RUN: //p')"
         ./ifup -nv --force -i tests/testcase.\$test \$args \\
                 >tests/up-res-out.\$test 2>tests/up-res-err.\$test || 

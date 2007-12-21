@@ -1,4 +1,4 @@
-%
+
 \documentclass{article}
 \usepackage{graphicx}
 \usepackage{noweb}
@@ -410,9 +410,10 @@ extern address_family *addr_fams[];
 
 Each address family incorporates a number of methods, which
 encapsulate various ways of configuring an interface for a particular
-address family. There are two definining components of a method: two
-sets of commands to bring an interface up and down, and a number of
-options for the commands.
+address family. There are three components of a method: two sets of
+commands to bring an interface up and down, a number of options for
+the commands, and a set of conversion functions to allow programmatic
+manipulation of the options.
 
 <<type definitions>>=
 typedef struct method method;
@@ -422,6 +423,7 @@ typedef struct method method;
 struct method {
 	char *name;
 	command_set *up, *down;
+	conversion *conversions;
 };
 @ 
 
@@ -434,6 +436,20 @@ with, and the function that should be used to execute them. See the
 typedef int (execfn)(char *command);
 typedef int (command_set)(interface_defn *ifd, execfn *e);
 @ 
+
+Each conversion is implemented as a mapping from an option name, to a
+function that updates that option's value, as follows:
+
+<<type definitions>>=
+typedef struct conversion conversion;
+@
+
+<<structure definitions>>=
+struct conversion {
+	char *option;
+	void (*fn)(char **);
+};
+@
 
 As our compile-time configuration is done at, well, compile-time, there
 is little need for functions in the actual module, and we can make do with
@@ -494,6 +510,7 @@ Clearly we need to reference some of the data structures we defined
 above, so we can begin with the rather trivial:
 
 <<output headers for address family>>=
+print "#include <stddef.h>\"\n";
 print "#include \"header.h\"\n\n\n";
 @ 
 
@@ -541,7 +558,7 @@ my %methods = ();
 @
 
 We'll use standard names, such as [[foo_up]], [[foo_down]], and
-[[foo_options]] for the various elements of each method which cannot
+[[foo_conv]] for the various elements of each method which cannot
 be defined inline. The two functions and the array will be declared
 static to avoid name conflicts.
 
@@ -553,6 +570,7 @@ foreach $method (keys %methods) {
 	{
 		"$method",
 		${method}_up, ${method}_down,
+		${method}_conv,
 	},
 EOF
 }
@@ -704,6 +722,7 @@ sub get_method {
 	nextline;
 	<<output code for description>>
 	<<output code for options list>>
+	<<output code for conversions>>
 	<<output code for up commands>>
 	<<output code for down commands>>
 }
@@ -758,6 +777,20 @@ if (match($line, "down", $indent)) {
 } else {
 	print "static int ${method}_down(interface_defn ifd) { return 0; }\n"
 }
+@
+
+<<output code for conversions>>=
+print "static conversion ${method}_conv[] = {\n";
+if (match($line, "conversion", $indent)) {
+	while (nextline && match($line, "", "$indent  ")) {
+		my $foo = $line;
+		$foo =~ s/^\s+//;
+		my ($option, $fn) = split(/ /, $foo);
+		print "\t{ \"$option\", $fn },\n";
+	}
+}
+print "\t\t{ NULL, NULL },\n";
+print "};\n";
 @
 
 <<defn2c subroutines>>=
@@ -1847,6 +1880,7 @@ with.
 <<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>
 <<check for duplicate options>>
 <<add option>>
+<<convert option if necessary>>
 @
 
 <<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>=
@@ -1886,6 +1920,19 @@ is straightforward.
 <<add option>>=
 add_variable(filename, firstword, rest,
 	 &currif->option, &currif->n_options, &currif->max_options);
+@
+
+<<convert option if necessary>>=
+{
+	conversion *c;
+	variable *o = &currif->option[currif->n_options - 1];
+	for (c = currif->method->conversions; c && c->option && c->fn; c++) {
+		if (strcmp(c->option, o->name) == 0) {
+			c->fn(&o->value);
+			break;
+		}
+	}
+}
 @
 
 \subsubsection{Auto and Allow Lines}
@@ -3929,6 +3976,7 @@ interfaces up and down.
 unsigned int mylinuxver();
 unsigned int mylinux(int,int,int);
 int execable(char *);
+void cleanup_hwaddress_for_iproute(char **pparam);
 @
 
 <<archlinux.c>>=
@@ -3973,6 +4021,27 @@ int execable(char *program) {
 		if (S_ISREG(buf.st_mode) && (S_IXUSR & buf.st_mode)) return 1;
 	}
 	return 0;
+}
+
+void cleanup_hwaddress_for_iproute(char **pparam) {
+	char *rest = *pparam;
+		/* we're shrinking the text, so no realloc needed */
+	char *space = strchr(rest, ' ');
+
+	if (space == NULL)
+		return;
+
+	*space = '\0';
+	if (strcasecmp(rest, "ether") == 0 ||
+		strcasecmp(rest, "ax25") == 0 ||
+		strcasecmp(rest, "ARCnet") == 0 ||
+		strcasecmp(rest, "netrom") == 0)
+	{
+		/* found deprecated <class> attribute */
+		memmove(rest, space+1, strlen(space+1)+1);
+	} else {
+		*space = ' ';
+	}
 }
 @ 
 
@@ -4019,13 +4088,16 @@ method static
     gateway address             -- Default gateway (dotted quad)
     pointopoint address		-- Address of other end point (dotted quad). \
 				   Note the spelling of "point-to".
-    lladdress address           -- Link local address. (Replaces hwaddress)
+    hwaddress address           -- Link local address.
     mtu size                    -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
 	[[peer %pointtopoint%]] dev %iface%
-    ip link set dev %iface% [[mtu %mtu%]] [[address %lladdress%]] up
+    ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
 
     [[ ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
 
@@ -4064,6 +4136,9 @@ method dhcp
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
     hwaddress address       -- Hardware Address.
+
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
@@ -4182,6 +4257,10 @@ method static
     media type             -- Medium type, driver dependent
     hwaddress address      -- Hardware address
     mtu size               -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
+
   up
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] dev %iface%
