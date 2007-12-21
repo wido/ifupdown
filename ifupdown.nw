@@ -4030,6 +4030,7 @@ method static
     [[ ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
 
   down
+    ip addr flush dev %iface%
     [[ ip route del default via %gateway% [[metric %metric%]] dev %iface% ]]
     ip link set dev %iface% down
 @
