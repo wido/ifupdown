@@ -4012,7 +4012,8 @@ method static
     allocated IPv4 addresses.
       
   options
-    address address             -- Address (dotted quad) *required*
+    address address             -- Address (dotted quad/netmask) *required*
+    netmask mask                -- Netmask (dotted quad or CIDR)
     broadcast broadcast_address -- Broadcast address (dotted quad)
     metric metric               -- Routing metric for default gateway (integer)
     gateway address             -- Default gateway (dotted quad)
@@ -4022,7 +4023,7 @@ method static
     mtu size                    -- MTU size
 
   up
-    ip addr add %address% [[broadcast %broadcast%]] \
+    ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
 	[[peer %pointtopoint%]] dev %iface%
     ip link set dev %iface% [[mtu %mtu%]] [[address %lladdress%]] up
 

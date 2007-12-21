@@ -4,6 +4,7 @@ ifupdown (0.7~alpha3) UNRELEASED; urgency=low
     - Fix aadr typo in IPv6 loopback method
     - Add dependency on new version of iproute that supports specifying
       netmasks as dotted-quads.
+    - Re-add netmask field for backwards compatability.  
 
  -- Anthony Towns <ajt@debian.org>  Fri, 21 Dec 2007 22:01:09 +1000
 
