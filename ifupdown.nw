@@ -4063,12 +4063,10 @@ method dhcp
     leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
-    hwaddress class address -- Hardware Address. /class/ is one of \
-                                *ether*, *ax25*, *ARCnet* or *netrom*. \
-                                /address/ is dependent on this choice.
+    hwaddress address       -- Hardware Address.
 
   up
-    [[ifconfig %iface% hw %hwaddress%]]
+    [[ip link set dev %iface% address %hwaddress%]]
     dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient3"))
     dhclient -e -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
@@ -4182,17 +4180,16 @@ method static
     netmask mask           -- Netmask (number of bits, eg 64) *required*
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
-    hwaddress class address -- Hardware Address. /class/ is one of \
-                                 *ether*, *ax25*, *ARCnet* or *netrom*. \
-                                 /address/ is dependent on this choice.
+    hwaddress address      -- Hardware address
     mtu size               -- MTU size
   up
-    ifconfig %iface% [[media %media%]] [[hw %hwaddress%]] [[mtu %mtu%]] up
-    ifconfig %iface% add %address%/%netmask%
-    [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] 
+    ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
+    ip -6 addr add %address%[[/%netmask%]] dev %iface%
+    [[ ip -6 route add default via %gateway% dev %iface% ]]
 
   down
-    ifconfig %iface% down
+    ip -6 addr flush dev %iface% scope global
+    ip link set dev %iface% down
 
 method manual
   description
