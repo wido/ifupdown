@@ -1,3 +1,10 @@
+ifupdown (0.7~alpha3) UNRELEASED; urgency=low
+
+  * Apply patches from Andreas Henriksson:
+    - Fix aadr typo in IPv6 loopback method
+
+ -- Anthony Towns <ajt@debian.org>  Fri, 21 Dec 2007 22:01:09 +1000
+
 ifupdown (0.7~alpha2) experimental; urgency=low
 
   * Add command line interface options (ifup -o foo=bar eth1). Yay!

@@ -4165,7 +4165,7 @@ method loopback
     This method may be used to define the IPv6 loopback interface.
   up
     ip link set dev %iface% up
-    ip aadr add dev %iface% ::1
+    ip addr add dev %iface% ::1
   down
     ip addr del dev %iface% ::1
     ip link set dev %iface% down
