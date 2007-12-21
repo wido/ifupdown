@@ -4,12 +4,12 @@ Priority: important
 Maintainer: Anthony Towns <ajt@debian.org>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
 Standards-Version: 3.7.2
-Build-Depends: debhelper (>= 4.1.68), nowebm
+Build-Depends: debhelper (>= 4.1.68), nowebm, po-debconf
 
 Package: ifupdown
 Architecture: any
-Depends: net-tools, ${shlibs:Depends}, ${debconf-depends}, lsb-base
-Suggests: iproute, dhcp3-client | dhcp-client, ppp
+Depends: net-tools, iproute, debconf (>= 1.2.0) | debconf-2.0, lsb-base, ${shlibs:Depends}
+Suggests: dhcp3-client | dhcp-client, ppp
 Replaces: netbase (<< 4.00)
 Conflicts: dhcp-client (= 3.0.1betaRC4-1)
 Description: high level tools to configure network interfaces

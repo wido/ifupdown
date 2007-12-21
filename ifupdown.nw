@@ -11,7 +11,7 @@
 \let\nwdocspar=\relax
 
 \title{ Interface Tools\thanks{
-Copyright \copyright\ 1999--2005 Anthony Towns. This program is free
+Copyright \copyright\ 1999--2007 Anthony Towns. This program is free
 software; you can redistribute it and/or modify it under the terms of
 the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any
@@ -222,7 +222,7 @@ conservative, so we'll encourage it to use a more entertaining method
 of compiling source code.
 
 <<make options>>=
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.5"'
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7alpha"'
 CC := gcc
 @ 
 
@@ -413,13 +413,6 @@ encapsulate various ways of configuring an interface for a particular
 address family. There are two definining components of a method: two
 sets of commands to bring an interface up and down, and a number of
 options for the commands.
-
-\emph{NB: I expect this will be extended sooner or later to make the
-options more flexible. Probably introducing some form of typing (for
-example to convert netmasks from CIDR specs to dotted-quads, ie
-/24~$\rightarrow$~255.255.255.0), and some form of matching to allow
-multiple options to be deduced from a single configuration
-statement. --- aj}
 
 <<type definitions>>=
 typedef struct method method;
@@ -1136,6 +1129,45 @@ struct variable {
 };
 @ 
 
+We'll define a function to help us build arrays of these [[variables]].
+It's fairly straightforward: to add a variable, we simply construct
+a new structure and add it at the end of our array of variables,
+increasing the size of the array first if necessary.
+
+<<exported symbols>>=
+void add_variable(char *filename, char *name, char *value, 
+		variable **var, int *n_vars, int *max_vars);
+@
+
+<<config functions>>=
+void add_variable(char *filename, char *name, char *value, 
+		variable **var, int *n_vars, int *max_vars)
+{
+	if (*n_vars >= *max_vars) {
+		variable *new_var;
+		*max_vars += 10;
+		new_var = realloc(*var, sizeof(variable) * *max_vars);
+		if (new_var == NULL) {
+			<<report internal error and die>>
+		}
+		*var = new_var;
+	}
+
+	(*var)[*n_vars].name = strdup(name);
+	(*var)[*n_vars].value = strdup(value);
+
+	if (!(*var)[*n_vars].name) {
+		<<report internal error and die>>
+	}
+
+	if (!(*var)[*n_vars].value) {
+		<<report internal error and die>>
+	}
+
+	(*n_vars)++;
+}
+@
+
 In addition, we want to represent each mapping in the configuration
 file. This is somewhat simpler, since each mapping is entirely self
 contained, and doesn't need to reference previously determined address
@@ -1848,44 +1880,13 @@ if (strcmp(firstword, "pre-down") == 0) {
 }
 @ 
 
-Adding an option is fairly straightforward: we simply construct
-a new variable and add it at the end of our array of variables,
-increasing the size of the array first if necessary.  Options with 
-empty values are rejected.
+Given the previous definition of [[add_variable()]] adding an option
+is straightforward.
 
 <<add option>>=
-if (currif->n_options >= currif->max_options) {
-	<<increase max number of options>>
-}
-
-currif->option[currif->n_options].name = strdup(firstword);
-currif->option[currif->n_options].value = strdup(rest);
-
-if (!currif->option[currif->n_options].name) {
-	<<report internal error and die>>
-}
-
-if (!currif->option[currif->n_options].value) {
-	<<report internal error and die>>
-}
-
-currif->n_options++;	
+add_variable(filename, firstword, rest,
+	 &currif->option, &currif->n_options, &currif->max_options);
 @
-
-We'll increase the space for variables by a constant amount each time,
-rather than doubling or anything smart like that.
-
-<<increase max number of options>>=
-{
-	variable *opt;
-	currif->max_options = currif->max_options + 10;
-	opt = realloc(currif->option, sizeof(*opt) * currif->max_options);
-	if (opt == NULL) {
-		<<report internal error and die>>
-	}
-	currif->option = opt;
-}
-@ 
 
 \subsubsection{Auto and Allow Lines}
 
@@ -3118,7 +3119,7 @@ Okay, so next on our agenda is argument handling.
 
 We'll do argument handling via the GNU [[getopt]] function, which
 means we have to include the appropriate header, and define a cute
-little structure to represent out long options:
+little structure to represent our long options:
 
 <<main headers>>=
 #include <getopt.h>
@@ -3136,6 +3137,7 @@ struct option long_opts[] = {
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"force",       no_argument,       NULL,  2 },
+        {"option",      required_argument, NULL, 'o'},
 	{0,0,0,0}
 };
 @ 
@@ -3163,6 +3165,9 @@ int force = 0;
 char *allow_class = NULL;
 char *interfaces = "/etc/network/interfaces";
 char *excludeint = NULL ;
+variable *option = NULL;
+int n_options = 0;
+int max_options = 0;
 @ 
 
 We'll also have two helper functions to display usage information,
@@ -3184,7 +3189,7 @@ static void usage(char *execname) {
 <<main functions>>=
 static void version(char *execname) {
 	printf("%s version " IFUPDOWN_VERSION "\n", execname);
-	printf("Copyright (c) 1999-2005 Anthony Towns\n\n");
+	printf("Copyright (c) 1999-2007 Anthony Towns\n\n");
 	printf(
 
 "This program is free software; you can redistribute it and/or modify\n"
@@ -3209,6 +3214,8 @@ static void help(char *execname) {
 	printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
 	printf("\t\t\t\t(note that this option doesn't disable mappings)\n");
 	printf("\t-v, --verbose\t\tprint out what would happen before doing it\n");
+	printf("\t-o OPTION=VALUE\t\tset OPTION to VALUE as though it were in\n");
+	printf("\t\t\t\t/etc/network/interfaces\n");
 	printf("\t--no-mappings\t\tdon't run any mappings\n");
 	printf("\t--force\t\t\tforce de/configuration\n");
 	exit(0);
@@ -3221,7 +3228,7 @@ Now, the meat of argument parsing is done with [[getopt()]] and a
 <<parse arguments>>=
 for(;;) {
 	int c;
-	c = getopt_long(argc, argv, "e:s:i:hVvna", long_opts, NULL);
+	c = getopt_long(argc, argv, "e:s:i:o:hVvna", long_opts, NULL);
 	if (c == EOF) break;
 
 	switch(c) {
@@ -3275,6 +3282,31 @@ case 2:
 case 'e':
 	excludeint = strdup(optarg);
 	break;
+@ 
+<<[[getopt]] possibilities>>=
+case 'o':
+{
+	char *name = strdup(optarg);
+	char *val = strchr(name, '=');
+	if (val == NULL) {
+		fprintf(stderr, "Error in --option \"%s\" -- no \"=\" character\n",
+			optarg);
+		exit(1);
+	}
+	*val++ = '\0';
+
+	if (strcmp(name, "post-up") == 0) {
+		strcpy(name, "up");
+	}
+	if (strcmp(name, "pre-down") == 0) {
+		strcpy(name, "down");
+	}
+	
+	add_variable(argv[0], name, val, &option, &n_options, &max_options);
+	free(name);
+
+	break;
+}
 @ 
 
 And we also have a help option and a version option:
@@ -3426,6 +3458,8 @@ Bringing an interface up or taking it down can be done thusly:
 		if (strcmp(liface, currif->logical_iface) == 0) {
 			okay = 1;
 
+			<<add options from command line to [[currif]]>>
+
 			<<run commands for [[currif]]; set [[failed]] on error>>
 
 			if (failed) break;
@@ -3501,6 +3535,72 @@ Bringing an interface up or taking it down can be done thusly:
 }
 @ 
 
+Adding the options from the command line is tedious, but simple:
+
+<<add options from command line to [[currif]]>>=
+{
+	int i;
+	for (i = 0; i < n_options; i++) {
+		if (option[i].value[0] == '\0') {
+			<<remove [[option[i]]] from [[currif]]>>
+		} else {
+			<<add [[option[i]]] to [[currif]]>>
+		}
+	}
+}
+@
+
+<<add [[option[i]]] to [[currif]]>>=
+{
+	int j = currif->n_options;
+	if (strcmp(option[i].name, "pre-up") != 0
+    	    && strcmp(option[i].name, "up") != 0
+	    && strcmp(option[i].name, "down") != 0
+	    && strcmp(option[i].name, "post-down") != 0)
+	{
+		for (j = 0; j < currif->n_options; j++) {
+			if (strcmp(currif->option[j].name, 
+			           option[i].name) == 0) 
+			{
+				currif->option[j].value = option[i].value;
+				break;
+			}
+		}
+	}
+	if (j == currif->n_options) {
+		add_variable(argv[0], option[i].name, option[i].value,
+			&currif->option, &currif->n_options, 
+			&currif->max_options);
+	}
+}
+@
+
+<<remove [[option[i]]] from [[currif]]>>=
+{
+	if (strcmp(option[i].name, "pre-up") != 0
+    	    && strcmp(option[i].name, "up") != 0
+	    && strcmp(option[i].name, "down") != 0
+	    && strcmp(option[i].name, "post-down") != 0)
+	{
+		int j;
+		for (j = 0; j < currif->n_options; j++) {
+			if (strcmp(currif->option[j].name, 
+			           option[i].name) == 0) 
+			{
+				currif->n_options--;
+				break;
+			}
+		}
+		for (; j < currif->n_options; j++) {
+			option[j].name = option[j+1].name;
+			option[j].value = option[j+1].value;
+		}
+	} else {
+		/* do nothing */
+	}
+}
+@
+
 \subsection{Target Interfaces}
 
 So, if we're going to actually do something, we should probably figure
@@ -3528,7 +3628,8 @@ if (do_all) {
 	} else if (<<we're taking interfaces down>>) {
 		read_all_state(argv[0], &target_iface, &n_target_ifaces);
 	} else {
-		assert(0);
+		fprintf(stderr, "%s: can't tell if interfaces are going up or down\n", argv[0]);
+		exit(1);
 	}	
 } else {
 	target_iface = argv + optind;
@@ -3898,11 +3999,10 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    ifconfig %iface% 127.0.0.1 up
-    route add -net 127.0.0.0       if ( mylinuxver() < mylinux(2,1,100) )
+    ip link set dev %iface% up
 
   down
-    ifconfig %iface% down
+    ip link set dev %iface% down
 @ 
 
 <<inet methods>>=
@@ -3913,33 +4013,24 @@ method static
       
   options
     address address             -- Address (dotted quad) *required*
-    netmask netmask             -- Netmask (dotted quad) *required*
     broadcast broadcast_address -- Broadcast address (dotted quad)
-    network network_address     -- Network address (dotted quad) *required \
-                                     for 2.0.x kernels*
     metric metric               -- Routing metric for default gateway (integer)
     gateway address             -- Default gateway (dotted quad)
     pointopoint address		-- Address of other end point (dotted quad). \
 				   Note the spelling of "point-to".
-    media type                  -- Medium type, driver dependent
-    hwaddress class address     -- Hardware Address. /class/ is one of \
-                                     *ether*, *ax25*, *ARCnet* or *netrom*. \
-                                     /address/ is dependent on the above \
-                                     choice.
+    lladdress address           -- Link local address. (Replaces hwaddress)
     mtu size                    -- MTU size
 
   up
-    [[ ifconfig %iface% hw %hwaddress%]]
-    ifconfig %iface% %address% netmask %netmask% [[broadcast %broadcast%]] \
-	[[pointopoint %pointopoint%]] [[media %media%]] [[mtu %mtu%]] \
-	up
-    route add -net %network%  \
-        if ( mylinuxver() < mylinux(2,1,100) )
-    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]]
+    ip addr add %address% [[broadcast %broadcast%]] \
+	[[peer %pointtopoint%]] dev %iface%
+    ip link set dev %iface% [[mtu %mtu%]] [[address %lladdress%]] up
+
+    [[ ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
 
   down
-    [[ route del default gw %gateway% [[metric %metric%]] %iface% ]]
-    ifconfig %iface% down
+    [[ ip route del default via %gateway% [[metric %metric%]] dev %iface% ]]
+    ip link set dev %iface% down
 @
 
 <<inet methods>>=
@@ -4001,7 +4092,7 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ifconfig %iface% down
+    ip link set dev %iface% down
 @ 
 
 <<inet methods>>=
@@ -4021,7 +4112,7 @@ method bootp
            [[--hwaddr %hwaddr%]] --returniffail --serverbcast
 
   down
-    ifconfig down %iface%
+    ip link set dev %iface% down
 @ 
 
 <<inet methods>>=
@@ -4073,9 +4164,11 @@ method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
-    ifconfig %iface% add ::1
+    ip link set dev %iface% up
+    ip aadr add dev %iface% ::1
   down
-    ifconfig %iface% del ::1
+    ip addr del dev %iface% ::1
+    ip link set dev %iface% down
 
 method static
   description

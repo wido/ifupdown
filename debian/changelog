@@ -1,3 +1,15 @@
+ifupdown (0.7~alpha2) experimental; urgency=low
+
+  * Add command line interface options (ifup -o foo=bar eth1). Yay!
+  * Switch to using iproute instead of ifconfig/route. Thanks to Andrew
+    Pollock.
+  * Drop support for kernels prior to 2.1.100 (and that don't have NETLINK
+    for iproute).
+  * Drop support for specifying a "netmask" in static inet interfaces.
+  * Bump DH_COMPAT to 4 (from 1!)
+
+ -- Anthony Towns <aj@azure.humbug.org.au>  Mon, 18 Jun 2007 15:47:21 +0100
+
 ifupdown (0.6.8) unstable; urgency=low
 
   * Add myself as co-maintainer with approval from Anthony Towns.

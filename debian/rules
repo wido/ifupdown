@@ -34,11 +34,8 @@
 #
 ######################################################################
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
 # This is the debhelper compatability version to use.
-export DH_COMPAT=1
+export DH_COMPAT=4
 
 # For working out whether we're cross-building
 DEB_BUILD_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
@@ -47,14 +44,6 @@ DEB_HOST_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 # user/group of to-be-installed files
 ROOT_USER  := 0
 ROOT_GROUP := 0
-
-ifeq (,$(wildcard /usr/bin/po2debconf))
-PO2DEBCONF := no
-MINDEBCONFVER := 0.5
-else
-PO2DEBCONF := yes
-MINDEBCONFVER := 1.2.0
-endif
 
 configure:
 	dh_testdir
@@ -101,17 +90,6 @@ clean:
 	-$(MAKE) clean
 
 	dh_clean
-ifeq ($(PO2DEBCONF),yes)
-	# Hack for woody compatibility. This makes sure that the
-	# debian/templates file shipped in the source package doesn't
-	# specify encodings, which woody's debconf can't handle. If building
-	# on a system with po-debconf installed (conveniently debhelper (>=
-	# 4.1.16) depends on it), the binary-arch target will generate a
-	# better version for sarge.
-	echo 1 > debian/po/output
-	po2debconf debian/templates.master > debian/templates
-	rm -f debian/po/output
-endif
 
 install-stamp: install
 install: build test
@@ -120,11 +98,11 @@ install: build test
 	dh_clean -k
 	dh_installdirs etc/network/if-pre-up.d etc/network/if-up.d etc/network/if-down.d etc/network/if-post-down.d
 
-	# Add here commands to install the package into debian/tmp.
-	$(MAKE) install BASEDIR=`pwd`/debian/tmp
+	# Add here commands to install the package into debian/ifupdown
+	$(MAKE) install BASEDIR=`pwd`/debian/ifupdown
 
 	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 755 debian/upgrade-from-0.5.x.pl \
-		debian/tmp/usr/share/ifupdown/
+		debian/ifupdown/usr/share/ifupdown/
 	touch install-stamp
 
 # Build architecture-independent files here.
@@ -139,7 +117,7 @@ binary-arch: build install
 	dh_installdebconf	
 	dh_installdocs
 	dh_installexamples contrib/*
-	mv debian/tmp/usr/share/doc/ifupdown/examples debian/tmp/usr/share/doc/ifupdown/contrib
+	mv debian/ifupdown/usr/share/doc/ifupdown/examples debian/ifupdown/usr/share/doc/ifupdown/contrib
 	dh_installexamples examples/*
 	dh_installmenu
 #	dh_installemacsen
@@ -149,9 +127,9 @@ binary-arch: build install
 	dh_installcron
 #	dh_installmanpages
 #	   ^-- can't do our symlink trick
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 interfaces.5 debian/tmp/usr/share/man/man5/interfaces.5
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 ifup.8 debian/tmp/usr/share/man/man8/ifup.8
-	ln -s ifup.8 debian/tmp/usr/share/man/man8/ifdown.8
+	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 interfaces.5 debian/ifupdown/usr/share/man/man5/interfaces.5
+	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 ifup.8 debian/ifupdown/usr/share/man/man8/ifup.8
+	ln -s ifup.8 debian/ifupdown/usr/share/man/man8/ifdown.8
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs ChangeLog
@@ -165,10 +143,8 @@ binary-arch: build install
 	dh_installdeb
 #	dh_perl
 	dh_shlibdeps
-ifeq ($(PO2DEBCONF),yes)
 	po2debconf -e utf8 debian/templates.master > debian/templates
-endif
-	dh_gencontrol -- -V'debconf-depends=debconf (>= $(MINDEBCONFVER)) | debconf-2.0'
+	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
 
