@@ -7,7 +7,13 @@ ifupdown (0.7~alpha3) UNRELEASED; urgency=low
     - Re-add netmask field for backwards compatibility.
     - Flush addresses when taking down a static inet interface.
     - Switch inet/dhcp and inet6/static methods to iproute.
-    - Update test cases. 
+    - Update test cases.
+  * Update Build-Depends: to reflect name change from nowebm to noweb.
+  * Move DH_COMPAT setting from debian/rules to debian/compat file.
+  * Don't ignore errors from make clean in debian/rules clean target.
+  * Escape hypens in interfaces.5 manpage.
+  * Don't create /usr/bin or /usr/sbin directories.
+  * Bump Standards-Version.
 
  -- Anthony Towns <ajt@debian.org>  Fri, 21 Dec 2007 22:01:09 +1000
 

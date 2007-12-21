@@ -34,9 +34,6 @@
 #
 ######################################################################
 
-# This is the debhelper compatability version to use.
-export DH_COMPAT=4
-
 # For working out whether we're cross-building
 DEB_BUILD_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
@@ -87,7 +84,7 @@ clean:
 	# Add here commands to clean up after the build process
 	rm -rf tests/
 	rm -f build-stamp install-stamp
-	-$(MAKE) clean
+	$(MAKE) clean
 
 	dh_clean
 

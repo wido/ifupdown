@@ -3,8 +3,8 @@ Section: admin
 Priority: important
 Maintainer: Anthony Towns <ajt@debian.org>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
-Standards-Version: 3.7.2
-Build-Depends: debhelper (>= 4.1.68), nowebm, po-debconf
+Standards-Version: 3.7.3
+Build-Depends: debhelper (>= 4.1.68), noweb, po-debconf
 
 Package: ifupdown
 Architecture: any

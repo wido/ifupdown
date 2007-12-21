@@ -1,5 +1,4 @@
-usr/bin
-usr/sbin
+sbin
 usr/share/doc/ifupdown/examples
 usr/share/ifupdown
 usr/share/man/man5
