@@ -6,6 +6,7 @@ ifupdown (0.7~alpha3) UNRELEASED; urgency=low
       netmasks as dotted-quads.
     - Re-add netmask field for backwards compatibility.
     - Flush addresses when taking down a static inet interface.
+      (Closes: Bug#431059)
     - Switch inet/dhcp and inet6/static methods to iproute.
     - Update test cases.
   * Update Build-Depends: to reflect name change from nowebm to noweb.
