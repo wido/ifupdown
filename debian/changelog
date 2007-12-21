@@ -1,4 +1,4 @@
-ifupdown (0.7~alpha3) UNRELEASED; urgency=low
+ifupdown (0.7~alpha3) experimental; urgency=low
 
   * Apply patches from Andreas Henriksson (Closes: Bug#456918)
     - Fix aadr typo in IPv6 loopback method
@@ -9,6 +9,8 @@ ifupdown (0.7~alpha3) UNRELEASED; urgency=low
       (Closes: Bug#431059)
     - Switch inet/dhcp and inet6/static methods to iproute.
     - Update test cases.
+    - Support for conversion of ifconfig format hwaddress to iproute format
+      hwaddress.
   * Update Build-Depends: to reflect name change from nowebm to noweb.
   * Move DH_COMPAT setting from debian/rules to debian/compat file.
   * Don't ignore errors from make clean in debian/rules clean target.
@@ -16,7 +18,7 @@ ifupdown (0.7~alpha3) UNRELEASED; urgency=low
   * Don't create /usr/bin or /usr/sbin directories.
   * Bump Standards-Version.
 
- -- Anthony Towns <ajt@debian.org>  Fri, 21 Dec 2007 22:01:09 +1000
+ -- Anthony Towns <ajt@debian.org>  Sat, 22 Dec 2007 00:31:16 +1000
 
 ifupdown (0.7~alpha2) experimental; urgency=low
 
