@@ -13,23 +13,21 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ifupdown 0.6.7\n"
+"Project-Id-Version: ifupdown\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2004-08-04 17:16+0200\n"
-"PO-Revision-Date: 2005-11-13 12:23+0100\n"
-"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
-"Language-Team: Swedish <sv@li.org>\n"
+"PO-Revision-Date: 2006-04-12 09:13+0200\n"
+"Last-Translator: Jacobo Tarrio <jtarrio@debian.org>\n"
+"Language-Team: Galician <trasno@ceu.fi.udc.es>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: swe\n"
-"X-Poedit-Country: swe\n"
 
 #. Type: boolean
 #. Description
 #: ../templates.master:4
 msgid "Update /etc/network/interfaces?"
-msgstr "Uppdatera /etc/network/interfaces?"
+msgstr "Â¿Actualizar /etc/network/interfaces?"
 
 #. Type: boolean
 #. Description
@@ -40,7 +38,6 @@ msgid ""
 "possible to automatically convert from the old format to the new in almost "
 "all cases."
 msgstr ""
-"Formatet på /etc/network/interfaces har genomgått en liten ändring som gör "
-"att versionerna 0.5.x och 0.6.x av ifupdown blivit inkompatibla. Dock är det "
-"möjligt att nästan alltid automatiskt konvertera från det gamla formatet "
-"till det nya."
+"O formato de /etc/network/interfaces tivo un cambio menor pero incompatible "
+"entre as versiÃ³ns 0.5.x e 0.6.x de ifupdown. Nembargantes, Ã© posible "
+"converter automÃ¡ticamente do formato antigo ao novo en case tÃ³dolos casos."

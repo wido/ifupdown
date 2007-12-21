@@ -1,31 +1,91 @@
+ifupdown (0.6.8) unstable; urgency=low
+
+  * Add myself as co-maintainer with approval from Anthony Towns.
+  * Change path of dhclient.leases to make sure the dhcp state survive
+    reboots. (Closes: #311777)
+  * Change leasehours option value to match the option name. 
+  * Async ifup/ifdown modication based on patch from Scott James
+    Remnant and Ubuntu.  (Closes: #347580)
+    - Rewrite the way that ifup and ifdown read and write the state
+      file.  Instead of storing it in memory and holding a lock on it
+      (preventing concurrent processes from actually being concurrent)
+      use atomic read and write functions that only hold the lock for
+      very short periods.
+    - Write to the state file when we start bringing up or tearing
+      down the interface, so we don't ever try to do the same
+      operation at the same time.
+    - Update the state file once the operation is complete to ensure
+      we record the actual status of it.
+  * Acknowledge NMUs. (Closes: #311011, #311443, #353154, #339834, #311928,
+    #336931, #338849, #362093, #330230, #386794, #384866, #312988, #266021,
+    #384438, #387155, #387453, #387677)
+
+ -- Petter Reinholdtsen <pere@debian.org>  Thu, 28 Sep 2006 18:14:47 +0200
+
+ifupdown (0.6.7-0.4) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix the 'client' dhcp option to work as documented.  Patch from
+    Roderick Schertler.  (Closes: #311011)
+  * Change section from base to admin to match the override file.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Fri, 15 Sep 2006 23:26:04 +0200
+
+ifupdown (0.6.7-0.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Correct typo in interfaces(5).  (Closes: #311443)
+  * Correct typo in ifupdown.nw. (Closes: #353154)
+  * Avoid segfault on freebsd. Patch from Brian M. Carlson. (Closes: #339834)
+
+  [ Translations ]
+  * Added Vietnamese (vi) by Clytie Siddall. (Closes: #311928)
+  * Added Portuguese (pt) by Simão Pedro Cardoso. (Closes: #336931)
+  * Updated Swedish (sv) by Daniel Nylander. (Closes: #338849)
+  * Added Galician (gl) by Jacobo Tarrio. (Closes: #362093)
+  * Added Norwegian Bokmaal (nb) by Petter Reinholdtsen.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Thu, 14 Sep 2006 15:02:06 +0200
+
+ifupdown (0.6.7-0.2) unstable; urgency=low
+
+  * Non-maintainer upload approved by maintainer.
+  * Add LSB-style dependency information to init.d scripts.
+    (Closes: #330230)
+  * Make sure the init.d scripts are added in dependency order.
+    (Closes: #386794)
+  * Updated standards-version from 3.6.1.0 to 3.7.2.  No changes needed.
+  * Update the FSF address in the copyright file to keep lintian happy.
+  * Use log_* functions from lsb-base in init.d scripts.  Add lsb-base
+    as dependency.  Based on patch from Ubuntu.  (Closes: #384866)
+
+ -- Petter Reinholdtsen <pere@debian.org>  Tue, 12 Sep 2006 16:22:43 +0200
+
+ifupdown (0.6.7-0.1) unstable; urgency=low
+
+  * Non-maintainer upload with authorization from maintainer.
+  * Support for link-local IPv6 gateways (Closes: #312988)
+      - patch from Florian Zumbiehl.
+  * Support for manual IPv6 method (Closes: #266021)
+      - patch from Rémi Denis-Courmont.
+
+ -- Mohammed Adnène Trojette <adn+deb@diwi.org>  Wed, 23 Aug 2006 17:01:03 +0200
+
 ifupdown (0.6.7) unstable; urgency=low
 
   * Don't use dirname/basename in ifupdown init script; they're in /usr/bin.
     (Closes: Bug#304188)
 
-  * Check for free space on /dev/shm when working out where to link
-    /e/n/run. Thanks to Jose Manuel Delgado Mendinueta. (Closes:
-    Bug#303656)
-
- -- Anthony Towns <ajt@debian.org>  Mon,  2 May 2005 23:57:25 +1000
+ -- Anthony Towns <ajt@debian.org>  Sun, 17 Apr 2005 00:22:11 +1000
 
 ifupdown (0.6.6) unstable; urgency=low
-
-  * The "what does wine come in" release
 
   * Fix brown paper bag bug where %iface% maps to the logical interface
     name rather than the hardware one. Thanks to Paul Hampson for being
     the first to spot it once the BTS was working again. Also add a test
     case. (Closes: Bug#303148)
 
-  * Fix brown paper bag bug where "test -e" doesn't actually identify a
-    dangling /etc/network/run symlink on upgrade. (Closes: Bug#303225)
-
-  * Fix brown paper bag bug where we only consider pointing
-    /etc/network/run at /dev/shm if /dev/shm *isn't* in /proc/mounts. (No
-    bug filed yet, though...)
-
- -- Anthony Towns <ajt@debian.org>  Tue,  5 Apr 2005 14:19:21 +1000
+ -- Anthony Towns <aj@localhost.localdomain>  Tue,  5 Apr 2005 14:19:21 +1000
 
 ifupdown (0.6.5) unstable; urgency=low
 
@@ -51,7 +111,7 @@ ifupdown (0.6.5) unstable; urgency=low
     Usage is "ifup --allow=hotplug <interfaces>"; only the allowed interfaces
     whill actually be tried. (Closes: Bug#300937)
 
-  * Satiate the POSIX sh monkeys, makenwdep.sh now uses printf for \t's,
+  * Satiate the POSIX sh monkeys, makenwdep.sh uses printf for \t's,
     not echo -e. (Closes: Bug#294970)
 
   * Switch to using "/etc/network/run/ifstate" instead of
@@ -66,15 +126,8 @@ ifupdown (0.6.5) unstable; urgency=low
     Thanks to Michael Weber. (Closes: Bug#88946)
   * Add LOGICAL variable for scripts. (Doesn't work for mapping scripts yet
     though)
-  * Add PHASE variable for scripts, same as MODE but more detailed;
-    pre-up, post-down, etc. (Closes: Bug#286155)
 
-  * Document lack of support for end-of-line comments in interfaces(5).
-    (Closes: Bug#79683)
-
-  * Remove conflict with old, experimental-only version of dhcp-client.
-
- -- Anthony Towns <ajt@debian.org>  Mon,  4 Apr 2005 23:41:06 +1000
+ -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
 

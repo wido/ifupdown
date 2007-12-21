@@ -1,9 +1,16 @@
 #!/bin/sh
-#
-# ifupdown-clean
-#
+### BEGIN INIT INFO
+# Provides:          ifupdown-clean
+# Required-Start:    checkroot
+# Required-Stop:     
+# Default-Start:     S
+# Default-Stop:
+# Short-Description: Clean old iterface status info during boot.
+### END INIT INFO
 
 set -e
+
+. /lib/lsb/init-functions
 
 MYNAME="${0##*/}"
 PATH=/sbin:/bin
@@ -17,14 +24,13 @@ IFSTATE=/etc/network/run/ifstate
 
 case "$1" in
   start)
-    echo -n "Cleaning up ifupdown..."
+    log_begin_msg "Cleaning up ifupdown..."
     if [ -f $IFSTATE -a ! -L $IFSTATE ]; then
       rm -f "$IFSTATE"
     elif [ -f $IFSTATE ]; then
-      # This is kinda bad :(
       >$IFSTATE
     fi
-    echo "done."
+    log_end_msg 0
     exit 0
     ;;
 

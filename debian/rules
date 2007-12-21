@@ -58,11 +58,13 @@ endif
 
 configure:
 	dh_testdir
+	# Add here commands to configure the package.
 
 build: build-stamp
-build-stamp: # configure
+build-stamp: configure
 	dh_testdir
 
+	# Add here commands to compile the package.
 	if [ -x /usr/bin/noweb ]; then \
 	  $(MAKE) clobber; \
 	else \
@@ -142,8 +144,8 @@ binary-arch: build install
 	dh_installmenu
 #	dh_installemacsen
 #	dh_installpam
-	dh_installinit --name=ifupdown --no-start -- start 39 S .  start 36 0 6 .
 	dh_installinit --name=ifupdown-clean --no-start -- start 18 S .
+	dh_installinit --name=ifupdown --no-start -- start 39 S .  start 36 0 6 .
 	dh_installcron
 #	dh_installmanpages
 #	   ^-- can't do our symlink trick
