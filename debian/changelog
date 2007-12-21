@@ -1,10 +1,10 @@
 ifupdown (0.7~alpha3) UNRELEASED; urgency=low
 
-  * Apply patches from Andreas Henriksson:
+  * Apply patches from Andreas Henriksson (Closes: Bug#456918)
     - Fix aadr typo in IPv6 loopback method
     - Add dependency on new version of iproute that supports specifying
       netmasks as dotted-quads.
-    - Re-add netmask field for backwards compatability.
+    - Re-add netmask field for backwards compatibility.
     - Flush addresses when taking down a static inet interface.
     - Switch inet/dhcp and inet6/static methods to iproute.
     - Update test cases. 
