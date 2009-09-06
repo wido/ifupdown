@@ -1,20 +1,22 @@
-ifupdown (0.6.9) UNRELEASED; urgency=low
+ifupdown (0.6.9) unstable; urgency=low
 
   * Fix typo subsytems -> subsystems in interfaces(5) manual page
     (Closes: #390086).  Thanks to A. Costa for the patch.
   * Fix typo iterface -> interface in init.d/ifupdown-clean (Closes:
     #458347).  Patch from Trent W. Buck.
-  * Fix bashism in example script get-mac-address.sh (Closes: #518924).
-    Patch from Simon Descarpentries.
-  * Remove obsolete debconf template translations (Closes: #520007, #534553).
-  * Fix gramatically incorrect message from ifupdown (Closes: #501554).  Patch
-    from Łukasz Stelmach.
+  * Fix bashism in example script get-mac-address.sh (Closes:
+    #518924).  Patch from Simon Descarpentries.
+  * Remove obsolete debconf template translations (Closes: #520007,
+    #534553).
+  * Fix gramatically incorrect message from ifupdown (Closes:
+    #501554).  Patch from Łukasz Stelmach.
   * Updated standards-version from 3.7.2 to 3.8.3.  No change needed.
   * Make sure postrm script fail on errors.  Thanks lintian.
   * Upgrade to debhelper version 7.
-  * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804, #544371).
+  * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804,
+    #544371).
 
- -- Petter Reinholdtsen <pere@debian.org>  Sun, 06 Sep 2009 10:49:47 +0200
+ -- Petter Reinholdtsen <pere@debian.org>  Sun, 06 Sep 2009 12:11:11 +0200
 
 ifupdown (0.6.8+nmu3) unstable; urgency=low
 
