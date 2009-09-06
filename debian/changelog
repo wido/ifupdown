@@ -7,7 +7,7 @@ ifupdown (0.6.9) UNRELEASED; urgency=low
   * Fix bashism in example script get-mac-address.sh (Closes: #518924).
     Patch from Simon Descarpentries.
   * Remove obsolete debconf template translations (Closes: #520007, #534553).
-  * Fix gramatically incorrect message from ifupdown (Closes #501554).  Patch
+  * Fix gramatically incorrect message from ifupdown (Closes: #501554).  Patch
     from Łukasz Stelmach.
   * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804, #544371).
 
