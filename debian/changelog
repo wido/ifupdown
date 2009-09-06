@@ -10,6 +10,7 @@ ifupdown (0.6.9) UNRELEASED; urgency=low
   * Fix gramatically incorrect message from ifupdown (Closes: #501554).  Patch
     from Łukasz Stelmach.
   * Updated standards-version from 3.7.2 to 3.8.3.  No change needed.
+  * Make sure postrm script fail on errors.  Thanks lintian.
   * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804, #544371).
 
  -- Petter Reinholdtsen <pere@debian.org>  Sun, 06 Sep 2009 10:49:47 +0200
