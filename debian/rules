@@ -95,7 +95,7 @@ install-stamp: install
 install: build test
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs etc/network/if-pre-up.d etc/network/if-up.d etc/network/if-down.d etc/network/if-post-down.d
 
 	# Add here commands to install the package into debian/tmp.

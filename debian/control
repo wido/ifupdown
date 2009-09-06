@@ -4,11 +4,11 @@ Priority: important
 Maintainer: Anthony Towns <ajt@debian.org>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
 Standards-Version: 3.8.3
-Build-Depends: debhelper (>= 4.1.68), nowebm
+Build-Depends: debhelper (>= 7), nowebm
 
 Package: ifupdown
 Architecture: any
-Depends: net-tools, ${shlibs:Depends}, lsb-base
+Depends: net-tools, ${shlibs:Depends}, ${misc:Depends}, lsb-base
 Suggests: iproute, dhcp3-client | dhcp-client, ppp
 Replaces: netbase (<< 4.00)
 Conflicts: dhcp-client (<< 3.0)
