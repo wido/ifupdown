@@ -1,3 +1,114 @@
+ifupdown (0.6.9) UNRELEASED; urgency=low
+
+  * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804, #544371).
+
+ -- Petter Reinholdtsen <pere@debian.org>  Sun, 06 Sep 2009 10:49:47 +0200
+
+ifupdown (0.6.8+nmu3) unstable; urgency=low
+
+  * Non-maintainer upload. (with maintainer's consent)
+  * Correctly make the modification in 0.6.8+nmu2
+  * Also adjust the way /sbin/dhclient is killed to be comparable to how
+    /sbin/dhclient is stopped
+  * Invoke dhclient with -v to maintain equivalent verbosity to dhclient3
+  * Conflict with dhcp-client v2
+
+ -- Andrew Pollock <apollock@debian.org>  Thu, 03 Sep 2009 21:50:47 -0700
+
+ifupdown (0.6.8+nmu2) unstable; urgency=low
+
+  * Non-maintainer upload. (with maintainer's consent)
+  * Invoke /sbin/dhclient without the -e option in preparation for DHCP v4
+    (closes: #544371)
+
+ -- Andrew Pollock <apollock@debian.org>  Wed, 02 Sep 2009 21:20:37 -0700
+
+ifupdown (0.6.8+nmu1) unstable; urgency=low
+
+  * Non-maintainer upload to fix pending l10n issues.
+  * Drop debconf support that dealt with a very old transition
+    Closes: #428084, #441673, #448416, #471804
+  * [Lintian] No longer ignore errors by "make clean"
+  * [Lintian] No longer include empty /usr/bin and /usr/sbin
+  * [Lintian] Removed debian/conffiles that only contained files
+    from /etc, that are added automatically by debhelper
+  * [Lintian] Raise debhelper compatibility level to 4
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 12 Apr 2008 13:32:24 +0200
+
+ifupdown (0.6.8) unstable; urgency=low
+
+  * Add myself as co-maintainer with approval from Anthony Towns.
+  * Change path of dhclient.leases to make sure the dhcp state survive
+    reboots. (Closes: #311777)
+  * Change leasehours option value to match the option name. 
+  * Async ifup/ifdown modication based on patch from Scott James
+    Remnant and Ubuntu.  (Closes: #347580)
+    - Rewrite the way that ifup and ifdown read and write the state
+      file.  Instead of storing it in memory and holding a lock on it
+      (preventing concurrent processes from actually being concurrent)
+      use atomic read and write functions that only hold the lock for
+      very short periods.
+    - Write to the state file when we start bringing up or tearing
+      down the interface, so we don't ever try to do the same
+      operation at the same time.
+    - Update the state file once the operation is complete to ensure
+      we record the actual status of it.
+  * Acknowledge NMUs. (Closes: #311011, #311443, #353154, #339834, #311928,
+    #336931, #338849, #362093, #330230, #386794, #384866, #312988, #266021,
+    #384438, #387155, #387453, #387677)
+
+ -- Petter Reinholdtsen <pere@debian.org>  Thu, 28 Sep 2006 18:14:47 +0200
+
+ifupdown (0.6.7-0.4) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix the 'client' dhcp option to work as documented.  Patch from
+    Roderick Schertler.  (Closes: #311011)
+  * Change section from base to admin to match the override file.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Fri, 15 Sep 2006 23:26:04 +0200
+
+ifupdown (0.6.7-0.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Correct typo in interfaces(5).  (Closes: #311443)
+  * Correct typo in ifupdown.nw. (Closes: #353154)
+  * Avoid segfault on freebsd. Patch from Brian M. Carlson. (Closes: #339834)
+
+  [ Translations ]
+  * Added Vietnamese (vi) by Clytie Siddall. (Closes: #311928)
+  * Added Portuguese (pt) by Simão Pedro Cardoso. (Closes: #336931)
+  * Updated Swedish (sv) by Daniel Nylander. (Closes: #338849)
+  * Added Galician (gl) by Jacobo Tarrio. (Closes: #362093)
+  * Added Norwegian Bokmaal (nb) by Petter Reinholdtsen.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Thu, 14 Sep 2006 15:02:06 +0200
+
+ifupdown (0.6.7-0.2) unstable; urgency=low
+
+  * Non-maintainer upload approved by maintainer.
+  * Add LSB-style dependency information to init.d scripts.
+    (Closes: #330230)
+  * Make sure the init.d scripts are added in dependency order.
+    (Closes: #386794)
+  * Updated standards-version from 3.6.1.0 to 3.7.2.  No changes needed.
+  * Update the FSF address in the copyright file to keep lintian happy.
+  * Use log_* functions from lsb-base in init.d scripts.  Add lsb-base
+    as dependency.  Based on patch from Ubuntu.  (Closes: #384866)
+
+ -- Petter Reinholdtsen <pere@debian.org>  Tue, 12 Sep 2006 16:22:43 +0200
+
+ifupdown (0.6.7-0.1) unstable; urgency=low
+
+  * Non-maintainer upload with authorization from maintainer.
+  * Support for link-local IPv6 gateways (Closes: #312988)
+      - patch from Florian Zumbiehl.
+  * Support for manual IPv6 method (Closes: #266021)
+      - patch from Rémi Denis-Courmont.
+
+ -- Mohammed Adnène Trojette <adn+deb@diwi.org>  Wed, 23 Aug 2006 17:01:03 +0200
+
 ifupdown (0.6.7) unstable; urgency=low
 
   * Don't use dirname/basename in ifupdown init script; they're in /usr/bin.
