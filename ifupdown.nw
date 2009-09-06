@@ -3468,7 +3468,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 	switch(cmds(currif)) {
 	    case -1:
-		printf("Don't seem to be have all the variables for %s/%s.\n", 
+		printf("Don't seem to have all the variables for %s/%s.\n", 
 			liface, currif->address_family->name);
 		failed = 1;
 		break;
