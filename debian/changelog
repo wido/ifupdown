@@ -1,5 +1,7 @@
 ifupdown (0.6.9) UNRELEASED; urgency=low
 
+  * Fix typo subsytems -> subsystems in interfaces(5) manual page
+    (Closes: #390086).  Thanks to A. Costa for the patch.
   * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804, #544371).
 
  -- Petter Reinholdtsen <pere@debian.org>  Sun, 06 Sep 2009 10:49:47 +0200
