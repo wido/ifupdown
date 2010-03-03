@@ -116,6 +116,7 @@ ifconfig eth0 1.2.3.4 netmask 255.255.255.0             up
 run-parts --verbose /etc/network/if-up.d
 Configuring interface eth0=eth0 (inet6)
 run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 ifconfig eth0    up
 ifconfig eth0 add 3ffe:ffff:100:f101::1/64
 

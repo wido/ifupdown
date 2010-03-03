@@ -4062,6 +4062,7 @@ method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ifconfig %iface% add ::1
   down
     ifconfig %iface% del ::1
@@ -4081,6 +4082,7 @@ method static
                                  /address/ is dependent on this choice.
     mtu size               -- MTU size
   up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ifconfig %iface% [[media %media%]] [[hw %hwaddress%]] [[mtu %mtu%]] up
     ifconfig %iface% add %address%/%netmask%
     [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] 
@@ -4114,6 +4116,7 @@ method v4tunnel
     ttl time              -- TTL setting
 
   up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up
