@@ -1233,14 +1233,20 @@ helpful error message. Pretty simple, hey?
 
 <<exported symbols>>=
 interfaces_file *read_interfaces(char *filename);
+interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename);
 @ 
 
 <<config functions>>=
 interfaces_file *read_interfaces(char *filename) {
-	<<variables local to read interfaces>>
 	interfaces_file *defn;
 
 	<<allocate defn or [[return NULL]]>>
+	return read_interfaces_defn(defn, filename);
+}
+
+interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
+	<<variables local to read interfaces>>
+
 	<<open file or [[return NULL]]>>
 
 	while (<<we've gotten a line from the file>>) {
@@ -1562,6 +1568,9 @@ if (rest == NULL) continue; /* blank line */
 if (strcmp(firstword, "mapping") == 0) {
 	<<process [[mapping]] line>>
 	currently_processing = MAPPING;
+} else if (strcmp(firstword, "source") == 0) {
+	<<process [[source]] line>>
+	currently_processing = NONE;
 } else if (strcmp(firstword, "iface") == 0) {
 	<<process [[iface]] line>>
 	currently_processing = IFACE;
@@ -1589,6 +1598,35 @@ switch(currently_processing) {
 		<<report bad option and die>>
 }
 @ 
+
+\subsubsection{Source Line}
+
+When processing the [[source]] stanza, we use [[wordexp]] function to expand wildcards 
+and environment variables. 
+
+<<config headers>>=
+#include <wordexp.h>
+@
+
+We use [[WRDE_NOCMD]] flag, so no command substitution occurs
+because of security concerns. Then we go through the output array and read interfaces 
+recursively into already allocated [[defn]].
+
+<<process [[source]] line>>=
+wordexp_t p;
+char ** w;
+int i;
+int fail = wordexp(rest, &p, WRDE_NOCMD);
+if (!fail)
+{
+	w = p.we_wordv;
+	for (i = 0; i < p.we_wordc; i++)
+	{
+		read_interfaces_defn(defn, w[i]);
+	}
+	wordfree(&p);
+}
+@
 
 \subsubsection{Mapping Line}
 

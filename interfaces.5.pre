@@ -26,13 +26,15 @@ This is where you configure how your system is connected to the network.
 Lines starting with `#' are ignored.
 A line may be extended across multiple lines by making the last character a backslash.
 .P
-The file consists of zero or more "iface", "mapping", "auto" and "allow-"
-stanzas. Here is an example.
+The file consists of zero or more "iface", "mapping", "auto", "allow-" and
+"source" stanzas. Here is an example.
 .EX
 auto lo eth0
 allow-hotplug eth1
 
 iface lo inet loopback
+
+source interfaces.d/machine\-dependent
 
 mapping eth0 
  	script /usr/local/sbin/map\-scheme
@@ -64,6 +66,14 @@ be brought up automatically by various subsytems. This may be done using
 a command such as "ifup \-\-allow=hotplug eth0 eth1", which will only bring
 up eth0 or eth1 if it is listed in an "allow-hotplug" line. Note that
 "allow-auto" and "auto" are synonyms.
+.P
+Lines beginning with "source" are used to include stanzas from other files,
+so configuration can be split into many files. The word "source" is 
+followed by the path of file to be sourced. Shell wildcards can be 
+used.
+(See
+.BR wordexp (3)
+for details.)
 .P
 Stanzas beginning with the word "mapping" are used to determine how a
 logical interface name is chosen for a physical interface that is to be
