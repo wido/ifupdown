@@ -34,6 +34,9 @@
 #
 ######################################################################
 
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
 # For working out whether we're cross-building
 DEB_BUILD_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
@@ -42,15 +45,15 @@ DEB_HOST_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
 ROOT_USER  := 0
 ROOT_GROUP := 0
 
+PACKAGE=ifupdown
+
 configure:
 	dh_testdir
-	# Add here commands to configure the package.
 
 build: build-stamp
-build-stamp: configure
+build-stamp: # configure
 	dh_testdir
 
-	# Add here commands to compile the package.
 	if [ -x /usr/bin/noweb ]; then \
 	  $(MAKE) clobber; \
 	else \
@@ -84,7 +87,7 @@ clean:
 	# Add here commands to clean up after the build process
 	rm -rf tests/
 	rm -f build-stamp install-stamp
-	$(MAKE) clean
+	[ ! -f Makefile ] || $(MAKE) clean
 
 	dh_clean
 
@@ -92,14 +95,14 @@ install-stamp: install
 install: build test
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs etc/network/if-pre-up.d etc/network/if-up.d etc/network/if-down.d etc/network/if-post-down.d
 
-	# Add here commands to install the package into debian/ifupdown
-	$(MAKE) install BASEDIR=`pwd`/debian/ifupdown
+	# Add here commands to install the package into debian/tmp.
+	$(MAKE) install BASEDIR=`pwd`/debian/$(PACKAGE)
 
 	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 755 debian/upgrade-from-0.5.x.pl \
-		debian/ifupdown/usr/share/ifupdown/
+		debian/$(PACKAGE)/usr/share/ifupdown/
 	touch install-stamp
 
 # Build architecture-independent files here.
@@ -111,10 +114,10 @@ binary-arch: build install
 #	dh_testversion
 	dh_testdir
 	dh_testroot
-	dh_installdebconf	
+#	dh_installdebconf	
 	dh_installdocs
 	dh_installexamples contrib/*
-	mv debian/ifupdown/usr/share/doc/ifupdown/examples debian/ifupdown/usr/share/doc/ifupdown/contrib
+	mv debian/$(PACKAGE)/usr/share/doc/ifupdown/examples debian/$(PACKAGE)/usr/share/doc/ifupdown/contrib
 	dh_installexamples examples/*
 	dh_installmenu
 #	dh_installemacsen
@@ -124,9 +127,9 @@ binary-arch: build install
 	dh_installcron
 #	dh_installmanpages
 #	   ^-- can't do our symlink trick
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 interfaces.5 debian/ifupdown/usr/share/man/man5/interfaces.5
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 ifup.8 debian/ifupdown/usr/share/man/man8/ifup.8
-	ln -s ifup.8 debian/ifupdown/usr/share/man/man8/ifdown.8
+	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 interfaces.5 debian/$(PACKAGE)/usr/share/man/man5/interfaces.5
+	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 ifup.8 debian/$(PACKAGE)/usr/share/man/man8/ifup.8
+	ln -s ifup.8 debian/$(PACKAGE)/usr/share/man/man8/ifdown.8
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs ChangeLog
@@ -140,7 +143,6 @@ binary-arch: build install
 	dh_installdeb
 #	dh_perl
 	dh_shlibdeps
-	po2debconf -e utf8 debian/templates.master > debian/templates
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb

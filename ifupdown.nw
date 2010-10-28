@@ -3167,7 +3167,10 @@ with this, namely:
 (cmds == iface_down)
 @
 
-XXX
+The [[--allow]] option lets us limit the interfaces ifupdown will act on.
+It's implemented by having an [[allow_class]] that tells us which class
+of interfaces we're working with, and skipping interfaces that aren't
+in that class, like so:
 
 <<we're limiting to [[--allow]]ed interfaces>>=
 (allow_class != NULL)
@@ -3574,7 +3577,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 	switch(cmds(currif)) {
 	    case -1:
-		printf("Don't seem to be have all the variables for %s/%s.\n", 
+		printf("Don't seem to have all the variables for %s/%s.\n", 
 			liface, currif->address_family->name);
 		failed = 1;
 		break;
@@ -4182,7 +4185,7 @@ method dhcp
     [[ip link set dev %iface% address %hwaddress%]]
     dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient3"))
-    dhclient -e -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
@@ -4196,7 +4199,7 @@ method dhcp
   down
     dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient3"))
-    cat /var/run/dhclient.%iface%.pid | xargs -i kill -TERM {} \
+    dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient"))
     pump -i %iface% -r \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
@@ -4300,6 +4303,7 @@ method static
     hwaddress cleanup_hwaddress_for_iproute
 
   up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] dev %iface%
     [[ ip -6 route add default via %gateway% dev %iface% ]]
@@ -4334,6 +4338,7 @@ method v4tunnel
     ttl time              -- TTL setting
 
   up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up

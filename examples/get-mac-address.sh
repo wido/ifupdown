@@ -10,7 +10,7 @@ which=""
 
 while read testmac scheme; do
 	if [ "$which" ]; then continue; fi
-	if [ "$mac" = "$(echo "$testmac" | sed -e 'y/ABCDEF/abcdef/')" ]; then which="$scheme"; fi
+	if [ "$mac" == "$(echo "$testmac" | sed -e 'y/ABCDEF/abcdef/')" ]; then which="$scheme"; fi
 done
 
 if [ "$which" ]; then echo $which; exit 0; fi

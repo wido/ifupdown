@@ -116,6 +116,7 @@ ip link set dev eth0   up
 run-parts --verbose /etc/network/if-up.d
 Configuring interface eth0=eth0 (inet6)
 run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 ip link set dev eth0	up
 ip -6 addr add 3ffe:ffff:100:f101::1/64 dev eth0
 
