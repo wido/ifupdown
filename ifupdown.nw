@@ -4252,6 +4252,17 @@ extern address_family addr_inet6;
 address_family inet6
 architecture linux
 
+method auto
+  description
+    This method may be used to define interfaces with automatically assigned
+    IPv6 addresses.
+  up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    ip link set dev %iface% up
+  down
+    ip -6 addr flush dev %iface% scope global
+    ip link set dev %iface% down
+
 method loopback
   description
     This method may be used to define the IPv6 loopback interface.
