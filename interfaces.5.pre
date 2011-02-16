@@ -267,7 +267,7 @@ The ifupdown suite was written by Anthony Towns <aj@azure.humbug.org.au>.
 This manpage was contributed by Joey Hess <joey@kitenet.net>.
 .SH "SEE ALSO"
 .BR ifup (8),
-.BR iwconfig (8),
+.BR ifconfig (8),
 .BR run\-parts (8).
 .P
 For advice on configuring this package read the
@@ -278,4 +278,4 @@ available at
 or in the \fBdebian-reference-en\fR package.
 .P
 Examples of how to set up interfaces can be found in
-.BR /usr/share/doc/ifupdown/examples/network-interfaces .
+.BR /usr/share/doc/ifupdown/examples/network-interfaces.gz .
