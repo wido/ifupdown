@@ -3,7 +3,7 @@ ifupdown (0.7~alpha4) experimental; urgency=low
   * Add source stanza (Closes: #159884, #149395).
   * Fix bashism in example script get-mac-address.sh (Closes: #518924).
 
- -- 
+ -- Andrew O. Shadoura <bugzilla@tut.by>  Wed, 16 Feb 2011 13:28:00 +0200
 
 ifupdown (0.7~alpha3) experimental; urgency=low
 
