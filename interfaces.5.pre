@@ -274,7 +274,7 @@ For advice on configuring this package read the
 .B Network Configuration
 chapter of the \fIDebian Reference\fR manual,
 available at
-\fIhttp://www.debian.org/doc/manuals/reference/ch-gateway.en.html\fR
+\fIhttp://www.debian.org/doc/manuals/debian-reference/ch05.en.html\fR
 or in the \fBdebian-reference-en\fR package.
 .P
 Examples of how to set up interfaces can be found in
