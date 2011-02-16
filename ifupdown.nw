@@ -4208,6 +4208,33 @@ method bootp
 @ 
 
 <<inet methods>>=
+method tunnel
+  description
+    This method is used to create GRE or IPIP tunnels. You need to have
+    the *ip* binary from the *iproute* package. For GRE tunnels, you
+    will need to load the ip_gre module and the ipip module for
+    IPIP tunnels.
+  options
+    address address       -- Local address (dotted quad) *required*
+    mode type             -- Tunnel type (either GRE or IPIP) *required*
+    endpoint address      -- Address of other tunnel endpoint *required*
+    dstaddr address       -- Remote address (remote address inside tunnel)
+    local address         -- Address of the local endpoint
+    gateway address       -- Default gateway
+    ttl time              -- TTL setting
+    mtu size              -- MTU size
+  up
+    ip tunnel add %iface% mode %mode% remote %endpoint% [[local %local%]] \
+       [[ttl %ttl%]]
+    ip link set %iface% up
+    ip addr add %address%/%netmask% dev %iface%
+    [[ ifconfig %iface% dstaddr %dstaddr% ]]
+    [[ ip route add ::/0 via %gateway% ]]
+  down
+    ip tunnel del %iface%
+@ 
+
+<<inet methods>>=
 method ppp
   description
     This method uses pon/poff to configure a PPP interface. See those
