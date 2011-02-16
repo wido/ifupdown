@@ -4312,12 +4312,14 @@ method static
     media type             -- Medium type, driver dependent
     hwaddress address      -- Hardware address
     mtu size               -- MTU size
+    privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   conversion
     hwaddress cleanup_hwaddress_for_iproute
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] dev %iface%
     [[ ip -6 route add default via %gateway% dev %iface% ]]
@@ -4350,9 +4352,11 @@ method v4tunnel
                              dotted quad)
     gateway address       -- Default gateway (colon delimited)
     ttl time              -- TTL setting
+    privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up
