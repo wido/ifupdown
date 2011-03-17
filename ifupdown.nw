@@ -2,6 +2,9 @@
 \documentclass{article}
 \usepackage{graphicx}
 \usepackage{noweb}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
 \pagestyle{noweb}
 \noweboptions{smallcode,hideunuseddefs}
 \begin{document}
@@ -74,9 +77,47 @@ essentially, putting all the pieces together --- is done by the
 The following diagram gives a brief idea of the information and control
 flow amongst the modules.
 
-\begin{center}
-\includegraphics[height=45mm]{modules}
-\end{center}
+\def\vsep{2.5cm}
+\def\hsep{1.4cm}
+\begin{figure}
+\centering
+\begin{tikzpicture}[every text node part/.style={text centered}]
+    \tikzstyle{block}=[rectangle,draw, text width=2cm, minimum height=2cm]
+    \tikzstyle{big}=[minimum height=4.5cm]
+    \tikzstyle{annot}=[above left]
+
+    \node[block] (ip) at (0,0) {IP address family};
+    \node[annot] at (ip.south east) {\small inet.defn};
+
+    \node[block] (ipx) at (0,-\vsep) {IPX address
+    family};
+    \node[annot] at (ipx.south east) {\small inet.defn};
+
+    \node[block,big] (addrfam) at (\hsep*2,-\vsep/2) {Compile time configuration};
+    \node[annot] at (addrfam.south east) {\small addrfam.c};
+
+    \node[block,big] (config) at (\hsep*4,-\vsep/2) {Runtime configuration};
+    \node[annot] at (config.south east) {\small config.c};
+
+    \node[block] (exec) at (\hsep*6,0) {Execution};
+    \node[annot] at (exec.south east) {\small execute.c};
+
+    \node[block] (main) at (\hsep*6,-\vsep) {Driver};
+    \node[annot] at (main.south east) {\small main.c};
+
+    \draw[-stealth] (ip.east) -- (addrfam.west |- ip);
+    \draw[-stealth] (ipx.east) -- (addrfam.west |- ipx);
+    \draw[-stealth] (addrfam) -- (config);
+    \draw[stealth-] (exec.west) -- (config.east |- exec);
+    \draw[stealth-] (main.west) -- (config.east |- main);
+    \draw[-stealth] (main) -- (exec);
+
+    \node[below=1.2cm of config.south] (mainf) {main()};
+
+    \draw[-stealth, rounded corners=0.3cm] (mainf) -- +(0,1cm) -| (main.south);
+\end{tikzpicture}
+\end{figure}
+
 
 Much of the information sharing will be done by defining and filling
 in some data structures and allowing the other modules to just access
