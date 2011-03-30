@@ -4326,6 +4326,8 @@ method auto
     IPv6 addresses.
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    sysctl net.ipv6.conf.%iface%.accept_ra=1
+    sysctl net.ipv6.conf.%iface%.autoconf=1
     ip link set dev %iface% up
   down
     ip -6 addr flush dev %iface% scope global
@@ -4361,6 +4363,8 @@ method static
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
+    sysctl net.ipv6.conf.%iface%.accept_ra=0
+    sysctl net.ipv6.conf.%iface%.autoconf=0
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] dev %iface%
     [[ ip -6 route add default via %gateway% dev %iface% ]]
