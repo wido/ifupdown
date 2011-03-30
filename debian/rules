@@ -101,8 +101,6 @@ install: build test
 	# Add here commands to install the package into debian/tmp.
 	$(MAKE) install BASEDIR=`pwd`/debian/$(PACKAGE)
 
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 755 debian/upgrade-from-0.5.x.pl \
-		debian/$(PACKAGE)/usr/share/ifupdown/
 	touch install-stamp
 
 # Build architecture-independent files here.
@@ -117,20 +115,14 @@ binary-arch: build install
 	dh_install
 #	dh_installdebconf	
 	dh_installdocs
-	dh_installexamples contrib/*
-	mv debian/$(PACKAGE)/usr/share/doc/ifupdown/examples debian/$(PACKAGE)/usr/share/doc/ifupdown/contrib
-	dh_installexamples examples/*
+	dh_installexamples
 	dh_installmenu
 #	dh_installemacsen
 #	dh_installpam
 	dh_installinit --name=ifupdown-clean --no-start -- start 18 S .
 	dh_installinit --name=ifupdown --no-start -- start 39 S .  start 36 0 6 .
 	dh_installcron
-#	dh_installmanpages
-#	   ^-- can't do our symlink trick
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 interfaces.5 debian/$(PACKAGE)/usr/share/man/man5/interfaces.5
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 ifup.8 debian/$(PACKAGE)/usr/share/man/man8/ifup.8
-	ln -s ifup.8 debian/$(PACKAGE)/usr/share/man/man8/ifdown.8
+	dh_installman
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs ChangeLog
