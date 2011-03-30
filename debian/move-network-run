@@ -1,0 +1,64 @@
+#!/bin/sh
+set -e
+
+MYNAME="${0##*/}"
+
+report() { echo "${MYNAME}: $*" ; }
+report_warn() { report "Warning: $*" >&2 ; }
+report_err() { report "Error: $*" >&2 ; }
+
+# Create /etc/network/run 
+if [ -e /etc/network/run -o -L /etc/network/run ]; then
+  echo "Renaming /etc/network/run to run.dpkg-old..."
+  mv /etc/network/run /etc/network/run.dpkg-old
+fi
+
+# The best choice is to use /lib/init/rw/network
+#
+# If we can't use that, we'll just make /etc/network/run a directory,
+# unless we're upgrading, in which case we'll just keep ifstate where it
+# is, by making /etc/network/run a symlink to /etc/network.
+
+WHAT_TO_USE=initrw
+
+if [ ! -d /lib/init/rw -o ! -w /lib/init/rw -o ! -r /proc/mounts ]; then
+  WHAT_TO_USE=owndir
+elif ! grep -qs "^tmpfs[[:space:]]\+/lib/init/rw[[:space:]]\+tmpfs[[:space:]]\+\([^[:space:]]\+,\)\?rw" /proc/mounts
+then
+  WHAT_TO_USE=owndir
+elif grep -qs '[[:space:]]/dev[[:space:]]devfs[[:space:]]' /proc/mounts; then
+  WHAT_TO_USE=owndir
+fi
+
+# Check for available space if we are using initrw
+if [ "$WHAT_TO_USE" = initrw ]; then
+  SPACE=`df -k /lib/init/rw | tail -1 | awk '{if ($4 ~ /%/) { print $3 } else { print $4 } }'`
+  if [ "$SPACE" -le 0 ]; then
+    WHAT_TO_USE=owndir
+  fi
+fi
+
+if [ "$WHAT_TO_USE" = owndir -a -e /etc/network/ifstate ]; then
+  WHAT_TO_USE=etcnetwork
+fi
+
+if [ "$WHAT_TO_USE" = initrw ]
+then
+  [ -d /lib/init/rw/network ] || mkdir /lib/init/rw/network
+  ln -s /lib/init/rw/network /etc/network/run
+elif [ "$WHAT_TO_USE" = "owndir" ]; then
+  mkdir /etc/network/run
+else
+  ln -s . /etc/network/run
+fi
+
+if [ -e /etc/network/run.dpkg-old/ifstate ]
+then
+  echo "Moving old /etc/network/run/ifstate to the new place"
+  if [ ! -L /etc/network/run.dpkg-old/ifstate ]; then
+    mv /etc/network/run.dpkg-old/ifstate /etc/network/run/ifstate
+  else
+    cat /etc/network/run.dpkg-old/ifstate >/etc/network/run/ifstate
+  fi
+fi
+
