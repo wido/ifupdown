@@ -38,17 +38,14 @@
 	dh $@
 
 override_dh_auto_configure:
-	if [ -x /usr/bin/noweb ]; then \
-	  $(MAKE) clobber; \
-	else \
-	  chmod a+rx defn2c.pl defn2man.pl makecdep.sh makenwdep.sh; \
-	fi
+	chmod a+rx makecdep.sh makenwdep.sh
 
 override_dh_auto_install:
 	$(MAKE) install BASEDIR=`pwd`/debian/`dh_listpackages`
 
 override_dh_auto_clean:
 	$(MAKE) clean
+	$(MAKE) clobber
 
 ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
