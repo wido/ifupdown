@@ -1,6 +1,8 @@
 CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7alpha"'
 CC := gcc
 
+BASEDIR ?= $(DESTDIR)
+
 CFILES := addrfam.c execute.c config.c main.c archlinux.c
 HFILES := header.h archlinux.h
 PERLFILES := defn2c.pl defn2man.pl
