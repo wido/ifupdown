@@ -4,7 +4,7 @@
 # Required-Start:    mountkernfs hostname
 # Required-Stop:     
 # Default-Start:     S
-# Default-Stop:
+# Default-Stop:      0 6
 # Short-Description: Clean old interface status info during boot.
 ### END INIT INFO
 

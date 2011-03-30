@@ -2,7 +2,7 @@
 ### BEGIN INIT INFO
 # Provides:          ifupdown
 # Required-Start:    ifupdown-clean
-# Required-Stop:     $local_fs
+# Required-Stop:     $local_fs ifupdown-clean
 # Default-Start:     S
 # Default-Stop:      0 6
 # Short-Description: Prepare the system for taking up interfaces.
@@ -66,7 +66,7 @@ case "$1" in
     # create it.
 
     if [ -L "$RUN_DIR" ] && [ ! -d "$RUN_DIR" ] ; then
-      runmkdir="$(myreadlink "$RUN_DIR")
+      runmkdir="$(myreadlink "$RUN_DIR")"
       if [ ! "$runmkdir" ] ; then
         report_err "Cannot create target of /etc/network/run"
         log_end_msg 1
@@ -97,9 +97,6 @@ case "$1" in
     if [ "$2" ]; then
       report_err "Arguments to '$1' command not accepted"
       exit 3
-    fi
-    if [ -x /etc/init.d/ifupdown-clean ]; then
-      /etc/init.d/ifupdown-clean start
     fi
     ;;
 
