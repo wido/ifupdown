@@ -4397,6 +4397,7 @@ method v4tunnel
                              dotted quad)
     gateway address       -- Default gateway (colon delimited)
     ttl time              -- TTL setting
+    mtu size              -- MTU size
     privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   up
@@ -4404,7 +4405,7 @@ method v4tunnel
     [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
-    ip link set %iface% up
+    ip link set %iface% up [[mtu %mtu%]]
     [[ ip addr add %address%/%netmask% dev %iface% ]]
     [[ ip route add %gateway% dev %iface% ]]
     [[ ip route add ::/0 via %gateway% dev %iface% ]]
