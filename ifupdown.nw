@@ -148,6 +148,8 @@ We shall begin with the template for the Makefile we shall use.
 <<Makefile>>=
 <<make options>>
 
+BASEDIR ?= $(DESTDIR)
+
 CFILES := addrfam.c execute.c config.c main.c archlinux.c
 HFILES := header.h archlinux.h
 PERLFILES := defn2c.pl defn2man.pl
