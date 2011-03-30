@@ -2,6 +2,16 @@ ifupdown (0.7~alpha4) experimental; urgency=low
 
   * Add source stanza (Closes: #159884, #149395).
   * Fix bashism in example script get-mac-address.sh (Closes: #518924).
+  * Use DebSrc3.0 source format and dh7.
+  * Add auto method for IPv6.
+  * Update URL for Debian Reference (Closes: #610238).
+  * Fix typos in the man page (Closes: #384143, #415285).
+  * Add GRE and IPIP tunnels support (Closes: #158089).
+  * Fix inet/static pointopoint option (Closes: #460276).
+  * Add support for enabling/disabling IPv6 privacy extension
+    (Closes: #520576).
+  * Move network state file to /lib/init/rw/network (Closes: #389996).
+  * Use explicit depends to not break network (Closes: #607713).
 
  -- Andrew O. Shadoura <bugzilla@tut.by>  Wed, 16 Feb 2011 13:28:00 +0200
 
