@@ -255,13 +255,6 @@ See the
 .B get-mac-address.sh
 script in the examples directory for an example of such a mapping
 script.  See also Debian bug #101728.
-.P
-It is not currently possible to divide up
-.B /etc/network/interfaces 
-into multiple files.  A feature that would make this possible is
-some sort of inclusion directive.  No such feature exists in the
-current ifupdown program.  For more information see Debian
-bug #159884.
 .SH AUTHOR
 The ifupdown suite was written by Anthony Towns <aj@azure.humbug.org.au>.
 This manpage was contributed by Joey Hess <joey@kitenet.net>.
