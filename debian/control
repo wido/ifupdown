@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 7), noweb
 
 Package: ifupdown
 Architecture: any
-Depends: net-tools, iproute (>= 20071016-1), ${shlibs:Depends}, ${misc:Depends}, lsb-base
+Depends: net-tools, iproute (>= 20071016-1), ${shlibs:Depends}, ${misc:Depends}, lsb-base, initscripts (>= 2.88dsf-13.3)
 Suggests: dhcp3-client | dhcp-client, ppp
 Replaces: netbase (<< 4.00)
 Conflicts: dhcp-client (<< 3.0)

@@ -10,7 +10,7 @@ ifupdown (0.7~alpha4) experimental; urgency=low
   * Fix inet/static pointopoint option (Closes: #460276).
   * Add support for enabling/disabling IPv6 privacy extension
     (Closes: #520576).
-  * Move network state file to /lib/init/rw/network (Closes: #389996).
+  * Move network state file to /run/network (Closes: #389996).
   * Fix init script dependencies (Closes: #607713, #601705).
   * Add MTU setting for v4tunnel (Closes: #408453, #575110).
 

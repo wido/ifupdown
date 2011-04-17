@@ -8,57 +8,53 @@ report_warn() { report "Warning: $*" >&2 ; }
 report_err() { report "Error: $*" >&2 ; }
 
 # Create /etc/network/run 
-if [ -e /etc/network/run -o -L /etc/network/run ]; then
-  echo "Renaming /etc/network/run to run.dpkg-old..."
+if [ ! -d /etc/network/run ]; then
+  if [ -e /etc/network/run -o -L /etc/network/run ]; then
+    echo "Renaming non-directory /etc/network/run to run.dpkg-old..."
+    mv /etc/network/run /etc/network/run.dpkg-old
+  fi
+
+  # The best choice is to use /run/network
+  # That must be supported everywhere
+
+  [ -d /run/network ] || mkdir /run/network
+  ln -s /run/network /etc/network/run
+fi 
+
+# Move /etc/network/ifstate to /etc/network/run/ifstate
+if [ -e /etc/network/ifstate ] &&
+     dpkg --compare-versions $(dpkg-query -f '${Version}' -W ifupdown) lt "0.6.5"
+then
+  if [ ! -e /etc/network/run/ifstate ] || ! diff /etc/network/ifstate /etc/network/run/ifstate >/dev/null
+  then
+    echo "Moving /etc/network/ifstate to /etc/network/run/ifstate"
+    if [ ! -L /etc/network/ifstate ]; then
+      mv /etc/network/ifstate /etc/network/run/ifstate
+    else
+      cat /etc/network/ifstate >/etc/network/run/ifstate
+      mv /etc/network/ifstate /etc/network/ifstate.dpkg-old
+    fi
+  fi
+fi
+
+# Move /etc/network/ifstate to /etc/network/run/ifstate
+if [ -d /etc/network/run -a ! -h /etc/network/run ]
+then
+  echo "Migrating to /run/network..."
+  [ -d /run/network ] || mkdir /run/network
+  if [ ! -e /etc/network/run/ifstate ]
+  then
+    echo "Moving /etc/network/run/ifstate to /run/network/ifstate"
+    if [ ! -L /etc/network/run/ifstate ]; then
+      mv /etc/network/run/ifstate /run/network/ifstate
+    else
+      cat /etc/network/run/ifstate >/run/network/ifstate
+      mv /etc/network/run/ifstate /run/network/ifstate.dpkg-old
+    fi
+  fi
   mv /etc/network/run /etc/network/run.dpkg-old
+  ln -s /run/network /etc/network/run
+  rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
 fi
 
-# The best choice is to use /lib/init/rw/network
-#
-# If we can't use that, we'll just make /etc/network/run a directory,
-# unless we're upgrading, in which case we'll just keep ifstate where it
-# is, by making /etc/network/run a symlink to /etc/network.
-
-WHAT_TO_USE=initrw
-
-if [ ! -d /lib/init/rw -o ! -w /lib/init/rw -o ! -r /proc/mounts ]; then
-  WHAT_TO_USE=owndir
-elif ! grep -qs "^tmpfs[[:space:]]\+/lib/init/rw[[:space:]]\+tmpfs[[:space:]]\+\([^[:space:]]\+,\)\?rw" /proc/mounts
-then
-  WHAT_TO_USE=owndir
-elif grep -qs '[[:space:]]/dev[[:space:]]devfs[[:space:]]' /proc/mounts; then
-  WHAT_TO_USE=owndir
-fi
-
-# Check for available space if we are using initrw
-if [ "$WHAT_TO_USE" = initrw ]; then
-  SPACE=`df -k /lib/init/rw | tail -1 | awk '{if ($4 ~ /%/) { print $3 } else { print $4 } }'`
-  if [ "$SPACE" -le 0 ]; then
-    WHAT_TO_USE=owndir
-  fi
-fi
-
-if [ "$WHAT_TO_USE" = owndir -a -e /etc/network/ifstate ]; then
-  WHAT_TO_USE=etcnetwork
-fi
-
-if [ "$WHAT_TO_USE" = initrw ]
-then
-  [ -d /lib/init/rw/network ] || mkdir /lib/init/rw/network
-  ln -s /lib/init/rw/network /etc/network/run
-elif [ "$WHAT_TO_USE" = "owndir" ]; then
-  mkdir /etc/network/run
-else
-  ln -s . /etc/network/run
-fi
-
-if [ -e /etc/network/run.dpkg-old/ifstate ]
-then
-  echo "Moving old /etc/network/run/ifstate to the new place"
-  if [ ! -L /etc/network/run.dpkg-old/ifstate ]; then
-    mv /etc/network/run.dpkg-old/ifstate /etc/network/run/ifstate
-  else
-    cat /etc/network/run.dpkg-old/ifstate >/etc/network/run/ifstate
-  fi
-fi
 
