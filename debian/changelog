@@ -1,6 +1,7 @@
 ifupdown (0.7~alpha4) experimental; urgency=low
 
-  * Add source stanza (Closes: #159884, #149395).
+  * Removed VCS repository from the tarball (Closes: #417718).
+  * Add source stanza (Closes: #159884, #149395, #471834).
   * Fix bashism in example script get-mac-address.sh (Closes: #518924).
   * Use DebSrc3.0 source format and dh7.
   * Add auto method for IPv6, fix static method (Closes: #604136).
@@ -13,6 +14,11 @@ ifupdown (0.7~alpha4) experimental; urgency=low
   * Move network state file to /run/network (Closes: #389996).
   * Fix init script dependencies (Closes: #607713, #601705).
   * Add MTU setting for v4tunnel (Closes: #408453, #575110).
+  * Allow multiple interface definitions to ease work with multiple IP per
+    interface.
+  * Allow passing PPP options, pass updetach by default (Closes: #196877).
+  * Add 6to4 tunnels support (Closes: #357929).
+  * Add CAN interface support (Closes: #584530).
 
  -- Andrew O. Shadoura <bugzilla@tut.by>  Wed, 16 Feb 2011 13:28:00 +0200
 
