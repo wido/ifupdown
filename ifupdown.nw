@@ -612,8 +612,8 @@ foreach $method (keys %methods) {
 	print <<EOF;
 	{
 		"$method",
-		${method}_up, ${method}_down,
-		${method}_conv,
+		_${method}_up, _${method}_down,
+		_${method}_conv,
 	},
 EOF
 }
@@ -810,7 +810,7 @@ it, while if it doesn't, we need to output a place holder.
 if (match($line, "up", $indent)) {
 	get_commands(${method}, "up");
 } else {
-	print "static int ${method}_up(interface_defn ifd) { return 0; }\n"
+	print "static int _${method}_up(interface_defn ifd) { return 0; }\n"
 }
 @ 
 
@@ -818,12 +818,12 @@ if (match($line, "up", $indent)) {
 if (match($line, "down", $indent)) {
 	get_commands(${method}, "down");
 } else {
-	print "static int ${method}_down(interface_defn ifd) { return 0; }\n"
+	print "static int _${method}_down(interface_defn ifd) { return 0; }\n"
 }
 @
 
 <<output code for conversions>>=
-print "static conversion ${method}_conv[] = {\n";
+print "static conversion _${method}_conv[] = {\n";
 if (match($line, "conversion", $indent)) {
 	while (nextline && match($line, "", "$indent  ")) {
 		my $foo = $line;
@@ -840,7 +840,7 @@ print "};\n";
 sub get_commands {
 	my $method = $_[0];
 	my $mode = $_[1];
-	my $function = "${method}_${mode}";
+	my $function = "_${method}_${mode}";
 	my $indent = ($line =~ /(\s*)[^\s]/) ? $1 : "";
 
 	print "static int ${function}(interface_defn *ifd, execfn *exec) {\n";
@@ -4391,6 +4391,32 @@ method v4tunnel
     [[ ip route add ::/0 via %gateway% dev %iface% ]]
 
   down
+    ip tunnel del %iface%
+
+method 6to4
+  description
+    This method may be used to setup an 6to4 tunnel. It requires
+    the *ip* command from the *iproute* package.
+
+  options
+    local address         -- Address of the local endpoint (IPv4 \
+                             dotted quad) *required*
+    ttl time              -- TTL setting
+    mtu size              -- MTU size
+    privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
+
+  up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
+    ip tunnel add %iface% mode sit remote any local %local% \
+       [[ttl %ttl%]]
+    ip link set %iface% up [[mtu %mtu%]]
+    ip addr add $(printf 2002:\\%02x\\%02x:\\%02x\\%02x::1 $(echo %local% | tr . ' '))/16 dev %iface%
+    ip route add 2000::/3 via ::192.88.99.1 dev %iface%
+
+  down
+    ip -6 route flush dev %iface%
+    ip link set dev %iface% down
     ip tunnel del %iface%
 @ 
 
