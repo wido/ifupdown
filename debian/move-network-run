@@ -37,12 +37,12 @@ then
   fi
 fi
 
-# Move /etc/network/ifstate to /etc/network/run/ifstate
-if [ -d /etc/network/run -a ! -h /etc/network/run ]
+# Migrate /etc/network/run to /run/network
+if [ "$1" = configure -a "$2" != "" -a -d /etc/network/run -a ! -h /etc/network/run ]
 then
   echo "Migrating to /run/network..."
   [ -d /run/network ] || mkdir /run/network
-  if [ ! -e /etc/network/run/ifstate ]
+  if [ -e /etc/network/run/ifstate ]
   then
     echo "Moving /etc/network/run/ifstate to /run/network/ifstate"
     if [ ! -L /etc/network/run/ifstate ]; then
@@ -54,7 +54,7 @@ then
   fi
   mv /etc/network/run /etc/network/run.dpkg-old
   ln -s /run/network /etc/network/run
-  rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
+  rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "Not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
 fi
 
 
