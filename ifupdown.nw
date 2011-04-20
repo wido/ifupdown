@@ -4260,8 +4260,10 @@ method ppp
     commands for details.
   options
     provider name  -- Use /name/ as the provider (from /etc/ppp/peers).
+    unit number    -- Use /number/ as the ppp unit number.
+    options string -- Pass /string/ as additional options to pon.
   up
-    pon [[%provider%]]
+    pon [[%provider%]] updetach [[unit %unit%]] [[%options%]]
   down
     poff [[%provider%]]
 @ 
