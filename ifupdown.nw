@@ -1919,38 +1919,19 @@ Since we want to keep the interfaces in order, we have to go all the
 way to the end of the list of interfaces to add the new interface, and
 we can hence set the [[next]] pointer to NULL in all cases. Gee. Whiz.
 
-Actually, I'm selling this a little short. We also want to make sure
-we don't try instantiating the same interface twice or anything. So we
-take care of that too. There now. Didn't that just get the adrenalin
-pumping?
+We allow multiple interface definitions just to cope well with multiple
+network addresses which can be assigned to the same interface (which is
+a standard feature in IPv6, for example).
 
 <<add to list of interfaces>>=
 {
 	interface_defn **where = &defn->ifaces; 
 	while(*where != NULL) {
-		if (duplicate_if(*where, currif)) {
-			<<report duplicate interface and die>>
-		}
 		where = &(*where)->next;
 	}
 
 	*where = currif;
 	currif->next = NULL;
-}
-@ 
-
-Duplicate interfaces are interfaces that have the same name and the
-same address family. Nothing more complicated than that.
-
-<<config function declarations>>=
-static int duplicate_if(interface_defn *ifa, interface_defn *ifb);
-@ 
-
-<<config functions>>=
-static int duplicate_if(interface_defn *ifa, interface_defn *ifb) {
-	if (strcmp(ifa->logical_iface, ifb->logical_iface) != 0) return 0;
-	if (ifa->address_family != ifb->address_family) return 0;
-	return 1;
 }
 @ 
 
@@ -2155,11 +2136,6 @@ return NULL;
 
 <<report unknown method and die>>=
 fprintf(stderr, "%s:%d: unknown method\n", filename, line);
-return NULL;
-@
-
-<<report duplicate interface and die>>=
-fprintf(stderr, "%s:%d: duplicate interface\n", filename, line);
 return NULL;
 @
 
