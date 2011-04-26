@@ -1,0 +1,60 @@
+#!/bin/sh
+set -e
+
+MYNAME="${0##*/}"
+
+report() { echo "${MYNAME}: $*" ; }
+report_warn() { report "Warning: $*" >&2 ; }
+report_err() { report "Error: $*" >&2 ; }
+
+# Create /etc/network/run 
+if [ ! -d /etc/network/run ]; then
+  if [ -e /etc/network/run -o -L /etc/network/run ]; then
+    echo "Renaming non-directory /etc/network/run to run.dpkg-old..."
+    mv /etc/network/run /etc/network/run.dpkg-old
+  fi
+
+  # The best choice is to use /run/network
+  # That must be supported everywhere
+
+  [ -d /run/network ] || mkdir /run/network
+  ln -s /run/network /etc/network/run
+fi 
+
+# Move /etc/network/ifstate to /etc/network/run/ifstate
+if [ -e /etc/network/ifstate ] &&
+     dpkg --compare-versions $(dpkg-query -f '${Version}' -W ifupdown) lt "0.6.5"
+then
+  if [ ! -e /etc/network/run/ifstate ] || ! diff /etc/network/ifstate /etc/network/run/ifstate >/dev/null
+  then
+    echo "Moving /etc/network/ifstate to /etc/network/run/ifstate"
+    if [ ! -L /etc/network/ifstate ]; then
+      mv /etc/network/ifstate /etc/network/run/ifstate
+    else
+      cat /etc/network/ifstate >/etc/network/run/ifstate
+      mv /etc/network/ifstate /etc/network/ifstate.dpkg-old
+    fi
+  fi
+fi
+
+# Migrate /etc/network/run to /run/network
+if [ "$1" = configure -a "$2" != "" -a -d /etc/network/run -a ! -h /etc/network/run ]
+then
+  echo "Migrating to /run/network..."
+  [ -d /run/network ] || mkdir /run/network
+  if [ -e /etc/network/run/ifstate ]
+  then
+    echo "Moving /etc/network/run/ifstate to /run/network/ifstate"
+    if [ ! -L /etc/network/run/ifstate ]; then
+      mv /etc/network/run/ifstate /run/network/ifstate
+    else
+      cat /etc/network/run/ifstate >/run/network/ifstate
+      mv /etc/network/run/ifstate /run/network/ifstate.dpkg-old
+    fi
+  fi
+  mv /etc/network/run /etc/network/run.dpkg-old
+  ln -s /run/network /etc/network/run
+  rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "Not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
+fi
+
+

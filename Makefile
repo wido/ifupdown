@@ -1,10 +1,12 @@
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.5"'
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7alpha"'
 CC := gcc
+
+BASEDIR ?= $(DESTDIR)
 
 CFILES := addrfam.c execute.c config.c main.c archlinux.c
 HFILES := header.h archlinux.h
 PERLFILES := defn2c.pl defn2man.pl
-DEFNFILES := inet.defn ipx.defn inet6.defn
+DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
 	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o

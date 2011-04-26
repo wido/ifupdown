@@ -1,7 +1,10 @@
-%
+
 \documentclass{article}
 \usepackage{graphicx}
 \usepackage{noweb}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
 \pagestyle{noweb}
 \noweboptions{smallcode,hideunuseddefs}
 \begin{document}
@@ -11,7 +14,7 @@
 \let\nwdocspar=\relax
 
 \title{ Interface Tools\thanks{
-Copyright \copyright\ 1999--2005 Anthony Towns. This program is free
+Copyright \copyright\ 1999--2007 Anthony Towns. This program is free
 software; you can redistribute it and/or modify it under the terms of
 the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any
@@ -74,9 +77,47 @@ essentially, putting all the pieces together --- is done by the
 The following diagram gives a brief idea of the information and control
 flow amongst the modules.
 
-\begin{center}
-\includegraphics[height=45mm]{modules}
-\end{center}
+\def\vsep{2.5cm}
+\def\hsep{1.4cm}
+\begin{figure}
+\centering
+\begin{tikzpicture}[every text node part/.style={text centered}]
+    \tikzstyle{block}=[rectangle,draw, text width=2cm, minimum height=2cm]
+    \tikzstyle{big}=[minimum height=4.5cm]
+    \tikzstyle{annot}=[above left]
+
+    \node[block] (ip) at (0,0) {IP address family};
+    \node[annot] at (ip.south east) {\small inet.defn};
+
+    \node[block] (ipx) at (0,-\vsep) {IPX address
+    family};
+    \node[annot] at (ipx.south east) {\small inet.defn};
+
+    \node[block,big] (addrfam) at (\hsep*2,-\vsep/2) {Compile time configuration};
+    \node[annot] at (addrfam.south east) {\small addrfam.c};
+
+    \node[block,big] (config) at (\hsep*4,-\vsep/2) {Runtime configuration};
+    \node[annot] at (config.south east) {\small config.c};
+
+    \node[block] (exec) at (\hsep*6,0) {Execution};
+    \node[annot] at (exec.south east) {\small execute.c};
+
+    \node[block] (main) at (\hsep*6,-\vsep) {Driver};
+    \node[annot] at (main.south east) {\small main.c};
+
+    \draw[-stealth] (ip.east) -- (addrfam.west |- ip);
+    \draw[-stealth] (ipx.east) -- (addrfam.west |- ipx);
+    \draw[-stealth] (addrfam) -- (config);
+    \draw[stealth-] (exec.west) -- (config.east |- exec);
+    \draw[stealth-] (main.west) -- (config.east |- main);
+    \draw[-stealth] (main) -- (exec);
+
+    \node[below=1.2cm of config.south] (mainf) {main()};
+
+    \draw[-stealth, rounded corners=0.3cm] (mainf) -- +(0,1cm) -| (main.south);
+\end{tikzpicture}
+\end{figure}
+
 
 Much of the information sharing will be done by defining and filling
 in some data structures and allowing the other modules to just access
@@ -107,10 +148,12 @@ We shall begin with the template for the Makefile we shall use.
 <<Makefile>>=
 <<make options>>
 
+BASEDIR ?= $(DESTDIR)
+
 CFILES := addrfam.c execute.c config.c main.c archlinux.c
 HFILES := header.h archlinux.h
 PERLFILES := defn2c.pl defn2man.pl
-DEFNFILES := inet.defn ipx.defn inet6.defn
+DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
 	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o
@@ -222,7 +265,7 @@ conservative, so we'll encourage it to use a more entertaining method
 of compiling source code.
 
 <<make options>>=
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.5"'
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7alpha"'
 CC := gcc
 @ 
 
@@ -410,16 +453,10 @@ extern address_family *addr_fams[];
 
 Each address family incorporates a number of methods, which
 encapsulate various ways of configuring an interface for a particular
-address family. There are two definining components of a method: two
-sets of commands to bring an interface up and down, and a number of
-options for the commands.
-
-\emph{NB: I expect this will be extended sooner or later to make the
-options more flexible. Probably introducing some form of typing (for
-example to convert netmasks from CIDR specs to dotted-quads, ie
-/24~$\rightarrow$~255.255.255.0), and some form of matching to allow
-multiple options to be deduced from a single configuration
-statement. --- aj}
+address family. There are three components of a method: two sets of
+commands to bring an interface up and down, a number of options for
+the commands, and a set of conversion functions to allow programmatic
+manipulation of the options.
 
 <<type definitions>>=
 typedef struct method method;
@@ -429,6 +466,7 @@ typedef struct method method;
 struct method {
 	char *name;
 	command_set *up, *down;
+	conversion *conversions;
 };
 @ 
 
@@ -441,6 +479,20 @@ with, and the function that should be used to execute them. See the
 typedef int (execfn)(char *command);
 typedef int (command_set)(interface_defn *ifd, execfn *e);
 @ 
+
+Each conversion is implemented as a mapping from an option name, to a
+function that updates that option's value, as follows:
+
+<<type definitions>>=
+typedef struct conversion conversion;
+@
+
+<<structure definitions>>=
+struct conversion {
+	char *option;
+	void (*fn)(char **);
+};
+@
 
 As our compile-time configuration is done at, well, compile-time, there
 is little need for functions in the actual module, and we can make do with
@@ -501,6 +553,7 @@ Clearly we need to reference some of the data structures we defined
 above, so we can begin with the rather trivial:
 
 <<output headers for address family>>=
+print "#include <stddef.h>\"\n";
 print "#include \"header.h\"\n\n\n";
 @ 
 
@@ -548,7 +601,7 @@ my %methods = ();
 @
 
 We'll use standard names, such as [[foo_up]], [[foo_down]], and
-[[foo_options]] for the various elements of each method which cannot
+[[foo_conv]] for the various elements of each method which cannot
 be defined inline. The two functions and the array will be declared
 static to avoid name conflicts.
 
@@ -559,7 +612,8 @@ foreach $method (keys %methods) {
 	print <<EOF;
 	{
 		"$method",
-		${method}_up, ${method}_down,
+		_${method}_up, _${method}_down,
+		_${method}_conv,
 	},
 EOF
 }
@@ -711,6 +765,7 @@ sub get_method {
 	nextline;
 	<<output code for description>>
 	<<output code for options list>>
+	<<output code for conversions>>
 	<<output code for up commands>>
 	<<output code for down commands>>
 }
@@ -755,7 +810,7 @@ it, while if it doesn't, we need to output a place holder.
 if (match($line, "up", $indent)) {
 	get_commands(${method}, "up");
 } else {
-	print "static int ${method}_up(interface_defn ifd) { return 0; }\n"
+	print "static int _${method}_up(interface_defn ifd) { return 0; }\n"
 }
 @ 
 
@@ -763,15 +818,29 @@ if (match($line, "up", $indent)) {
 if (match($line, "down", $indent)) {
 	get_commands(${method}, "down");
 } else {
-	print "static int ${method}_down(interface_defn ifd) { return 0; }\n"
+	print "static int _${method}_down(interface_defn ifd) { return 0; }\n"
 }
+@
+
+<<output code for conversions>>=
+print "static conversion _${method}_conv[] = {\n";
+if (match($line, "conversion", $indent)) {
+	while (nextline && match($line, "", "$indent  ")) {
+		my $foo = $line;
+		$foo =~ s/^\s+//;
+		my ($option, $fn) = split(/ /, $foo);
+		print "\t{ \"$option\", $fn },\n";
+	}
+}
+print "\t\t{ NULL, NULL },\n";
+print "};\n";
 @
 
 <<defn2c subroutines>>=
 sub get_commands {
 	my $method = $_[0];
 	my $mode = $_[1];
-	my $function = "${method}_${mode}";
+	my $function = "_${method}_${mode}";
 	my $indent = ($line =~ /(\s*)[^\s]/) ? $1 : "";
 
 	print "static int ${function}(interface_defn *ifd, execfn *exec) {\n";
@@ -1136,6 +1205,45 @@ struct variable {
 };
 @ 
 
+We'll define a function to help us build arrays of these [[variables]].
+It's fairly straightforward: to add a variable, we simply construct
+a new structure and add it at the end of our array of variables,
+increasing the size of the array first if necessary.
+
+<<exported symbols>>=
+void add_variable(char *filename, char *name, char *value, 
+		variable **var, int *n_vars, int *max_vars);
+@
+
+<<config functions>>=
+void add_variable(char *filename, char *name, char *value, 
+		variable **var, int *n_vars, int *max_vars)
+{
+	if (*n_vars >= *max_vars) {
+		variable *new_var;
+		*max_vars += 10;
+		new_var = realloc(*var, sizeof(variable) * *max_vars);
+		if (new_var == NULL) {
+			<<report internal error and die>>
+		}
+		*var = new_var;
+	}
+
+	(*var)[*n_vars].name = strdup(name);
+	(*var)[*n_vars].value = strdup(value);
+
+	if (!(*var)[*n_vars].name) {
+		<<report internal error and die>>
+	}
+
+	if (!(*var)[*n_vars].value) {
+		<<report internal error and die>>
+	}
+
+	(*n_vars)++;
+}
+@
+
 In addition, we want to represent each mapping in the configuration
 file. This is somewhat simpler, since each mapping is entirely self
 contained, and doesn't need to reference previously determined address
@@ -1168,14 +1276,20 @@ helpful error message. Pretty simple, hey?
 
 <<exported symbols>>=
 interfaces_file *read_interfaces(char *filename);
+interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename);
 @ 
 
 <<config functions>>=
 interfaces_file *read_interfaces(char *filename) {
-	<<variables local to read interfaces>>
 	interfaces_file *defn;
 
 	<<allocate defn or [[return NULL]]>>
+	return read_interfaces_defn(defn, filename);
+}
+
+interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
+	<<variables local to read interfaces>>
+
 	<<open file or [[return NULL]]>>
 
 	while (<<we've gotten a line from the file>>) {
@@ -1497,6 +1611,9 @@ if (rest == NULL) continue; /* blank line */
 if (strcmp(firstword, "mapping") == 0) {
 	<<process [[mapping]] line>>
 	currently_processing = MAPPING;
+} else if (strcmp(firstword, "source") == 0) {
+	<<process [[source]] line>>
+	currently_processing = NONE;
 } else if (strcmp(firstword, "iface") == 0) {
 	<<process [[iface]] line>>
 	currently_processing = IFACE;
@@ -1524,6 +1641,35 @@ switch(currently_processing) {
 		<<report bad option and die>>
 }
 @ 
+
+\subsubsection{Source Line}
+
+When processing the [[source]] stanza, we use [[wordexp]] function to expand wildcards 
+and environment variables. 
+
+<<config headers>>=
+#include <wordexp.h>
+@
+
+We use [[WRDE_NOCMD]] flag, so no command substitution occurs
+because of security concerns. Then we go through the output array and read interfaces 
+recursively into already allocated [[defn]].
+
+<<process [[source]] line>>=
+wordexp_t p;
+char ** w;
+int i;
+int fail = wordexp(rest, &p, WRDE_NOCMD);
+if (!fail)
+{
+	w = p.we_wordv;
+	for (i = 0; i < p.we_wordc; i++)
+	{
+		read_interfaces_defn(defn, w[i]);
+	}
+	wordfree(&p);
+}
+@
 
 \subsubsection{Mapping Line}
 
@@ -1773,38 +1919,19 @@ Since we want to keep the interfaces in order, we have to go all the
 way to the end of the list of interfaces to add the new interface, and
 we can hence set the [[next]] pointer to NULL in all cases. Gee. Whiz.
 
-Actually, I'm selling this a little short. We also want to make sure
-we don't try instantiating the same interface twice or anything. So we
-take care of that too. There now. Didn't that just get the adrenalin
-pumping?
+We allow multiple interface definitions just to cope well with multiple
+network addresses which can be assigned to the same interface (which is
+a standard feature in IPv6, for example).
 
 <<add to list of interfaces>>=
 {
 	interface_defn **where = &defn->ifaces; 
 	while(*where != NULL) {
-		if (duplicate_if(*where, currif)) {
-			<<report duplicate interface and die>>
-		}
 		where = &(*where)->next;
 	}
 
 	*where = currif;
 	currif->next = NULL;
-}
-@ 
-
-Duplicate interfaces are interfaces that have the same name and the
-same address family. Nothing more complicated than that.
-
-<<config function declarations>>=
-static int duplicate_if(interface_defn *ifa, interface_defn *ifb);
-@ 
-
-<<config functions>>=
-static int duplicate_if(interface_defn *ifa, interface_defn *ifb) {
-	if (strcmp(ifa->logical_iface, ifb->logical_iface) != 0) return 0;
-	if (ifa->address_family != ifb->address_family) return 0;
-	return 1;
 }
 @ 
 
@@ -1815,6 +1942,7 @@ with.
 <<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>
 <<check for duplicate options>>
 <<add option>>
+<<convert option if necessary>>
 @
 
 <<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>=
@@ -1848,44 +1976,26 @@ if (strcmp(firstword, "pre-down") == 0) {
 }
 @ 
 
-Adding an option is fairly straightforward: we simply construct
-a new variable and add it at the end of our array of variables,
-increasing the size of the array first if necessary.  Options with 
-empty values are rejected.
+Given the previous definition of [[add_variable()]] adding an option
+is straightforward.
 
 <<add option>>=
-if (currif->n_options >= currif->max_options) {
-	<<increase max number of options>>
-}
-
-currif->option[currif->n_options].name = strdup(firstword);
-currif->option[currif->n_options].value = strdup(rest);
-
-if (!currif->option[currif->n_options].name) {
-	<<report internal error and die>>
-}
-
-if (!currif->option[currif->n_options].value) {
-	<<report internal error and die>>
-}
-
-currif->n_options++;	
+add_variable(filename, firstword, rest,
+	 &currif->option, &currif->n_options, &currif->max_options);
 @
 
-We'll increase the space for variables by a constant amount each time,
-rather than doubling or anything smart like that.
-
-<<increase max number of options>>=
+<<convert option if necessary>>=
 {
-	variable *opt;
-	currif->max_options = currif->max_options + 10;
-	opt = realloc(currif->option, sizeof(*opt) * currif->max_options);
-	if (opt == NULL) {
-		<<report internal error and die>>
+	conversion *c;
+	variable *o = &currif->option[currif->n_options - 1];
+	for (c = currif->method->conversions; c && c->option && c->fn; c++) {
+		if (strcmp(c->option, o->name) == 0) {
+			c->fn(&o->value);
+			break;
+		}
 	}
-	currif->option = opt;
 }
-@ 
+@
 
 \subsubsection{Auto and Allow Lines}
 
@@ -2026,11 +2136,6 @@ return NULL;
 
 <<report unknown method and die>>=
 fprintf(stderr, "%s:%d: unknown method\n", filename, line);
-return NULL;
-@
-
-<<report duplicate interface and die>>=
-fprintf(stderr, "%s:%d: duplicate interface\n", filename, line);
 return NULL;
 @
 
@@ -3129,7 +3234,7 @@ Okay, so next on our agenda is argument handling.
 
 We'll do argument handling via the GNU [[getopt]] function, which
 means we have to include the appropriate header, and define a cute
-little structure to represent out long options:
+little structure to represent our long options:
 
 <<main headers>>=
 #include <getopt.h>
@@ -3147,6 +3252,7 @@ struct option long_opts[] = {
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"force",       no_argument,       NULL,  2 },
+	{"option",      required_argument, NULL, 'o'},
 	{0,0,0,0}
 };
 @ 
@@ -3174,6 +3280,9 @@ int force = 0;
 char *allow_class = NULL;
 char *interfaces = "/etc/network/interfaces";
 char *excludeint = NULL ;
+variable *option = NULL;
+int n_options = 0;
+int max_options = 0;
 @ 
 
 We'll also have two helper functions to display usage information,
@@ -3195,7 +3304,7 @@ static void usage(char *execname) {
 <<main functions>>=
 static void version(char *execname) {
 	printf("%s version " IFUPDOWN_VERSION "\n", execname);
-	printf("Copyright (c) 1999-2005 Anthony Towns\n\n");
+	printf("Copyright (c) 1999-2007 Anthony Towns\n\n");
 	printf(
 
 "This program is free software; you can redistribute it and/or modify\n"
@@ -3220,6 +3329,8 @@ static void help(char *execname) {
 	printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
 	printf("\t\t\t\t(note that this option doesn't disable mappings)\n");
 	printf("\t-v, --verbose\t\tprint out what would happen before doing it\n");
+	printf("\t-o OPTION=VALUE\t\tset OPTION to VALUE as though it were in\n");
+	printf("\t\t\t\t/etc/network/interfaces\n");
 	printf("\t--no-mappings\t\tdon't run any mappings\n");
 	printf("\t--force\t\t\tforce de/configuration\n");
 	exit(0);
@@ -3232,7 +3343,7 @@ Now, the meat of argument parsing is done with [[getopt()]] and a
 <<parse arguments>>=
 for(;;) {
 	int c;
-	c = getopt_long(argc, argv, "e:s:i:hVvna", long_opts, NULL);
+	c = getopt_long(argc, argv, "e:s:i:o:hVvna", long_opts, NULL);
 	if (c == EOF) break;
 
 	switch(c) {
@@ -3286,6 +3397,31 @@ case 2:
 case 'e':
 	excludeint = strdup(optarg);
 	break;
+@ 
+<<[[getopt]] possibilities>>=
+case 'o':
+{
+	char *name = strdup(optarg);
+	char *val = strchr(name, '=');
+	if (val == NULL) {
+		fprintf(stderr, "Error in --option \"%s\" -- no \"=\" character\n",
+			optarg);
+		exit(1);
+	}
+	*val++ = '\0';
+
+	if (strcmp(name, "post-up") == 0) {
+		strcpy(name, "up");
+	}
+	if (strcmp(name, "pre-down") == 0) {
+		strcpy(name, "down");
+	}
+	
+	add_variable(argv[0], name, val, &option, &n_options, &max_options);
+	free(name);
+
+	break;
+}
 @ 
 
 And we also have a help option and a version option:
@@ -3437,6 +3573,8 @@ Bringing an interface up or taking it down can be done thusly:
 		if (strcmp(liface, currif->logical_iface) == 0) {
 			okay = 1;
 
+			<<add options from command line to [[currif]]>>
+
 			<<run commands for [[currif]]; set [[failed]] on error>>
 
 			if (failed) break;
@@ -3466,7 +3604,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 	switch(cmds(currif)) {
 	    case -1:
-		printf("Don't seem to be have all the variables for %s/%s.\n", 
+		printf("Don't seem to have all the variables for %s/%s.\n", 
 			liface, currif->address_family->name);
 		failed = 1;
 		break;
@@ -3484,33 +3622,75 @@ Bringing an interface up or taking it down can be done thusly:
 	    	failed = 1;
 		/* what happened here? */
 	}
-	currif->iface = oldiface;
-}
-@ 
-<<run commands for [[currif]]>>=
-{
-	char *oldiface = currif->iface;
-	currif->iface = iface;
-
-	if (verbose) {
-		fprintf(stderr, "Configuring interface %s=%s (%s)\n", 
-			iface, liface, currif->address_family->name);
-	}
-
-	switch(cmds(currif)) {
-	    case -1:
-		printf("Don't seem to be have all the variables for %s/%s.\n", 
-			liface, currif->address_family->name);
-		break;
-	    case 0:
-		/* not entirely successful */
-		 */
-	    case 1:
-		/* successful */
-	}
 	currif->real_iface = NULL;
 }
 @ 
+
+Adding the options from the command line is tedious, but simple:
+
+<<add options from command line to [[currif]]>>=
+{
+	int i;
+	for (i = 0; i < n_options; i++) {
+		if (option[i].value[0] == '\0') {
+			<<remove [[option[i]]] from [[currif]]>>
+		} else {
+			<<add [[option[i]]] to [[currif]]>>
+		}
+	}
+}
+@
+
+<<add [[option[i]]] to [[currif]]>>=
+{
+	int j = currif->n_options;
+	if (strcmp(option[i].name, "pre-up") != 0
+    	    && strcmp(option[i].name, "up") != 0
+	    && strcmp(option[i].name, "down") != 0
+	    && strcmp(option[i].name, "post-down") != 0)
+	{
+		for (j = 0; j < currif->n_options; j++) {
+			if (strcmp(currif->option[j].name, 
+			           option[i].name) == 0) 
+			{
+				currif->option[j].value = option[i].value;
+				break;
+			}
+		}
+	}
+	if (j == currif->n_options) {
+		add_variable(argv[0], option[i].name, option[i].value,
+			&currif->option, &currif->n_options, 
+			&currif->max_options);
+	}
+}
+@
+
+<<remove [[option[i]]] from [[currif]]>>=
+{
+	if (strcmp(option[i].name, "pre-up") != 0
+    	    && strcmp(option[i].name, "up") != 0
+	    && strcmp(option[i].name, "down") != 0
+	    && strcmp(option[i].name, "post-down") != 0)
+	{
+		int j;
+		for (j = 0; j < currif->n_options; j++) {
+			if (strcmp(currif->option[j].name, 
+			           option[i].name) == 0) 
+			{
+				currif->n_options--;
+				break;
+			}
+		}
+		for (; j < currif->n_options; j++) {
+			option[j].name = option[j+1].name;
+			option[j].value = option[j+1].value;
+		}
+	} else {
+		/* do nothing */
+	}
+}
+@
 
 \subsection{Target Interfaces}
 
@@ -3539,7 +3719,8 @@ if (do_all) {
 	} else if (<<we're taking interfaces down>>) {
 		read_all_state(argv[0], &target_iface, &n_target_ifaces);
 	} else {
-		assert(0);
+		fprintf(stderr, "%s: can't tell if interfaces are going up or down\n", argv[0]);
+		exit(1);
 	}	
 } else {
 	target_iface = argv + optind;
@@ -3839,6 +4020,7 @@ interfaces up and down.
 unsigned int mylinuxver();
 unsigned int mylinux(int,int,int);
 int execable(char *);
+void cleanup_hwaddress_for_iproute(char **pparam);
 @
 
 <<archlinux.c>>=
@@ -3884,6 +4066,27 @@ int execable(char *program) {
 	}
 	return 0;
 }
+
+void cleanup_hwaddress_for_iproute(char **pparam) {
+	char *rest = *pparam;
+		/* we're shrinking the text, so no realloc needed */
+	char *space = strchr(rest, ' ');
+
+	if (space == NULL)
+		return;
+
+	*space = '\0';
+	if (strcasecmp(rest, "ether") == 0 ||
+		strcasecmp(rest, "ax25") == 0 ||
+		strcasecmp(rest, "ARCnet") == 0 ||
+		strcasecmp(rest, "netrom") == 0)
+	{
+		/* found deprecated <class> attribute */
+		memmove(rest, space+1, strlen(space+1)+1);
+	} else {
+		*space = ' ';
+	}
+}
 @ 
 
 \subsection{IPv4 Address Family}
@@ -3909,11 +4112,10 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    ifconfig %iface% 127.0.0.1 up
-    route add -net 127.0.0.0       if ( mylinuxver() < mylinux(2,1,100) )
+    ip link set dev %iface% up
 
   down
-    ifconfig %iface% down
+    ip link set dev %iface% down
 @ 
 
 <<inet methods>>=
@@ -3923,34 +4125,30 @@ method static
     allocated IPv4 addresses.
       
   options
-    address address             -- Address (dotted quad) *required*
-    netmask netmask             -- Netmask (dotted quad) *required*
+    address address             -- Address (dotted quad/netmask) *required*
+    netmask mask                -- Netmask (dotted quad or CIDR)
     broadcast broadcast_address -- Broadcast address (dotted quad)
-    network network_address     -- Network address (dotted quad) *required \
-                                     for 2.0.x kernels*
     metric metric               -- Routing metric for default gateway (integer)
     gateway address             -- Default gateway (dotted quad)
-    pointopoint address		-- Address of other end point (dotted quad). \
-				   Note the spelling of "point-to".
-    media type                  -- Medium type, driver dependent
-    hwaddress class address     -- Hardware Address. /class/ is one of \
-                                     *ether*, *ax25*, *ARCnet* or *netrom*. \
-                                     /address/ is dependent on the above \
-                                     choice.
+    pointopoint address         -- Address of other end point (dotted quad). \
+                                   Note the spelling of "point-to".
+    hwaddress address           -- Link local address.
     mtu size                    -- MTU size
 
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
+
   up
-    [[ ifconfig %iface% hw %hwaddress%]]
-    ifconfig %iface% %address% netmask %netmask% [[broadcast %broadcast%]] \
-	[[pointopoint %pointopoint%]] [[media %media%]] [[mtu %mtu%]] \
-	up
-    route add -net %network%  \
-        if ( mylinuxver() < mylinux(2,1,100) )
-    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]]
+    ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
+	[[peer %pointopoint%]] dev %iface%
+    ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
+
+    [[ ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
 
   down
-    [[ route del default gw %gateway% [[metric %metric%]] %iface% ]]
-    ifconfig %iface% down
+    ip addr flush dev %iface%
+    [[ ip route del default via %gateway% [[metric %metric%]] dev %iface% ]]
+    ip link set dev %iface% down
 @
 
 <<inet methods>>=
@@ -3981,15 +4179,16 @@ method dhcp
     leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
-    hwaddress class address -- Hardware Address. /class/ is one of \
-                                *ether*, *ax25*, *ARCnet* or *netrom*. \
-                                /address/ is dependent on this choice.
+    hwaddress address       -- Hardware Address.
+
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
 
   up
-    [[ifconfig %iface% hw %hwaddress%]]
+    [[ip link set dev %iface% address %hwaddress%]]
     dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient3"))
-    dhclient -e -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
@@ -4003,7 +4202,7 @@ method dhcp
   down
     dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient3"))
-    cat /var/run/dhclient.%iface%.pid | xargs -i kill -TERM {} \
+    dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient"))
     pump -i %iface% -r \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
@@ -4012,7 +4211,7 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ifconfig %iface% down
+    ip link set dev %iface% down
 @ 
 
 <<inet methods>>=
@@ -4032,7 +4231,34 @@ method bootp
            [[--hwaddr %hwaddr%]] --returniffail --serverbcast
 
   down
-    ifconfig down %iface%
+    ip link set dev %iface% down
+@ 
+
+<<inet methods>>=
+method tunnel
+  description
+    This method is used to create GRE or IPIP tunnels. You need to have
+    the *ip* binary from the *iproute* package. For GRE tunnels, you
+    will need to load the ip_gre module and the ipip module for
+    IPIP tunnels.
+  options
+    address address       -- Local address (dotted quad) *required*
+    mode type             -- Tunnel type (either GRE or IPIP) *required*
+    endpoint address      -- Address of other tunnel endpoint *required*
+    dstaddr address       -- Remote address (remote address inside tunnel)
+    local address         -- Address of the local endpoint
+    gateway address       -- Default gateway
+    ttl time              -- TTL setting
+    mtu size              -- MTU size
+  up
+    ip tunnel add %iface% mode %mode% remote %endpoint% [[local %local%]] \
+       [[ttl %ttl%]]
+    ip link set %iface% up
+    ip addr add %address%/%netmask% dev %iface%
+    [[ ifconfig %iface% dstaddr %dstaddr% ]]
+    [[ ip route add ::/0 via %gateway% ]]
+  down
+    ip tunnel del %iface%
 @ 
 
 <<inet methods>>=
@@ -4042,8 +4268,10 @@ method ppp
     commands for details.
   options
     provider name  -- Use /name/ as the provider (from /etc/ppp/peers).
+    unit number    -- Use /number/ as the ppp unit number.
+    options string -- Pass /string/ as additional options to pon.
   up
-    pon [[%provider%]]
+    pon [[%provider%]] updetach [[unit %unit%]] [[%options%]]
   down
     poff [[%provider%]]
 @ 
@@ -4080,13 +4308,28 @@ extern address_family addr_inet6;
 address_family inet6
 architecture linux
 
+method auto
+  description
+    This method may be used to define interfaces with automatically assigned
+    IPv6 addresses.
+  up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    sysctl net.ipv6.conf.%iface%.accept_ra=1
+    sysctl net.ipv6.conf.%iface%.autoconf=1
+    ip link set dev %iface% up
+  down
+    ip -6 addr flush dev %iface% scope global
+    ip link set dev %iface% down
+
 method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
-    ifconfig %iface% add ::1
+    ip link set dev %iface% up
+    ip addr add dev %iface% ::1
   down
-    ifconfig %iface% del ::1
+    ip addr del dev %iface% ::1
+    ip link set dev %iface% down
 
 method static
   description
@@ -4098,17 +4341,25 @@ method static
     netmask mask           -- Netmask (number of bits, eg 64) *required*
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
-    hwaddress class address -- Hardware Address. /class/ is one of \
-                                 *ether*, *ax25*, *ARCnet* or *netrom*. \
-                                 /address/ is dependent on this choice.
+    hwaddress address      -- Hardware address
     mtu size               -- MTU size
+    privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
+
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
+
   up
-    ifconfig %iface% [[media %media%]] [[hw %hwaddress%]] [[mtu %mtu%]] up
-    ifconfig %iface% add %address%/%netmask%
-    [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] 
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
+    sysctl net.ipv6.conf.%iface%.accept_ra=0
+    sysctl net.ipv6.conf.%iface%.autoconf=0
+    ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
+    ip -6 addr add %address%[[/%netmask%]] dev %iface%
+    [[ ip -6 route add default via %gateway% dev %iface% ]]
 
   down
-    ifconfig %iface% down
+    ip -6 addr flush dev %iface% scope global
+    ip link set dev %iface% down
 
 method manual
   description
@@ -4134,16 +4385,46 @@ method v4tunnel
                              dotted quad)
     gateway address       -- Default gateway (colon delimited)
     ttl time              -- TTL setting
+    mtu size              -- MTU size
+    privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
-    ip link set %iface% up
+    ip link set %iface% up [[mtu %mtu%]]
     [[ ip addr add %address%/%netmask% dev %iface% ]]
     [[ ip route add %gateway% dev %iface% ]]
     [[ ip route add ::/0 via %gateway% dev %iface% ]]
 
   down
+    ip tunnel del %iface%
+
+method 6to4
+  description
+    This method may be used to setup an 6to4 tunnel. It requires
+    the *ip* command from the *iproute* package.
+
+  options
+    local address         -- Address of the local endpoint (IPv4 \
+                             dotted quad) *required*
+    ttl time              -- TTL setting
+    mtu size              -- MTU size
+    privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
+
+  up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
+    ip tunnel add %iface% mode sit remote any local %local% \
+       [[ttl %ttl%]]
+    ip link set %iface% up [[mtu %mtu%]]
+    ip addr add $(printf 2002:\\%02x\\%02x:\\%02x\\%02x::1 $(echo %local% | tr . ' '))/16 dev %iface%
+    ip route add 2000::/3 via ::192.88.99.1 dev %iface%
+
+  down
+    ip -6 route flush dev %iface%
+    ip link set dev %iface% down
     ip tunnel del %iface%
 @ 
 
@@ -4189,6 +4470,47 @@ method dynamic
   down
     ipx_interface del %iface% %frame%
 @ 
+
+\subsection{CAN Address Family}
+
+<<address family declarations>>=
+extern address_family addr_can;
+@ 
+
+<<address family references>>=
+&addr_can,
+@ 
+
+<<can.defn>>=
+address_family can
+architecture linux
+
+method static
+  description
+    This method may be used to setup an Controller Area Network (CAN)
+    interface. It requires the the *ip* command from the *iproute* package.
+
+  options
+    bitrate bitrate		-- bitrate (1..1000000) *required*
+    samplepoint samplepoint	-- sample point (0.000..0.999)
+    loopback loopback		-- loop back CAN Messages (on|off)
+    listenonly listenonly	-- listen only mode (on|off)
+    triple triple		-- activate triple sampling (on|off)
+    oneshot oneshot		-- one shot mode (on|off)
+    berr berr			-- activate berr reporting (on|off) 
+
+  up
+    ip link set %iface% type can bitrate %bitrate%
+    [[ ip link set %iface% type can loopback %loopback% ]]
+    [[ ip link set %iface% type can listen-only %listenonly% ]]
+    [[ ip link set %iface% type can triple-sampling %triple% ]]
+    [[ ip link set %iface% type can one-shot %oneshot% ]]
+    [[ ip link set %iface% type can berr-reporting %berr% ]]
+    ip link set %iface% up
+
+  down
+    ip link set %iface% down
+@
 
 \begin{flushleft}
 \bibliography{biblio}

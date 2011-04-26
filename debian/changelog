@@ -1,3 +1,121 @@
+ifupdown (0.7~alpha4) experimental; urgency=low
+
+  * Removed VCS repository from the tarball (Closes: #417718).
+  * Add source stanza (Closes: #159884, #149395, #471834).
+  * Fix bashism in example script get-mac-address.sh (Closes: #518924).
+  * Use DebSrc3.0 source format and dh7.
+  * Add auto method for IPv6, fix static method (Closes: #604136).
+  * Update URL for Debian Reference (Closes: #610238).
+  * Fix typos in the man page (Closes: #384143, #415285).
+  * Add GRE and IPIP tunnels support (Closes: #158089).
+  * Fix inet/static pointopoint option (Closes: #460276).
+  * Add support for enabling/disabling IPv6 privacy extension
+    (Closes: #520576).
+  * Move network state file to /run/network (Closes: #389996).
+  * Fix init script dependencies (Closes: #607713, #601705).
+  * Add MTU setting for v4tunnel (Closes: #408453, #575110).
+  * Allow multiple interface definitions to ease work with multiple IP per
+    interface.
+  * Allow passing PPP options, pass updetach by default (Closes: #196877).
+  * Add 6to4 tunnels support (Closes: #357929).
+  * Add CAN interface support (Closes: #584530).
+
+ -- Andrew O. Shadoura <bugzilla@tut.by>  Wed, 16 Feb 2011 13:28:00 +0200
+
+ifupdown (0.7~alpha3) experimental; urgency=low
+
+  * Apply patches from Andreas Henriksson (Closes: Bug#456918)
+    - Fix aadr typo in IPv6 loopback method
+    - Add dependency on new version of iproute that supports specifying
+      netmasks as dotted-quads.
+    - Re-add netmask field for backwards compatibility.
+    - Flush addresses when taking down a static inet interface.
+      (Closes: Bug#431059)
+    - Switch inet/dhcp and inet6/static methods to iproute.
+    - Update test cases.
+    - Support for conversion of ifconfig format hwaddress to iproute format
+      hwaddress.
+  * Update Build-Depends: to reflect name change from nowebm to noweb.
+  * Move DH_COMPAT setting from debian/rules to debian/compat file.
+  * Don't ignore errors from make clean in debian/rules clean target.
+  * Escape hypens in interfaces.5 manpage.
+  * Don't create /usr/bin or /usr/sbin directories.
+  * Bump Standards-Version.
+
+ -- Anthony Towns <ajt@debian.org>  Sat, 22 Dec 2007 00:31:16 +1000
+
+ifupdown (0.7~alpha2) experimental; urgency=low
+
+  * Add command line interface options (ifup -o foo=bar eth1). Yay!
+  * Switch to using iproute instead of ifconfig/route. Thanks to Andrew
+    Pollock.
+  * Drop support for kernels prior to 2.1.100 (and that don't have NETLINK
+    for iproute).
+  * Drop support for specifying a "netmask" in static inet interfaces.
+  * Bump DH_COMPAT to 4 (from 1!)
+
+ -- Anthony Towns <aj@azure.humbug.org.au>  Mon, 18 Jun 2007 15:47:21 +0100
+
+ifupdown (0.6.10) unstable; urgency=low
+
+  * Try to load the ipv6 module when doing up on inet6 stansas except
+    manual, ignoring any errors or warnings (Closes: #480046, #413428,
+    512553).  Thanks to Andreas Henriksson for the patch.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Wed, 03 Mar 2010 08:09:39 +0100
+
+ifupdown (0.6.9) unstable; urgency=low
+
+  * Fix typo subsytems -> subsystems in interfaces(5) manual page
+    (Closes: #390086).  Thanks to A. Costa for the patch.
+  * Fix typo iterface -> interface in init.d/ifupdown-clean (Closes:
+    #458347).  Patch from Trent W. Buck.
+  * Fix bashism in example script get-mac-address.sh (Closes:
+    #518924).  Patch from Simon Descarpentries.
+  * Remove obsolete debconf template translations (Closes: #520007,
+    #534553).
+  * Fix gramatically incorrect message from ifupdown (Closes:
+    #501554).  Patch from Łukasz Stelmach.
+  * Updated standards-version from 3.7.2 to 3.8.3.  No change needed.
+  * Make sure postrm script fail on errors.  Thanks lintian.
+  * Upgrade to debhelper version 7.
+  * Acknowledge NMUs (Closes: #428084, #441673, #448416, #471804,
+    #544371).
+
+ -- Petter Reinholdtsen <pere@debian.org>  Sun, 06 Sep 2009 12:11:11 +0200
+
+ifupdown (0.6.8+nmu3) unstable; urgency=low
+
+  * Non-maintainer upload. (with maintainer's consent)
+  * Correctly make the modification in 0.6.8+nmu2
+  * Also adjust the way /sbin/dhclient is killed to be comparable to how
+    /sbin/dhclient is stopped
+  * Invoke dhclient with -v to maintain equivalent verbosity to dhclient3
+  * Conflict with dhcp-client v2
+
+ -- Andrew Pollock <apollock@debian.org>  Thu, 03 Sep 2009 21:50:47 -0700
+
+ifupdown (0.6.8+nmu2) unstable; urgency=low
+
+  * Non-maintainer upload. (with maintainer's consent)
+  * Invoke /sbin/dhclient without the -e option in preparation for DHCP v4
+    (closes: #544371)
+
+ -- Andrew Pollock <apollock@debian.org>  Wed, 02 Sep 2009 21:20:37 -0700
+
+ifupdown (0.6.8+nmu1) unstable; urgency=low
+
+  * Non-maintainer upload to fix pending l10n issues.
+  * Drop debconf support that dealt with a very old transition
+    Closes: #428084, #441673, #448416, #471804
+  * [Lintian] No longer ignore errors by "make clean"
+  * [Lintian] No longer include empty /usr/bin and /usr/sbin
+  * [Lintian] Removed debian/conffiles that only contained files
+    from /etc, that are added automatically by debhelper
+  * [Lintian] Raise debhelper compatibility level to 4
+
+ -- Christian Perrier <bubulle@debian.org>  Sat, 12 Apr 2008 13:32:24 +0200
+
 ifupdown (0.6.8) unstable; urgency=low
 
   * Add myself as co-maintainer with approval from Anthony Towns.
@@ -76,16 +194,29 @@ ifupdown (0.6.7) unstable; urgency=low
   * Don't use dirname/basename in ifupdown init script; they're in /usr/bin.
     (Closes: Bug#304188)
 
- -- Anthony Towns <ajt@debian.org>  Sun, 17 Apr 2005 00:22:11 +1000
+  * Check for free space on /dev/shm when working out where to link
+    /e/n/run. Thanks to Jose Manuel Delgado Mendinueta. (Closes:
+    Bug#303656)
+
+ -- Anthony Towns <ajt@debian.org>  Mon,  2 May 2005 23:57:25 +1000
 
 ifupdown (0.6.6) unstable; urgency=low
+
+  * The "what does wine come in" release
 
   * Fix brown paper bag bug where %iface% maps to the logical interface
     name rather than the hardware one. Thanks to Paul Hampson for being
     the first to spot it once the BTS was working again. Also add a test
     case. (Closes: Bug#303148)
 
- -- Anthony Towns <aj@localhost.localdomain>  Tue,  5 Apr 2005 14:19:21 +1000
+  * Fix brown paper bag bug where "test -e" doesn't actually identify a
+    dangling /etc/network/run symlink on upgrade. (Closes: Bug#303225)
+
+  * Fix brown paper bag bug where we only consider pointing
+    /etc/network/run at /dev/shm if /dev/shm *isn't* in /proc/mounts. (No
+    bug filed yet, though...)
+
+ -- Anthony Towns <ajt@debian.org>  Tue,  5 Apr 2005 14:19:21 +1000
 
 ifupdown (0.6.5) unstable; urgency=low
 
@@ -111,7 +242,7 @@ ifupdown (0.6.5) unstable; urgency=low
     Usage is "ifup --allow=hotplug <interfaces>"; only the allowed interfaces
     whill actually be tried. (Closes: Bug#300937)
 
-  * Satiate the POSIX sh monkeys, makenwdep.sh uses printf for \t's,
+  * Satiate the POSIX sh monkeys, makenwdep.sh now uses printf for \t's,
     not echo -e. (Closes: Bug#294970)
 
   * Switch to using "/etc/network/run/ifstate" instead of
@@ -126,8 +257,15 @@ ifupdown (0.6.5) unstable; urgency=low
     Thanks to Michael Weber. (Closes: Bug#88946)
   * Add LOGICAL variable for scripts. (Doesn't work for mapping scripts yet
     though)
+  * Add PHASE variable for scripts, same as MODE but more detailed;
+    pre-up, post-down, etc. (Closes: Bug#286155)
 
- -- Anthony Towns <aj@azure.humbug.org.au>  Wed, 23 Mar 2005 04:53:53 +1000
+  * Document lack of support for end-of-line comments in interfaces(5).
+    (Closes: Bug#79683)
+
+  * Remove conflict with old, experimental-only version of dhcp-client.
+
+ -- Anthony Towns <ajt@debian.org>  Mon,  4 Apr 2005 23:41:06 +1000
 
 ifupdown (0.6.4-4.12) unstable; urgency=low
 

@@ -1,45 +1,11 @@
 #!/bin/sh
 set -e
 
-. /usr/share/debconf/confmodule
-
 MYNAME="${0##*/}"
 
 report() { echo "${MYNAME}: $*" ; }
 report_warn() { report "Warning: $*" >&2 ; }
 report_err() { report "Error: $*" >&2 ; }
-
-ATTEMPT_CONVERSION=false
-if [ "$1" = "configure" ] && [ "$2" != "" ] &&
-        dpkg --compare-versions "$2" le "0.6.2pr-3"
-then
-  # Get answers to questions
-  db_get ifupdown/convert-interfaces;    ATTEMPT_CONVERSION="$RET"
-fi
-
-# Update /etc/network/interfaces from "noauto" to "auto"
-if [ "$ATTEMPT_CONVERSION" = "true" ]; then
-  echo
-  echo -n "Automatically converting /etc/network/interfaces"
-  (
-    cd /etc/network;
-    if /usr/share/ifupdown/upgrade-from-0.5.x.pl \
-      < interfaces > interfaces.dpkg-new 2>/dev/null
-    then
-      echo " succeeded."
-      mv interfaces interfaces.dpkg-old
-      mv interfaces.dpkg-new interfaces
-      echo "Old interfaces file saved as interfaces.dpkg-old."
-    else
-      echo " failed."
-      echo
-      echo "If you wish to reattempt the conversion you may run"
-      echo "    cat /etc/network/interfaces |"
-      echo "         /usr/share/ifupdown/upgrade-from-0.5.x.pl"
-      echo
-    fi
-  )
-fi
 
 # Create /etc/network/run 
 if [ "$1" = configure -a ! -d /etc/network/run ]; then
@@ -48,44 +14,11 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
     mv /etc/network/run /etc/network/run.dpkg-old
   fi
 
-  # The best choice is to use /dev/shm/network
-  #
-  # If we can't use that, we'll just make /etc/network/run a directory,
-  # unless we're upgrading, in which case we'll just keep ifstate where it
-  # is, by making /etc/network/run a symlink to /etc/network.
+  # The best choice is to use /run/network
+  # That must be supported everywhere
 
-  WHAT_TO_USE=devshm
-
-  if [ ! -d /dev/shm -o ! -w /dev/shm -o ! -r /proc/mounts ]; then
-    WHAT_TO_USE=owndir
-  elif ! grep -qs "^tmpfs[[:space:]]\+/dev/shm[[:space:]]\+tmpfs[[:space:]]\+\([^[:space:]]\+,\)\?rw" /proc/mounts
-  then
-    WHAT_TO_USE=owndir
-  elif grep -qs '[[:space:]]/dev[[:space:]]devfs[[:space:]]' /proc/mounts; then
-    WHAT_TO_USE=owndir
-  fi
-
-  # Check for available space if we are using devshm
-  if [ "$WHAT_TO_USE" = devshm ]; then
-    SPACE=`df -k /dev/shm | tail -1 | awk '{if ($4 ~ /%/) { print $3 } else { print $4 } }'`
-    if [ "$SPACE" -le 0 ]; then
-      WHAT_TO_USE=owndir
-    fi
-  fi
-
-  if [ "$WHAT_TO_USE" = owndir -a -e /etc/network/ifstate ]; then
-    WHAT_TO_USE=etcnetwork
-  fi
-
-  if [ "$WHAT_TO_USE" = devshm ]
-  then
-    [ -d /dev/shm/network ] || mkdir /dev/shm/network
-    ln -s /dev/shm/network /etc/network/run
-  elif [ "$WHAT_TO_USE" = "owndir" ]; then
-    mkdir /etc/network/run
-  else
-    ln -s . /etc/network/run
-  fi
+  [ -d /run/network ] || mkdir /run/network
+  ln -s /run/network /etc/network/run
 fi 
 
 # Move /etc/network/ifstate to /etc/network/run/ifstate
@@ -103,7 +36,28 @@ then
     fi
   fi
 fi
-   
+
+# Migrate /etc/network/run to /run/network
+if [ "$1" = configure -a "$2" != "" -a -d /etc/network/run -a ! -h /etc/network/run ]
+then
+  echo "Migrating to /run/network..."
+  [ -d /run/network ] || mkdir /run/network
+  if [ -e /etc/network/run/ifstate ]
+  then
+    echo "Moving /etc/network/run/ifstate to /run/network/ifstate"
+    if [ ! -L /etc/network/run/ifstate ]; then
+      mv /etc/network/run/ifstate /run/network/ifstate
+    else
+      cat /etc/network/run/ifstate >/run/network/ifstate
+      mv /etc/network/run/ifstate /run/network/ifstate.dpkg-old
+    fi
+  fi
+  mv /etc/network/run /etc/network/run.dpkg-old
+  ln -s /run/network /etc/network/run
+  rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "Not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
+fi
+
+
 if [ "$1" = "configure" -a "$2" != "" ] &&
      dpkg --compare-versions "$2" le "0.6.4-4.1" &&
      [ -f /etc/network/run/ifstate -a -x /sbin/dhclient ]
@@ -150,7 +104,5 @@ if [ "$1" = "configure" ] ; then
     echo "iface lo inet loopback" >> /etc/network/interfaces
   fi
 fi
-
-db_stop
 
 #DEBHELPER#

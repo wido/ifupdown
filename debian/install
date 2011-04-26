@@ -1,0 +1,3 @@
+debian/move-network-run usr/share/ifupdown
+debian/upgrade-from-0.5.x.pl usr/share/ifupdown
+contrib/* usr/share/doc/ifupdown/contrib

@@ -1,11 +1,11 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          ifupdown-clean
-# Required-Start:    checkroot
+# Required-Start:    mountkernfs hostname
 # Required-Stop:     
 # Default-Start:     S
-# Default-Stop:
-# Short-Description: Clean old iterface status info during boot.
+# Default-Stop:      0 6
+# Short-Description: Clean old interface status info during boot.
 ### END INIT INFO
 
 set -e
@@ -28,6 +28,7 @@ case "$1" in
     if [ -f $IFSTATE -a ! -L $IFSTATE ]; then
       rm -f "$IFSTATE"
     elif [ -f $IFSTATE ]; then
+      # This is kinda bad :(
       >$IFSTATE
     fi
     log_end_msg 0
