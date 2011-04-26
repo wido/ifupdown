@@ -3244,7 +3244,7 @@ struct option long_opts[] = {
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"force",       no_argument,       NULL,  2 },
-        {"option",      required_argument, NULL, 'o'},
+	{"option",      required_argument, NULL, 'o'},
 	{0,0,0,0}
 };
 @ 
@@ -4122,8 +4122,8 @@ method static
     broadcast broadcast_address -- Broadcast address (dotted quad)
     metric metric               -- Routing metric for default gateway (integer)
     gateway address             -- Default gateway (dotted quad)
-    pointopoint address		-- Address of other end point (dotted quad). \
-				   Note the spelling of "point-to".
+    pointopoint address         -- Address of other end point (dotted quad). \
+                                   Note the spelling of "point-to".
     hwaddress address           -- Link local address.
     mtu size                    -- MTU size
 
