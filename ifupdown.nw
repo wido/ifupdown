@@ -4311,7 +4311,9 @@ architecture linux
 method auto
   description
     This method may be used to define interfaces with automatically assigned
-    IPv6 addresses.
+    IPv6 addresses. Using this method on its own doesn't mean that RDNSS options
+    will be applied, too. To make this happen, *rdnssd* daemon must be installed,
+    properly configured and running.
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     sysctl net.ipv6.conf.%iface%.accept_ra=1
