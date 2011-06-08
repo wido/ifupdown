@@ -1,3 +1,12 @@
+ifupdown (0.7~alpha5) experimental; urgency=low
+
+  * Set PHASE variable (Closes: #629821)
+  * Allow privacy extensions for inet6/auto (Closes: #629841)
+  * Make Router Advertisements and SLAAC configurable (Closes: #629837)
+  * Fix the IPv4 interface down sequence (Closes: #629836)
+
+ -- Andrew O. Shadoura <bugzilla@tut.by>  Thu, 09 Jun 2011 00:07:09 +0300
+
 ifupdown (0.7~alpha4) experimental; urgency=low
 
   * New maintainer.
