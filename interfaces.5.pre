@@ -260,6 +260,7 @@ The ifupdown suite was written by Anthony Towns <aj@azure.humbug.org.au>.
 This manpage was contributed by Joey Hess <joey@kitenet.net>.
 .SH "SEE ALSO"
 .BR ifup (8),
+.BR ip (8),
 .BR ifconfig (8),
 .BR run\-parts (8).
 .P
