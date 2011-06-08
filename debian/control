@@ -4,7 +4,7 @@ Priority: important
 Maintainer: Andrew O. Shadoura <bugzilla@tut.by>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 7), noweb
+Build-Depends: debhelper (>= 7.0.50~), noweb
 
 Package: ifupdown
 Architecture: any
