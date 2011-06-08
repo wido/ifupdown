@@ -19,6 +19,8 @@ ifupdown (0.7~alpha4) experimental; urgency=low
   * Allow passing PPP options, pass updetach by default (Closes: #196877).
   * Add 6to4 tunnels support (Closes: #357929).
   * Add CAN interface support (Closes: #584530).
+  * Drop 0.5.x migration script.
+  * Drop dependency on net-tools; suggest it instead.
 
  -- Andrew O. Shadoura <bugzilla@tut.by>  Wed, 16 Feb 2011 13:28:00 +0200
 
