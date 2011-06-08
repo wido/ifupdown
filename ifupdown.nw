@@ -4254,9 +4254,8 @@ method tunnel
     ip tunnel add %iface% mode %mode% remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up
-    ip addr add %address%/%netmask% dev %iface%
-    [[ ifconfig %iface% dstaddr %dstaddr% ]]
-    [[ ip route add ::/0 via %gateway% ]]
+    ip addr add %address%/%netmask% dev %iface% [[peer %dstaddr%]]
+    [[ ip route add default via %gateway% ]]
   down
     ip tunnel del %iface%
 @ 
