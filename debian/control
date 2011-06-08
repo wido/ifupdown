@@ -3,7 +3,7 @@ Section: admin
 Priority: important
 Maintainer: Andrew O. Shadoura <bugzilla@tut.by>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
-Standards-Version: 3.8.3
+Standards-Version: 3.9.2
 Build-Depends: debhelper (>= 7), noweb
 
 Package: ifupdown
