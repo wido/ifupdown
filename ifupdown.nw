@@ -2376,6 +2376,11 @@ We can then go ahead and fill in the environment.
 *environend = NULL;
 @
 
+<<add [[PHASE]] to environment>>=
+*(environend++) = setlocalenv("%s=%s", "PHASE", phase); 
+*environend = NULL;
+@
+
 <<add [[PATH]] to environment>>=
 *(environend++) = setlocalenv("%s=%s", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
 *environend = NULL;
