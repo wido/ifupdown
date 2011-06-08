@@ -4318,8 +4318,12 @@ method auto
     IPv6 addresses. Using this method on its own doesn't mean that RDNSS options
     will be applied, too. To make this happen, *rdnssd* daemon must be installed,
     properly configured and running.
+
+  options
+    privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     sysctl net.ipv6.conf.%iface%.accept_ra=1
     sysctl net.ipv6.conf.%iface%.autoconf=1
     ip link set dev %iface% up
