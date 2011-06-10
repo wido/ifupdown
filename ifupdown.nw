@@ -4400,11 +4400,9 @@ method v4tunnel
     gateway address       -- Default gateway (colon delimited)
     ttl time              -- TTL setting
     mtu size              -- MTU size
-    privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up [[mtu %mtu%]]
@@ -4425,11 +4423,9 @@ method 6to4
                              dotted quad) *required*
     ttl time              -- TTL setting
     mtu size              -- MTU size
-    privext int           -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     ip tunnel add %iface% mode sit remote any local %local% \
        [[ttl %ttl%]]
     ip link set %iface% up [[mtu %mtu%]]
