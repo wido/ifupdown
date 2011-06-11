@@ -4074,6 +4074,7 @@ unsigned int mylinuxver();
 unsigned int mylinux(int,int,int);
 int execable(char *);
 void cleanup_hwaddress_for_iproute(char **pparam);
+void make_hex_address(char **pparam);
 @
 
 <<archlinux.c>>=
@@ -4139,6 +4140,20 @@ void cleanup_hwaddress_for_iproute(char **pparam) {
 	} else {
 		*space = ' ';
 	}
+}
+
+void make_hex_address(char **pparam)
+{
+	char addrcomp[4];
+	int maxlen = strlen("0000:0000");
+
+	int ret = sscanf(*pparam, "%3hhu.%3hhu.%3hhu.%3hhu", &addrcomp[0], &addrcomp[1], &addrcomp[2], &addrcomp[3]);
+
+	if (ret != 4)
+		return;
+
+	*pparam = realloc(*pparam, maxlen + 1);
+	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx", addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
 }
 @ 
 
@@ -4472,12 +4487,15 @@ method 6to4
     ttl time              -- TTL setting
     mtu size              -- MTU size
 
+  conversion
+    local make_hex_address =hexaddress
+
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ip tunnel add %iface% mode sit remote any local %local% \
        [[ttl %ttl%]]
     ip link set %iface% up [[mtu %mtu%]]
-    ip addr add $(printf 2002:\\%02x\\%02x:\\%02x\\%02x::1 $(echo %local% | tr . ' '))/16 dev %iface%
+    ip addr add 2002:%hexaddress%::1/16 dev %iface%
     ip route add 2000::/3 via ::192.88.99.1 dev %iface%
 
   down
