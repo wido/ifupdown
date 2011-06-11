@@ -555,7 +555,7 @@ Clearly we need to reference some of the data structures we defined
 above, so we can begin with the rather trivial:
 
 <<output headers for address family>>=
-print "#include <stddef.h>\"\n";
+print "#include <stddef.h>\n";
 print "#include \"header.h\"\n\n\n";
 @ 
 
