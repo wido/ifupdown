@@ -59,6 +59,12 @@ Read interface definitions from
 .I FILE
 instead of from /etc/network/interfaces.
 .TP
+\fB\-e\fR \fIPATTERN\fR, \fB\-\-exclude=\fR\fIPATTERN\fR
+Exclude interfaces from the list of interfaces to operate on by the \fIPATTERN\fR.
+Notice that the \fIPATTERN\fR can be a full interface name or substrings that
+match interfaces. Users could easily have unexpected behaviour
+if they use a small string to do the match.
+.TP
 .BR \-n ", " \-\-no\-act
 Don't configure any interfaces or run any "up" or "down" commands.
 .TP
