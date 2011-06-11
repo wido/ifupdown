@@ -1991,14 +1991,25 @@ add_variable(filename, firstword, rest,
 	 &currif->option, &currif->n_options, &currif->max_options);
 @
 
+If it is necessary, convert the option. If the conversion specifies a new option name,
+add a new option of that name prior to calling the conversion function. Also, we allow
+more than one conversion for the one variable to happen, so we iterate over the whole list
+of them and do not break the loop after the first match.
+
 <<convert option if necessary>>=
 {
 	conversion *c;
 	variable *o = &currif->option[currif->n_options - 1];
 	for (c = currif->method->conversions; c && c->option && c->fn; c++) {
 		if (strcmp(c->option, o->name) == 0) {
-			c->fn(&o->value);
-			break;
+			if (c->newoption) {
+				add_variable(filename, c->newoption, rest,
+					&currif->option, &currif->n_options, &currif->max_options);
+				variable *o2 = &currif->option[currif->n_options - 1];
+				c->fn(&o2->value);
+			} else {
+				c->fn(&o->value);
+			}
 		}
 	}
 }
