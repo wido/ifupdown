@@ -481,7 +481,8 @@ typedef int (command_set)(interface_defn *ifd, execfn *e);
 @ 
 
 Each conversion is implemented as a mapping from an option name, to a
-function that updates that option's value, as follows:
+function that updates that option's value or adds a new variable which
+value is the result of conversion, as follows:
 
 <<type definitions>>=
 typedef struct conversion conversion;
@@ -490,6 +491,7 @@ typedef struct conversion conversion;
 <<structure definitions>>=
 struct conversion {
 	char *option;
+	char *newoption;
 	void (*fn)(char **);
 };
 @
@@ -828,11 +830,16 @@ if (match($line, "conversion", $indent)) {
 	while (nextline && match($line, "", "$indent  ")) {
 		my $foo = $line;
 		$foo =~ s/^\s+//;
-		my ($option, $fn) = split(/ /, $foo);
-		print "\t{ \"$option\", $fn },\n";
+		my ($option, $fn, $newoption) = split(/ /, $foo);
+		if ($newoption) {
+			$newoption =~ s/^=//;
+			print "\t{ \"$option\", \"$newoption\", $fn },\n";
+		} else {
+			print "\t{ \"$option\", NULL, $fn },\n";
+		}
 	}
 }
-print "\t\t{ NULL, NULL },\n";
+print "\t\t{ NULL, NULL, NULL },\n";
 print "};\n";
 @
 
