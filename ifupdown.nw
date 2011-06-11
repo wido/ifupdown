@@ -761,29 +761,26 @@ same method twice.
 sub get_method {
 	my $method = $_[0];
 	my $indent = ($line =~ /(\s*)[^\s]/) ? $1 : "";
+	my @options = ();
+	my @variables = ();
 
 	die "Duplicate method $method\n" if ($methods{$method}++);
 
 	nextline;
 	<<output code for description>>
 	<<output code for options list>>
+	<<prepare variables list>>
 	<<output code for conversions>>
 	<<output code for up commands>>
 	<<output code for down commands>>
 }
 @ 
 
-The description and options sections are just documentation chunks,
-and hence aren't at all relevant for the C code.
+The description section is just a documentation chunk,
+and hence isn't at all relevant for the C code.
 
 <<output code for description>>=
 if (match($line, "description", $indent)) {
-	skip_section();
-}
-@ 
-
-<<output code for options list>>=
-if (match($line, "options", $indent)) {
 	skip_section();
 }
 @ 
@@ -801,6 +798,28 @@ sub skip_section {
 	my $indent = ($line =~ /(\s*)[^\s]/) ? $1 : "";
 
 	1 while (nextline && match($line, "", $indent));
+}
+@ 
+
+The options section is processed to check later that no repetitive
+options created by the conversions.
+
+<<output code for options list>>=
+if (match($line, "options", $indent)) {
+	@options = get_options();
+}
+@ 
+
+<<prepare variables list>>=
+if (@options) {
+	foreach my $o (@options) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S.*)$/) {
+			my $opt = $1;
+			my $optargs = $2;
+			my $dsc = $3;
+			push @variables, $opt;
+		}
+	}
 }
 @ 
 
@@ -833,6 +852,8 @@ if (match($line, "conversion", $indent)) {
 		my ($option, $fn, $newoption) = split(/ /, $foo);
 		if ($newoption) {
 			$newoption =~ s/^=//;
+			die "Duplicate option use: $newoption (from $method/$option)" if (grep $_ eq $newoption, @variables);
+			push @variables, $newoption;
 			print "\t{ \"$option\", \"$newoption\", $fn },\n";
 		} else {
 			print "\t{ \"$option\", NULL, $fn },\n";
@@ -1055,6 +1076,14 @@ Reading the options is almost exactly the same as the description,
 except we want a list instead of just a string.
 
 <<defn2man subroutines>>=
+<<[[get_options]] fragment>>
+@ 
+
+<<defn2c subroutines>>=
+<<[[get_options]] fragment>>
+@ 
+
+<<[[get_options]] fragment>>=
 sub get_options {
 	my @opts = ();
 	my $indent = ($line =~ /(\s*)\S/) ? $1 : "";
