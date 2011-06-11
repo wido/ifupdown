@@ -1,17 +1,24 @@
 ifupdown (0.7~alpha5) experimental; urgency=low
 
-  * Set PHASE variable (Closes: #629821)
-  * Allow privacy extensions for inet6/auto (Closes: #629841)
-  * Make Router Advertisements and SLAAC configurable (Closes: #629837)
-  * Fix the IPv4 interface down sequence (Closes: #629836)
-  * Added Vcs-* fields.
+  * Set PHASE variable (Closes: #629821).
+  * Allow privacy extensions for inet6/auto (Closes: #629841).
+  * Make Router Advertisements and SLAAC configurable (Closes: #629837).
+  * Fix the IPv4 interface down sequence (Closes: #629836).
+  * Add Vcs-* fields.
+  * Remove privacy extensions option for 6in4/6to4 interfaces
+    as no SLAAC is possible there.
+  * Document interface exclusion option.
+  * Improve conversions code, allowing calculating 6to4 address without
+    calling external utilities.
+  * Fix some compilation warnings.
+  * Update test cases.
 
  -- Andrew O. Shadoura <bugzilla@tut.by>  Thu, 09 Jun 2011 00:07:09 +0300
 
 ifupdown (0.7~alpha4) experimental; urgency=low
 
   * New maintainer.
-  * Removed VCS repository from the tarball (Closes: #417718).
+  * Remove VCS repository from the tarball (Closes: #417718).
   * Add source stanza (Closes: #159884, #149395, #471834).
   * Fix bashism in example script get-mac-address.sh (Closes: #518924).
   * Use DebSrc3.0 source format and dh7.
