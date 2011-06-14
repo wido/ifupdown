@@ -1,3 +1,12 @@
+ifupdown (0.7~alpha5+really0.6.10) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * No source changes.
+  * Bump version to replace 0.7~alpha5 which was uploaded to
+    unstable (rather than experimental) by mistake (Closes: #630501).
+
+ -- Roger Leigh <rleigh@debian.org>  Tue, 14 Jun 2011 17:48:20 +0100
+
 ifupdown (0.6.10) unstable; urgency=low
 
   * Try to load the ipv6 module when doing up on inet6 stansas except
