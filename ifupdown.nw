@@ -1694,7 +1694,7 @@ recursively into already allocated [[defn]].
 <<process [[source]] line>>=
 wordexp_t p;
 char ** w;
-int i;
+size_t i;
 int fail = wordexp(rest, &p, WRDE_NOCMD);
 if (!fail)
 {
