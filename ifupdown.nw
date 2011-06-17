@@ -4356,6 +4356,18 @@ method wvdial
   down
     /sbin/start-stop-daemon --stop -x /usr/bin/wvdial \
                       -p /var/run/wvdial.%iface% -s 2
+
+<<inet methods>>=
+method ipv4ll
+  description
+    This method uses avahi-autoipd to configure an interface with an
+    IPv4 Link-Layer address (169.254.0.0/16 family). This method is also
+    known as APIPA or IPAC, and often colloquially referred to
+    as "Zeroconf address".
+  up
+    /usr/sbin/avahi-autoipd -D %iface%
+  down
+    /usr/sbin/avahi-autoipd --kill %iface%
 @
 
 
