@@ -11,7 +11,7 @@ Vcs-Browser: http://anonscm.debian.org/hg/collab-maint/ifupdown/
 Package: ifupdown
 Architecture: any
 Depends: iproute (>= 20071016-1), ${shlibs:Depends}, ${misc:Depends}, lsb-base, initscripts (>= 2.88dsf-13.3)
-Suggests: dhcp3-client | dhcp-client, ppp, rdnssd, net-tools
+Suggests: isc-dhcp-client| dhcp3-client, ppp, rdnssd, net-tools
 Replaces: netbase (<< 4.00)
 Conflicts: dhcp-client (<< 3.0)
 Description: high level tools to configure network interfaces
