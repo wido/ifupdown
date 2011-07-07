@@ -2975,6 +2975,30 @@ Which means we can finish of the chunk, thus:
 varvalue = get_var(command, nextpercent - command, ifd);
 @ 
 
+We also define an exported [[var_true()]] function to allow methods to
+have lines of code that are conditional on the value of a variable.
+
+<<exported symbols>>=
+int var_true(char *id, interface_defn *ifd);
+@
+
+<<execute functions>>=
+int var_true(char *id, interface_defn *ifd) {
+	char *varvalue;
+
+	varvalue = get_var(id, strlen(id), ifd);
+	if (varvalue) {
+		if (strcmp(varvalue, "1") == 0 ||
+		    strcasecmp(varvalue, "true") == 0 ||
+		    strcasecmp(varvalue, "yes") == 0)
+			return 1;
+		else
+			return 0;
+	} else
+		return 0;
+}
+@
+
 \subsection{Mapping Scripts}
 
 Doing a mapping is moderately complicated, since we need to pass a
@@ -4393,15 +4417,21 @@ method auto
     IPv6 addresses. Using this method on its own doesn't mean that RDNSS options
     will be applied, too. To make this happen, *rdnssd* daemon must be installed,
     properly configured and running.
+    If stateless DHCPv6 support is turned on, then additional network
+    configuration parameters such as DNS and NTP servers will be retrieved
+    from a DHCP server.
 
   options
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
+    dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[sysctl net.ipv6.conf.%iface%.use_tempaddr=%privext%]]
     sysctl net.ipv6.conf.%iface%.accept_ra=1
     sysctl net.ipv6.conf.%iface%.autoconf=1
     ip link set dev %iface% up
+    dhclient -6 -S -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
     ip -6 addr flush dev %iface% scope global
     ip link set dev %iface% down
@@ -4459,6 +4489,30 @@ method manual
   up
 
   down
+
+method dhcp
+  description
+    This method may be used to obtain network interface configuration via
+    stateful DHCPv6 with dhclient.  In stateful DHCPv6, the DHCP server is
+    responsible for assigning addresses to clients.
+
+  options
+    hwaddress address      -- Hardware address
+
+  conversion
+    hwaddress cleanup_hwaddress_for_iproute
+
+  up
+    modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+    [[ip link set dev %iface% address %hwaddress%]]
+    sysctl net.ipv6.conf.%iface%.accept_ra=0
+    dhclient -6 -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+
+  down
+    dhclient -6 -r -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+    ip link set dev %iface% down
 
 method v4tunnel
   description
