@@ -539,6 +539,8 @@ our C program.
 
 use strict;
 
+<<determine the target architecrure>>
+
 # declarations
 <<defn2c variables>>
 
@@ -549,6 +551,13 @@ use strict;
 <<output headers for address family>>
 <<parse [[.defn]] file and output intermediate structures>>
 <<output address family data structure>>
+@ 
+
+First of all, we determine the target architecture by calling [[dpkg-architecture]] and stripping the trailing newline:
+<<determine the target architecrure>>=
+my $DEB_HOST_ARCH_OS = `dpkg-architecture -qDEB_HOST_ARCH_OS`;
+
+$DEB_HOST_ARCH_OS =~ s/\n//;
 @ 
 
 Clearly we need to reference some of the data structures we defined
@@ -637,6 +646,14 @@ and if there aren't any more lines to be read, it will evaluate to
 [[false]]. In order to keep these semantics, we'll use the subroutine
 [[nextline]] to update it. (Since we'll later find we'll want to reuse
 this subroutine, we'll keep it in a chunk of its own)
+
+We need to extract from the [[.defn]] file the only set of methods that
+corresponds to our target architecture. To perform this, we need to keep
+the current architecture name in a variable which we define globally:
+
+<<defn2c variables>>=
+my $arch = "";
+@ 
 
 <<defn2c subroutines>>=
 <<[[nextline]] subroutine>>
@@ -733,19 +750,25 @@ was.
 
 <<defn2c subroutines>>=
 sub get_architecture {
-	my $arch = $_[0];
-	die("architecture declaration appears too late") if (keys %methods);
-	print "#include \"arch${arch}.h\"\n\n\n";
+	$arch = $_[0];
+	print "#include \"arch${arch}.h\"\n\n\n" if ($arch eq $DEB_HOST_ARCH_OS);
+	%methods = ();
 	nextline;
 }
 @ 
 
-Which leaves us with the hard bit, actually creating the functions and
-array for each method.
+After each [[architecture]] keyword occurrence, we drop all the methods
+defined for the previous architecture.
+
+Next, we actually create the functions and array for each method.
 
 <<parse a top-level section and output intermediate structures>>=
 if (match($line, "method")) {
-	get_method $match;
+	if ($arch eq $DEB_HOST_ARCH_OS) {
+		get_method $match;
+	} else {
+		skip_section;
+	}
 	next;
 }
 @
