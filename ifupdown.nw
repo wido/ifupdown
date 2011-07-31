@@ -940,6 +940,8 @@ So we'll use a similar structure to [[defn2c.pl]].
 
 use strict;
 
+<<determine the target architecrure>>
+
 # declarations
 <<defn2man variables>>
 
@@ -947,7 +949,7 @@ use strict;
 <<defn2man subroutines>>
 
 # main code
-<<parse [[.defn]] file and output manpage fragment>>
+<<parse [[.defn]] file and output intermediate structures>>
 @ 
 
 As predicted, we'll also incorporate [[nextline]], [[match]] and
@@ -956,6 +958,7 @@ As predicted, we'll also incorporate [[nextline]], [[match]] and
 <<defn2man variables>>=
 my $line;
 my $match;
+my $arch = "";
 @ 
 
 <<defn2man subroutines>>=
@@ -964,28 +967,7 @@ my $match;
 <<[[skip_section]] subroutine>>
 @ 
 
-Now we'll have a slightly different structure to the program itself
-this time, since we need to do things pretty much in order for
-outputting the manpage. This imposes stricter ordering requirements on
-the [[.defn]] files than [[defn2c]] did.
-
-<<parse [[.defn]] file and output manpage fragment>>=
-nextline;
-if ($line and match($line, "address_family")) {
-	get_address_family $match;
-} else {
-	die "address_family must be listed first\n";
-}
-if ($line and match($line, "architecture")) {
-	get_architecture $match;
-}
-while ($line and match($line, "method")) {
-	get_method $match;
-}
-@ 
-
-Okay, so it wasn't \emph{that} different from what we had before. Sue
-me.
+We use the same main loop as in [[defn2c]] with absolutely no changes.
 
 The [[get_address_family]] and [[get_architecture]] subroutines are
 fairly straight forward:
@@ -1001,7 +983,7 @@ sub get_address_family {
 
 <<defn2man subroutines>>=
 sub get_architecture {
-	# no op
+	$arch = $_[0];
 	nextline;
 }
 @ 
