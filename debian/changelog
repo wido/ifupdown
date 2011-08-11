@@ -3,7 +3,12 @@ ifupdown (0.7~beta1) experimental; urgency=low
   * Update the examples (Closes: #630551).
   * Remove Default-Stop from the LSB headers (Closes: #630506).
   * Add IPv4LL method (Closes: #204641).
+  * Add initial DHCPv6 support.
   * Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
+  * Support per-architecture build-time rule definitions.
+  * Add %sysctl_iface% variable.
+  * Accept VLAN interface names (Closes: #632902).
+  * Update test cases.
 
  -- Andrew O. Shadoura <bugzilla@tut.by>  Fri, 17 Jun 2011 20:32:41 +0300
 
