@@ -4217,13 +4217,15 @@ void make_hex_address(char **pparam)
 	char addrcomp[4];
 	int maxlen = strlen("0000:0000");
 
-	int ret = sscanf(*pparam, "%3hhu.%3hhu.%3hhu.%3hhu", &addrcomp[0], &addrcomp[1], &addrcomp[2], &addrcomp[3]);
+	int ret = sscanf(*pparam, "%3hhu.%3hhu.%3hhu.%3hhu",
+		&addrcomp[0], &addrcomp[1], &addrcomp[2], &addrcomp[3]);
 
 	if (ret != 4)
 		return;
 
 	*pparam = realloc(*pparam, maxlen + 1);
-	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx", addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
+	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
+		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
 }
 @ 
 
