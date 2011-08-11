@@ -1,7 +1,7 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          ifupdown-clean
-# Required-Start:    checkroot
+# Required-Start:    mountdevsubfs hostname
 # Required-Stop:     
 # Default-Start:     S
 # Default-Stop:
