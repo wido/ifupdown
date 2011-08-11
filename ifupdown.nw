@@ -2918,6 +2918,7 @@ case '%':
 
 	if (varvalue) {
 		addstr(&result, &len, &pos, varvalue, strlen(varvalue));
+		free(varvalue);
 	} else {
 		okay[opt_depth - 1] = 0;
 	}
@@ -2968,7 +2969,11 @@ int strncmpz(char *l, char *r, size_t llen) {
 @ 
 
 Given the above, the implementation of the [[get_var()]] function to
-lookup the value of a variable, is reasonably straight forward.
+lookup the value of a variable, is reasonably straight forward. The
+only two issues to address in this function are pseudo-variables
+[[%iface%]] and [[%sysctl_iface%]]. These are generated at run time.
+This isn't really the best solution, but considering there are only two
+of them, this should not present any problem at all.
 
 <<execute function declarations>>=
 char *get_var(char *id, size_t idlen, interface_defn *ifd);
@@ -2979,11 +2984,21 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	int i;
 
 	if (strncmpz(id, "iface", idlen) == 0) {
-		return ifd->real_iface;
-	} else {
+		return strdup(ifd->real_iface);
+	}
+	if (strncmpz(id, "sysctl_iface", idlen) == 0) {
+		char * iface = strdup(ifd->real_iface);
+		char * dot = strchr(iface, '.');
+		if (dot) {
+			*dot = '/';
+		}
+		return iface;
+	}
+
+	{
 		for (i = 0; i < ifd->n_options; i++) {
 			if (strncmpz(id, ifd->option[i].name, idlen) == 0) {
-				return ifd->option[i].value;
+				return strdup(ifd->option[i].value);
 			}
 		}
 	}
@@ -3012,11 +3027,15 @@ int var_true(char *id, interface_defn *ifd) {
 	varvalue = get_var(id, strlen(id), ifd);
 	if (varvalue) {
 		if (strcmp(varvalue, "1") == 0 ||
-		    strcasecmp(varvalue, "true") == 0 ||
-		    strcasecmp(varvalue, "yes") == 0)
+			strcasecmp(varvalue, "true") == 0 ||
+			strcasecmp(varvalue, "yes") == 0)
+		{
+			free(varvalue);
 			return 1;
-		else
+		} else {
+			free(varvalue);
 			return 0;
+		}
 	} else
 		return 0;
 }
