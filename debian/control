@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 7), nowebm
 Package: ifupdown
 Architecture: any
 Depends: net-tools, ${shlibs:Depends}, ${misc:Depends}, lsb-base
-Suggests: iproute, dhcp3-client | dhcp-client, ppp
+Suggests: iproute, isc-dhcp-client | dhcp-client, ppp
 Replaces: netbase (<< 4.00)
 Conflicts: dhcp-client (<< 3.0)
 Description: high level tools to configure network interfaces
