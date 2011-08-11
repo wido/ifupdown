@@ -1,3 +1,13 @@
+ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
+
+  * Backport the fixes for the following bugs from 0.7 branch:
+    - Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
+    - Remove Default-Stop from the LSB headers (Closes: #630506).
+    - Fix init script dependencies (Closes: #607713).
+  * Report the correct version number on --version.
+
+ -- Andrew O. Shadoura <bugzilla@tut.by>  Sun, 07 Aug 2011 15:38:26 +0300
+
 ifupdown (0.7~alpha5+really0.6.10) unstable; urgency=low
 
   * Non-maintainer upload.
