@@ -4,7 +4,7 @@
 # Required-Start:    ifupdown-clean
 # Required-Stop:     $local_fs
 # Default-Start:     S
-# Default-Stop:      0 6
+# Default-Stop:      
 # Short-Description: Prepare the system for taking up interfaces.
 ### END INIT INFO
 
