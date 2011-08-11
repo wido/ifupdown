@@ -2975,6 +2975,10 @@ only two issues to address in this function are pseudo-variables
 This isn't really the best solution, but considering there are only two
 of them, this should not present any problem at all.
 
+Both of these variables hold the name of the physical interface.
+The difference is that [[%sysctl_iface%]] has all dots replaced by
+forward slashes, so it can be used in sysctl variable names.
+
 <<execute function declarations>>=
 char *get_var(char *id, size_t idlen, interface_defn *ifd);
 @ 
