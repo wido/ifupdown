@@ -1,7 +1,7 @@
 Source: ifupdown
 Section: admin
 Priority: important
-Maintainer: Anthony Towns <ajt@debian.org>
+Maintainer: Andrew O. Shadoura <bugzilla@tut.by>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
 Standards-Version: 3.8.3
 Build-Depends: debhelper (>= 7), nowebm
