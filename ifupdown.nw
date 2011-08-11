@@ -750,9 +750,9 @@ was.
 
 <<defn2c subroutines>>=
 sub get_architecture {
+	%methods = () if ($arch ne $DEB_HOST_ARCH_OS);
 	$arch = $_[0];
 	print "#include \"arch${arch}.h\"\n\n\n" if ($arch eq $DEB_HOST_ARCH_OS);
-	%methods = ();
 	nextline;
 }
 @ 
