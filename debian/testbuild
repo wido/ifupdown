@@ -190,7 +190,7 @@ EOF
 
 cat >tests/testcase.7 <<EOF
 # RUN: -a
-auto eth0 tunnel
+auto eth0 eth0.1 tunnel
 iface eth0 inet static
   address 1.2.3.4
   netmask 255.255.255.0
@@ -199,6 +199,9 @@ iface eth0 inet6 static
   netmask 64
   privext 2
   accept_ra 0
+iface eth0.1 inet6 static
+  address 3ffe:ffff:120:f101::1
+  netmask 64
 iface tunnel inet6 6to4
   local 1.2.3.4
 EOF
@@ -220,6 +223,17 @@ sysctl net.ipv6.conf.eth0.autoconf=0
 
 ip link set dev eth0	up
 ip -6 addr add 3ffe:ffff:100:f101::1/64 dev eth0
+
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth0.1=eth0.1 (inet6)
+run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl net.ipv6.conf.eth0/1.autoconf=0
+
+ip link set dev eth0.1   up
+ip -6 addr add 3ffe:ffff:120:f101::1/64 dev eth0.1
 
 run-parts --verbose /etc/network/if-up.d
 Configuring interface tunnel=tunnel (inet6)
