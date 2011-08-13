@@ -657,6 +657,7 @@ my $arch = "";
 
 <<defn2c subroutines>>=
 <<[[nextline]] subroutine>>
+<<[[our_arch]] function>>
 @ 
 
 <<[[nextline]] subroutine>>=
@@ -673,6 +674,16 @@ sub nextline {
 		$line = $1 . $addon;
 	}
 	return 1;
+}
+@ 
+
+We accept any valid Debian OS identifier (that is, [[DEB_HOST_ARCH_OS]]) as
+the architecture name, as well as the literal string `[[any]]' which means
+the definition file is functional on every architecture.
+
+<<[[our_arch]] function>>=
+sub our_arch {
+    return ($arch eq $DEB_HOST_ARCH_OS) || ($arch eq "any")
 }
 @ 
 
@@ -750,9 +761,9 @@ was.
 
 <<defn2c subroutines>>=
 sub get_architecture {
-	%methods = () if ($arch ne $DEB_HOST_ARCH_OS);
+	%methods = () if (!our_arch());
 	$arch = $_[0];
-	print "#include \"arch${arch}.h\"\n\n\n" if ($arch eq $DEB_HOST_ARCH_OS);
+	print "#include \"arch${DEB_HOST_ARCH_OS}.h\"\n\n\n" if (our_arch());
 	nextline;
 }
 @ 
@@ -764,7 +775,7 @@ Next, we actually create the functions and array for each method.
 
 <<parse a top-level section and output intermediate structures>>=
 if (match($line, "method")) {
-	if ($arch eq $DEB_HOST_ARCH_OS) {
+	if (our_arch()) {
 		get_method $match;
 	} else {
 		skip_section;
