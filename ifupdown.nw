@@ -4119,51 +4119,15 @@ interfaces up and down.
 
 \appendix
 
-\section{Linux Address Families}
-
-<<archlinux.h>>=
-unsigned int mylinuxver();
-unsigned int mylinux(int,int,int);
+\section{Architecture-dependent functions}
+\subsection{Common functions}
+<<common functions declarations>>=
 int execable(char *);
 void cleanup_hwaddress_for_iproute(char **pparam);
 void make_hex_address(char **pparam);
-@
+@ 
 
-<<archlinux.c>>=
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/utsname.h>
-#include <sys/stat.h>
-
-#include "archlinux.h"
-
-unsigned int mylinuxver() {
-	static int maj = -1, rev = 0, min = 0;
-
-	if (maj == -1) {
-		struct utsname u;
-		char *pch;
-		uname(&u);
-		maj = atoi(u.release);
-		pch = strchr(u.release, '.');
-		if (pch) {
-			rev = atoi(pch+1);
-			pch = strchr(pch+1, '.');
-			if (pch) {
-				min = atoi(pch+1);
-			}
-		}
-	}
-
-	return mylinux(maj,rev,min);
-}
-
-unsigned int mylinux(int maj, int rev, int min) { 
-	return min | rev << 10 | maj << 13;
-}
-
+<<common functions implementations>>=
 int execable(char *program) {
 	struct stat buf;
 
@@ -4209,8 +4173,56 @@ void make_hex_address(char **pparam)
 	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
 		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
 }
+
 @ 
 
+\subsection{Linux-specific functions}
+
+<<archlinux.h>>=
+unsigned int mylinuxver();
+unsigned int mylinux(int,int,int);
+<<common functions declarations>>
+@
+
+<<archlinux.c>>=
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#include <sys/stat.h>
+
+#include "archlinux.h"
+
+unsigned int mylinuxver() {
+	static int maj = -1, rev = 0, min = 0;
+
+	if (maj == -1) {
+		struct utsname u;
+		char *pch;
+		uname(&u);
+		maj = atoi(u.release);
+		pch = strchr(u.release, '.');
+		if (pch) {
+			rev = atoi(pch+1);
+			pch = strchr(pch+1, '.');
+			if (pch) {
+				min = atoi(pch+1);
+			}
+		}
+	}
+
+	return mylinux(maj,rev,min);
+}
+
+unsigned int mylinux(int maj, int rev, int min) { 
+	return min | rev << 10 | maj << 13;
+}
+
+<<common functions implementations>>
+@ 
+
+\section{Linux Address Families}
 \subsection{IPv4 Address Family}
 
 <<address family declarations>>=
@@ -4225,10 +4237,31 @@ extern address_family addr_inet;
 address_family inet
 architecture linux
 
-<<inet methods>>
+<<Linux inet methods>>
+
 @ 
 
-<<inet methods>>=
+<<Linux inet methods>>=
+<<Linux inet methods: loopback>>
+
+<<Linux inet methods: static>>
+
+<<inet methods: manual>>
+
+<<inet methods: dhcp>>
+
+<<inet methods: bootp>>
+
+<<Linux inet methods: tunnel>>
+
+<<inet methods: ppp>>
+
+<<inet methods: wvdial>>
+
+<<inet methods: ipv4ll>>
+@ 
+
+<<Linux inet methods: loopback>>=
 method loopback
   description
     This method may be used to define the IPv4 loopback interface.
@@ -4240,7 +4273,7 @@ method loopback
     ip link set dev %iface% down
 @ 
 
-<<inet methods>>=
+<<Linux inet methods: static>>=
 method static
   description
     This method may be used to define ethernet interfaces with statically
@@ -4273,7 +4306,7 @@ method static
     ip link set dev %iface% down
 @
 
-<<inet methods>>=
+<<inet methods: manual>>=
 method manual
   description
     This method may be used to define interfaces for which no configuration
@@ -4285,7 +4318,7 @@ method manual
   down
 @ 
 
-<<inet methods>>=
+<<inet methods: dhcp>>=
 method dhcp
   description
     This method may be used to obtain an address via DHCP with any of
@@ -4333,10 +4366,13 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+        if (execable("/sbin/ip"))
+    ifconfig %iface% down \
+        elsif (1)
 @ 
 
-<<inet methods>>=
+<<inet methods: bootp>>=
 method bootp
   description
     This method may be used to obtain an address via bootp.
@@ -4353,10 +4389,13 @@ method bootp
            [[--hwaddr %hwaddr%]] --returniffail --serverbcast
 
   down
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+        if (execable("/sbin/ip"))
+    ifconfig %iface% down \
+        elsif (1)
 @ 
 
-<<inet methods>>=
+<<Linux inet methods: tunnel>>=
 method tunnel
   description
     This method is used to create GRE or IPIP tunnels. You need to have
@@ -4382,7 +4421,7 @@ method tunnel
     ip tunnel del %iface%
 @ 
 
-<<inet methods>>=
+<<inet methods: ppp>>=
 method ppp
   description
     This method uses pon/poff to configure a PPP interface. See those
@@ -4397,7 +4436,7 @@ method ppp
     poff [[%provider%]]
 @ 
 
-<<inet methods>>=
+<<inet methods: wvdial>>=
 method wvdial
   description
     This method uses wvdial to configure a PPP interface. See that command
@@ -4411,7 +4450,7 @@ method wvdial
     /sbin/start-stop-daemon --stop -x /usr/bin/wvdial \
                       -p /var/run/wvdial.%iface% -s 2
 
-<<inet methods>>=
+<<inet methods: ipv4ll>>=
 method ipv4ll
   description
     This method uses avahi-autoipd to configure an interface with an
