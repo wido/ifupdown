@@ -4123,7 +4123,7 @@ interfaces up and down.
 \subsection{Common functions}
 <<common functions declarations>>=
 int execable(char *);
-void cleanup_hwaddress_for_iproute(char **pparam);
+void cleanup_hwaddress(char **pparam);
 void make_hex_address(char **pparam);
 @ 
 
@@ -4137,7 +4137,7 @@ int execable(char *program) {
 	return 0;
 }
 
-void cleanup_hwaddress_for_iproute(char **pparam) {
+void cleanup_hwaddress(char **pparam) {
 	char *rest = *pparam;
 		/* we're shrinking the text, so no realloc needed */
 	char *space = strchr(rest, ' ');
@@ -4291,7 +4291,7 @@ method static
     mtu size                    -- MTU size
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
@@ -4337,7 +4337,7 @@ method dhcp
     hwaddress address       -- Hardware Address.
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
@@ -4533,7 +4533,7 @@ method static
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
@@ -4569,7 +4569,7 @@ method dhcp
     hwaddress address      -- Hardware address
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
