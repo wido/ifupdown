@@ -4222,6 +4222,26 @@ unsigned int mylinux(int maj, int rev, int min) {
 <<common functions implementations>>
 @ 
 
+\subsection{kFreeBSD-specific functions}
+
+<<archkfreebsd.h>>=
+/* no OS-specific functions yet */
+<<common functions declarations>>
+@
+
+<<archkfreebsd.c>>=
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#include <sys/stat.h>
+
+#include "archkfreebsd.h"
+
+<<common functions implementations>>
+@ 
+
 \section{Linux Address Families}
 \subsection{IPv4 Address Family}
 
