@@ -4743,6 +4743,30 @@ method static
     ip link set %iface% down
 @
 
+\section{kFreeBSD Address Families}
+\subsection{IPv4 Address Family}
+
+<<inet.defn>>=
+architecture kfreebsd
+
+<<kFreeBSD inet methods>>
+@ 
+
+<<kFreeBSD inet methods>>=
+<<inet methods: manual>>
+
+<<inet methods: dhcp>>
+
+<<inet methods: bootp>>
+
+<<inet methods: ppp>>
+
+<<inet methods: wvdial>>
+
+<<inet methods: ipv4ll>>
+@ 
+
+
 \begin{flushleft}
 \bibliography{biblio}
 \bibliographystyle{unsrt}
