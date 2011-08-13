@@ -4130,14 +4130,69 @@ interfaces up and down.
 
 \appendix
 
-\section{Linux Address Families}
+\section{Architecture-dependent functions}
+\subsection{Common functions}
+<<common functions declarations>>=
+int execable(char *);
+void cleanup_hwaddress(char **pparam);
+void make_hex_address(char **pparam);
+@ 
+
+<<common functions implementations>>=
+int execable(char *program) {
+	struct stat buf;
+
+	if (0 == stat(program, &buf)) {
+		if (S_ISREG(buf.st_mode) && (S_IXUSR & buf.st_mode)) return 1;
+	}
+	return 0;
+}
+
+void cleanup_hwaddress(char **pparam) {
+	char *rest = *pparam;
+		/* we're shrinking the text, so no realloc needed */
+	char *space = strchr(rest, ' ');
+
+	if (space == NULL)
+		return;
+
+	*space = '\0';
+	if (strcasecmp(rest, "ether") == 0 ||
+		strcasecmp(rest, "ax25") == 0 ||
+		strcasecmp(rest, "ARCnet") == 0 ||
+		strcasecmp(rest, "netrom") == 0)
+	{
+		/* found deprecated <class> attribute */
+		memmove(rest, space+1, strlen(space+1)+1);
+	} else {
+		*space = ' ';
+	}
+}
+
+void make_hex_address(char **pparam)
+{
+	char addrcomp[4];
+	int maxlen = strlen("0000:0000");
+
+	int ret = sscanf(*pparam, "%3hhu.%3hhu.%3hhu.%3hhu",
+		&addrcomp[0], &addrcomp[1], &addrcomp[2], &addrcomp[3]);
+
+	if (ret != 4)
+		return;
+
+	*pparam = realloc(*pparam, maxlen + 1);
+	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
+		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
+}
+
+@ 
+
+\subsection{Linux-specific functions}
 
 <<archlinux.h>>=
 unsigned int mylinuxver();
 unsigned int mylinux(int,int,int);
-int execable(char *);
-void cleanup_hwaddress_for_iproute(char **pparam);
-void make_hex_address(char **pparam);
+<<common functions declarations>>
 @
 
 <<archlinux.c>>=
@@ -4175,53 +4230,30 @@ unsigned int mylinux(int maj, int rev, int min) {
 	return min | rev << 10 | maj << 13;
 }
 
-int execable(char *program) {
-	struct stat buf;
-
-	if (0 == stat(program, &buf)) {
-		if (S_ISREG(buf.st_mode) && (S_IXUSR & buf.st_mode)) return 1;
-	}
-	return 0;
-}
-
-void cleanup_hwaddress_for_iproute(char **pparam) {
-	char *rest = *pparam;
-		/* we're shrinking the text, so no realloc needed */
-	char *space = strchr(rest, ' ');
-
-	if (space == NULL)
-		return;
-
-	*space = '\0';
-	if (strcasecmp(rest, "ether") == 0 ||
-		strcasecmp(rest, "ax25") == 0 ||
-		strcasecmp(rest, "ARCnet") == 0 ||
-		strcasecmp(rest, "netrom") == 0)
-	{
-		/* found deprecated <class> attribute */
-		memmove(rest, space+1, strlen(space+1)+1);
-	} else {
-		*space = ' ';
-	}
-}
-
-void make_hex_address(char **pparam)
-{
-	char addrcomp[4];
-	int maxlen = strlen("0000:0000");
-
-	int ret = sscanf(*pparam, "%3hhu.%3hhu.%3hhu.%3hhu",
-		&addrcomp[0], &addrcomp[1], &addrcomp[2], &addrcomp[3]);
-
-	if (ret != 4)
-		return;
-
-	*pparam = realloc(*pparam, maxlen + 1);
-	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
-		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
-}
+<<common functions implementations>>
 @ 
 
+\subsection{kFreeBSD-specific functions}
+
+<<archkfreebsd.h>>=
+/* no OS-specific functions yet */
+<<common functions declarations>>
+@
+
+<<archkfreebsd.c>>=
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#include <sys/stat.h>
+
+#include "archkfreebsd.h"
+
+<<common functions implementations>>
+@ 
+
+\section{Linux Address Families}
 \subsection{IPv4 Address Family}
 
 <<address family declarations>>=
@@ -4236,10 +4268,31 @@ extern address_family addr_inet;
 address_family inet
 architecture linux
 
-<<inet methods>>
+<<Linux inet methods>>
+
 @ 
 
-<<inet methods>>=
+<<Linux inet methods>>=
+<<Linux inet methods: loopback>>
+
+<<Linux inet methods: static>>
+
+<<inet methods: manual>>
+
+<<inet methods: dhcp>>
+
+<<inet methods: bootp>>
+
+<<Linux inet methods: tunnel>>
+
+<<inet methods: ppp>>
+
+<<inet methods: wvdial>>
+
+<<inet methods: ipv4ll>>
+@ 
+
+<<Linux inet methods: loopback>>=
 method loopback
   description
     This method may be used to define the IPv4 loopback interface.
@@ -4251,7 +4304,7 @@ method loopback
     ip link set dev %iface% down
 @ 
 
-<<inet methods>>=
+<<Linux inet methods: static>>=
 method static
   description
     This method may be used to define ethernet interfaces with statically
@@ -4269,7 +4322,7 @@ method static
     mtu size                    -- MTU size
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
@@ -4284,7 +4337,7 @@ method static
     ip link set dev %iface% down
 @
 
-<<inet methods>>=
+<<inet methods: manual>>=
 method manual
   description
     This method may be used to define interfaces for which no configuration
@@ -4296,7 +4349,7 @@ method manual
   down
 @ 
 
-<<inet methods>>=
+<<inet methods: dhcp>>=
 method dhcp
   description
     This method may be used to obtain an address via DHCP with any of
@@ -4315,7 +4368,7 @@ method dhcp
     hwaddress address       -- Hardware Address.
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
@@ -4344,10 +4397,13 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+        if (execable("/sbin/ip"))
+    ifconfig %iface% down \
+        elsif (1)
 @ 
 
-<<inet methods>>=
+<<inet methods: bootp>>=
 method bootp
   description
     This method may be used to obtain an address via bootp.
@@ -4364,10 +4420,13 @@ method bootp
            [[--hwaddr %hwaddr%]] --returniffail --serverbcast
 
   down
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+        if (execable("/sbin/ip"))
+    ifconfig %iface% down \
+        elsif (1)
 @ 
 
-<<inet methods>>=
+<<Linux inet methods: tunnel>>=
 method tunnel
   description
     This method is used to create GRE or IPIP tunnels. You need to have
@@ -4393,7 +4452,7 @@ method tunnel
     ip tunnel del %iface%
 @ 
 
-<<inet methods>>=
+<<inet methods: ppp>>=
 method ppp
   description
     This method uses pon/poff to configure a PPP interface. See those
@@ -4408,7 +4467,7 @@ method ppp
     poff [[%provider%]]
 @ 
 
-<<inet methods>>=
+<<inet methods: wvdial>>=
 method wvdial
   description
     This method uses wvdial to configure a PPP interface. See that command
@@ -4422,7 +4481,7 @@ method wvdial
     /sbin/start-stop-daemon --stop -x /usr/bin/wvdial \
                       -p /var/run/wvdial.%iface% -s 2
 
-<<inet methods>>=
+<<inet methods: ipv4ll>>=
 method ipv4ll
   description
     This method uses avahi-autoipd to configure an interface with an
@@ -4505,7 +4564,7 @@ method static
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
@@ -4541,7 +4600,7 @@ method dhcp
     hwaddress address      -- Hardware address
 
   conversion
-    hwaddress cleanup_hwaddress_for_iproute
+    hwaddress cleanup_hwaddress
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
@@ -4694,6 +4753,30 @@ method static
   down
     ip link set %iface% down
 @
+
+\section{kFreeBSD Address Families}
+\subsection{IPv4 Address Family}
+
+<<inet.defn>>=
+architecture kfreebsd
+
+<<kFreeBSD inet methods>>
+@ 
+
+<<kFreeBSD inet methods>>=
+<<inet methods: manual>>
+
+<<inet methods: dhcp>>
+
+<<inet methods: bootp>>
+
+<<inet methods: ppp>>
+
+<<inet methods: wvdial>>
+
+<<inet methods: ipv4ll>>
+@ 
+
 
 \begin{flushleft}
 \bibliography{biblio}
