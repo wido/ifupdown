@@ -41,7 +41,6 @@ override_dh_auto_configure:
 	chmod a+rx makecdep.sh makenwdep.sh
 
 override_dh_installinit:
-	dh_installinit --name=ifupdown-clean --no-start -- start 18 S .
 	dh_installinit --name=ifupdown --no-start -- start 39 S .
 
 override_dh_auto_clean:
