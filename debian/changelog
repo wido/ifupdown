@@ -1,3 +1,10 @@
+ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
+
+  * Don't try to remove state file before the root filesystem is
+    remounted R/W (Closes: #637435).
+
+ -- Andrew O. Shadoura <bugzilla@tut.by>  Sat, 13 Aug 2011 20:05:15 +0300
+
 ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
 
   * Backport the fixes for the following bugs from 0.7 branch:
