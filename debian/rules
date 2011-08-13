@@ -123,7 +123,7 @@ binary-arch: build install
 #	dh_installemacsen
 #	dh_installpam
 	dh_installinit --name=ifupdown-clean --no-start -- start 18 S .
-	dh_installinit --name=ifupdown --no-start -- start 39 S .  start 36 0 6 .
+	dh_installinit --name=ifupdown --no-start -- start 39 S .
 	dh_installcron
 #	dh_installmanpages
 #	   ^-- can't do our symlink trick
