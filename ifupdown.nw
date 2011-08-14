@@ -4268,7 +4268,7 @@ architecture linux
 
 <<inet methods: manual>>
 
-<<inet methods: dhcp>>
+<<Linux inet methods: dhcp>>
 
 <<inet methods: bootp>>
 
@@ -4338,7 +4338,7 @@ method manual
   down
 @ 
 
-<<inet methods: dhcp>>=
+<<Linux inet methods: dhcp>>=
 method dhcp
   description
     This method may be used to obtain an address via DHCP with any of
@@ -4386,10 +4386,7 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ip link set dev %iface% down \
-        if (execable("/sbin/ip"))
-    ifconfig %iface% down \
-        elsif (1)
+    ip link set dev %iface% down
 @ 
 
 <<inet methods: bootp>>=
