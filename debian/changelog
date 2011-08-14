@@ -6,7 +6,8 @@ ifupdown (0.7~beta1) experimental; urgency=low
   * Add initial DHCPv6 support.
   * Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
   * Support per-architecture build-time rule definitions.
-  * Add %sysctl_iface% variable.
+  * Add a syntax (%iface/a/b%) to perform character replacement over
+    variable values.
   * Accept VLAN interface names (Closes: #632902).
   * Update test cases.
 
