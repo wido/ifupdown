@@ -4759,7 +4759,7 @@ architecture kfreebsd
 
 <<inet methods: manual>>
 
-<<inet methods: dhcp>>
+<<kFreeBSD inet methods: dhcp>>
 
 <<inet methods: bootp>>
 
@@ -4813,6 +4813,54 @@ method static
     [[ route del default gw %gateway% [[metric %metric%]] %iface% 2>&1 1>/dev/null || true ]]
     ifconfig %iface% down
 @
+
+<<kFreeBSD inet methods: dhcp>>=
+method dhcp
+  description
+    This method may be used to obtain an address via DHCP with any of
+    the tools: dhclient, pump, udhcpc, dhcpcd.
+    (They have been listed in their order of precedence.)
+    If you have a complicated DHCP setup you should
+    note that some of these clients use their own configuration files
+    and do not obtain their configuration information via *ifup*.
+
+  options
+    hostname hostname       -- Hostname to be requested (pump, dhcpcd, udhcpc)
+    leasehours leasehours   -- Preferred lease time in hours (pump)
+    leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
+    vendor vendor           -- Vendor class identifier (dhcpcd)
+    client client           -- Client identifier (dhcpcd, udhcpc)
+    hwaddress address       -- Hardware Address.
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[ifconfig %iface% link %hwaddress%]]
+    dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient3"))
+    dhclient -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient"))
+    udhcpc -n -p /var/run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
+           [[-c %client%]] \
+        elsif (execable("/sbin/udhcpc"))
+    dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
+           [[-l %leasetime%]] %iface% \
+        elsif (execable("/sbin/dhcpcd"))
+
+  down
+    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient3"))
+    dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient"))
+    cat /var/run/udhcpc.%iface%.pid | xargs -i kill -TERM {} \
+        elsif (execable("/sbin/udhcpc"))
+    dhcpcd -k %iface% \
+        elsif (execable("/sbin/dhcpcd"))
+
+    ifconfig %iface% down
+@ 
+
 
 \begin{flushleft}
 \bibliography{biblio}
