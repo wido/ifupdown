@@ -2911,6 +2911,7 @@ case '%':
 	<<get [[varvalue]]>>
 
 	if (varvalue) {
+		<<replace the character if needed>>
 		addstr(&result, &len, &pos, varvalue, strlen(varvalue));
 		free(varvalue);
 	} else {
@@ -2928,15 +2929,37 @@ We don't do anything particularly clever dealing with the next percent
 
 <<variables local to handle percent token>>=
 char *nextpercent;
+size_t namelen;
+char pat = 0, rep = 0;
 @ 
+
+We support doing a simple replacement in the values returned by [[get_var()]].
+When the syntax `\verb!%var/p/r/%!' is used, the first occurence of the
+symbol `\verb!p!' will be replaced by `\verb!r!' when the substitution
+is done. Currently, both pattern and replacement string can be one character
+length only.
 
 <<determine variable name>>=
 command++;
 nextpercent = strchr(command, '%');
+namelen = nextpercent - command;
 if (!nextpercent) {
 	errno = EUNBALPER;
 	free(result);
 	return NULL;
+}
+/* %var/p/r% */
+if (*(nextpercent - 4) == '/') {
+	pat = *(nextpercent - 3);
+	rep = *(nextpercent - 1);
+	namelen -= 4;
+}
+@ 
+
+<<replace the character if needed>>=
+char * position = strchr(varvalue, pat);
+if (position) {
+	*position = rep;
 }
 @ 
 
@@ -2964,14 +2987,8 @@ int strncmpz(char *l, char *r, size_t llen) {
 
 Given the above, the implementation of the [[get_var()]] function to
 lookup the value of a variable, is reasonably straight forward. The
-only two issues to address in this function are pseudo-variables
-[[%iface%]] and [[%sysctl_iface%]]. These are generated at run time.
-This isn't really the best solution, but considering there are only two
-of them, this should not present any problem at all.
-
-Both of these variables hold the name of the physical interface.
-The difference is that [[%sysctl_iface%]] has all dots replaced by
-forward slashes, so it can be used in sysctl variable names.
+only issue to address in this function is a pseudo-variable
+[[%iface%]].
 
 <<execute function declarations>>=
 char *get_var(char *id, size_t idlen, interface_defn *ifd);
@@ -2983,14 +3000,6 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 
 	if (strncmpz(id, "iface", idlen) == 0) {
 		return strdup(ifd->real_iface);
-	}
-	if (strncmpz(id, "sysctl_iface", idlen) == 0) {
-		char * iface = strdup(ifd->real_iface);
-		char * dot = strchr(iface, '.');
-		if (dot) {
-			*dot = '/';
-		}
-		return iface;
 	}
 
 	{
@@ -3008,7 +3017,7 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 Which means we can finish of the chunk, thus:
 
 <<get [[varvalue]]>>=
-varvalue = get_var(command, nextpercent - command, ifd);
+varvalue = get_var(command, namelen, ifd);
 @ 
 
 We also define an exported [[var_true()]] function to allow methods to
@@ -4527,9 +4536,9 @@ method auto
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%sysctl_iface%.use_tempaddr=%privext%]]
-    sysctl net.ipv6.conf.%sysctl_iface%.accept_ra=1
-    sysctl net.ipv6.conf.%sysctl_iface%.autoconf=1
+    [[sysctl net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    sysctl net.ipv6.conf.%iface/.//%.accept_ra=1
+    sysctl net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
     dhclient -6 -S -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
@@ -4569,10 +4578,10 @@ method static
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%sysctl_iface%.use_tempaddr=%privext%]]
-    [[sysctl net.ipv6.conf.%sysctl_iface%.accept_ra=%accept_ra%]]
-    sysctl net.ipv6.conf.%sysctl_iface%.autoconf=0
-    [[sysctl net.ipv6.conf.%sysctl_iface%.autoconf=%autoconf%]]
+    [[sysctl net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    [[sysctl net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
+    sysctl net.ipv6.conf.%iface/.//%.autoconf=0
+    [[sysctl net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] dev %iface%
     [[ ip -6 route add default via %gateway% dev %iface% ]]
@@ -4606,7 +4615,7 @@ method dhcp
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[ip link set dev %iface% address %hwaddress%]]
-    sysctl net.ipv6.conf.%sysctl_iface%.accept_ra=0
+    sysctl net.ipv6.conf.%iface/.//%.accept_ra=0
     dhclient -6 -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
