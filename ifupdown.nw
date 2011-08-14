@@ -4815,15 +4815,14 @@ method static
 method dhcp
   description
     This method may be used to obtain an address via DHCP with any of
-    the tools: dhclient, pump, udhcpc, dhcpcd.
+    the tools: dhclient, udhcpc, dhcpcd.
     (They have been listed in their order of precedence.)
     If you have a complicated DHCP setup you should
     note that some of these clients use their own configuration files
     and do not obtain their configuration information via *ifup*.
 
   options
-    hostname hostname       -- Hostname to be requested (pump, dhcpcd, udhcpc)
-    leasehours leasehours   -- Preferred lease time in hours (pump)
+    hostname hostname       -- Hostname to be requested (dhcpcd, udhcpc)
     leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
