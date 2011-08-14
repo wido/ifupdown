@@ -1,3 +1,9 @@
+ifupdown (0.7~alpha5+really0.6.13) unstable; urgency=low
+
+  * Clean up SysV symlinks on upgrade (Closes: #637804).
+
+ -- Andrew O. Shadoura <bugzilla@tut.by>  Sun, 14 Aug 2011 21:36:02 +0300
+
 ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
 
   * Fix init script dependencies so we don't try to remove state
