@@ -117,4 +117,12 @@ if [ "$1" = "configure" ] ; then
   fi
 fi
 
+if [ -x "/etc/init.d/ifupdown-clean" ]; then
+    update-rc.d -f ifupdown-clean remove >/dev/null || exit $?
+fi
+
+if [ -x "/etc/init.d/ifupdown" ]; then
+    update-rc.d -f ifupdown remove >/dev/null || exit $?
+fi
+
 #DEBHELPER#
