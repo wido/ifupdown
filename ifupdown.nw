@@ -4753,6 +4753,10 @@ architecture kfreebsd
 @ 
 
 <<kFreeBSD inet methods>>=
+<<kFreeBSD inet methods: loopback>>
+
+<<kFreeBSD inet methods: static>>
+
 <<inet methods: manual>>
 
 <<inet methods: dhcp>>
@@ -4766,6 +4770,49 @@ architecture kfreebsd
 <<inet methods: ipv4ll>>
 @ 
 
+<<kFreeBSD inet methods: loopback>>=
+method loopback
+  description
+    This method may be used to define the IPv4 loopback interface.
+
+  up
+    ifconfig %iface% 127.0.0.1 up
+
+  down
+    ifconfig %iface% down
+@ 
+
+<<kFreeBSD inet methods: static>>=
+method static
+  description
+    This method may be used to define ethernet interfaces with statically
+    allocated IPv4 addresses.
+      
+  options
+    address address             -- Address (dotted quad/netmask) *required*
+    netmask mask                -- Netmask (dotted quad or CIDR)
+    broadcast broadcast_address -- Broadcast address (dotted quad)
+    metric metric               -- Routing metric for default gateway (integer)
+    gateway address             -- Default gateway (dotted quad)
+    pointopoint address         -- Address of other end point (dotted quad). \
+                                   Note the spelling of "point-to".
+    hwaddress address           -- Link local address.
+    mtu size                    -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[ ifconfig %iface% link %hwaddress%]]
+    ifconfig %iface% %address% [[netmask %netmask%]] [[broadcast %broadcast%]] \
+	[[pointopoint %pointopoint%]] [[media %media%]] [[mtu %mtu%]] \
+	up
+    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]]
+
+  down
+    [[ route del default gw %gateway% [[metric %metric%]] %iface% 2>&1 1>/dev/null || true ]]
+    ifconfig %iface% down
+@
 
 \begin{flushleft}
 \bibliography{biblio}
