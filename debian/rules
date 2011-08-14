@@ -122,7 +122,9 @@ binary-arch: build install
 	dh_installmenu
 #	dh_installemacsen
 #	dh_installpam
+	dh_installinit --name=ifupdown-clean --no-start -- remove
 	dh_installinit --name=ifupdown-clean --no-start -- start 18 S .
+	dh_installinit --name=ifupdown --no-start -- remove
 	dh_installinit --name=ifupdown --no-start -- start 39 S .
 	dh_installcron
 #	dh_installmanpages
