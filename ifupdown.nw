@@ -3034,6 +3034,7 @@ int var_true(char *id, interface_defn *ifd) {
 	varvalue = get_var(id, strlen(id), ifd);
 	if (varvalue) {
 		if (strcmp(varvalue, "1") == 0 ||
+			strcasecmp(varvalue, "on") == 0 ||
 			strcasecmp(varvalue, "true") == 0 ||
 			strcasecmp(varvalue, "yes") == 0)
 		{
