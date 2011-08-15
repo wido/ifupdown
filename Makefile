@@ -1,15 +1,16 @@
 CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7alpha"'
 CC := gcc
+ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 BASEDIR ?= $(DESTDIR)
 
-CFILES := addrfam.c execute.c config.c main.c archlinux.c
-HFILES := header.h archlinux.h
+CFILES := addrfam.c execute.c config.c main.c arch$(ARCH).c
+HFILES := header.h arch$(ARCH).h
 PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 

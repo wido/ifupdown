@@ -147,16 +147,17 @@ We shall begin with the template for the Makefile we shall use.
 
 <<Makefile>>=
 <<make options>>
+ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 BASEDIR ?= $(DESTDIR)
 
-CFILES := addrfam.c execute.c config.c main.c archlinux.c
-HFILES := header.h archlinux.h
+CFILES := addrfam.c execute.c config.c main.c arch$(ARCH).c
+HFILES := header.h arch$(ARCH).h
 PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 
@@ -4290,7 +4291,7 @@ architecture linux
 
 <<inet methods: manual>>
 
-<<inet methods: dhcp>>
+<<Linux inet methods: dhcp>>
 
 <<inet methods: bootp>>
 
@@ -4360,7 +4361,7 @@ method manual
   down
 @ 
 
-<<inet methods: dhcp>>=
+<<Linux inet methods: dhcp>>=
 method dhcp
   description
     This method may be used to obtain an address via DHCP with any of
@@ -4408,10 +4409,7 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ip link set dev %iface% down \
-        if (execable("/sbin/ip"))
-    ifconfig %iface% down \
-        elsif (1)
+    ip link set dev %iface% down
 @ 
 
 <<inet methods: bootp>>=
@@ -4775,9 +4773,13 @@ architecture kfreebsd
 @ 
 
 <<kFreeBSD inet methods>>=
+<<kFreeBSD inet methods: loopback>>
+
+<<kFreeBSD inet methods: static>>
+
 <<inet methods: manual>>
 
-<<inet methods: dhcp>>
+<<kFreeBSD inet methods: dhcp>>
 
 <<inet methods: bootp>>
 
@@ -4786,6 +4788,96 @@ architecture kfreebsd
 <<inet methods: wvdial>>
 
 <<inet methods: ipv4ll>>
+@ 
+
+<<kFreeBSD inet methods: loopback>>=
+method loopback
+  description
+    This method may be used to define the IPv4 loopback interface.
+
+  up
+    ifconfig %iface% 127.0.0.1 up
+
+  down
+    ifconfig %iface% down
+@ 
+
+<<kFreeBSD inet methods: static>>=
+method static
+  description
+    This method may be used to define ethernet interfaces with statically
+    allocated IPv4 addresses.
+      
+  options
+    address address             -- Address (dotted quad/netmask) *required*
+    netmask mask                -- Netmask (dotted quad or CIDR)
+    broadcast broadcast_address -- Broadcast address (dotted quad)
+    metric metric               -- Routing metric for default gateway (integer)
+    gateway address             -- Default gateway (dotted quad)
+    pointopoint address         -- Address of other end point (dotted quad). \
+                                   Note the spelling of "point-to".
+    hwaddress address           -- Link local address.
+    mtu size                    -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[ ifconfig %iface% link %hwaddress%]]
+    ifconfig %iface% %address% [[netmask %netmask%]] [[broadcast %broadcast%]] \
+	[[pointopoint %pointopoint%]] [[media %media%]] [[mtu %mtu%]] \
+	up
+    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]]
+
+  down
+    [[ route del default gw %gateway% [[metric %metric%]] %iface% 2>&1 1>/dev/null || true ]]
+    ifconfig %iface% down
+@
+
+<<kFreeBSD inet methods: dhcp>>=
+method dhcp
+  description
+    This method may be used to obtain an address via DHCP with any of
+    the tools: dhclient, udhcpc, dhcpcd.
+    (They have been listed in their order of precedence.)
+    If you have a complicated DHCP setup you should
+    note that some of these clients use their own configuration files
+    and do not obtain their configuration information via *ifup*.
+
+  options
+    hostname hostname       -- Hostname to be requested (dhcpcd, udhcpc)
+    leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
+    vendor vendor           -- Vendor class identifier (dhcpcd)
+    client client           -- Client identifier (dhcpcd, udhcpc)
+    hwaddress address       -- Hardware Address.
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[ifconfig %iface% link %hwaddress%]]
+    dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient3"))
+    dhclient -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient"))
+    udhcpc -n -p /var/run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
+           [[-c %client%]] \
+        elsif (execable("/sbin/udhcpc"))
+    dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
+           [[-l %leasetime%]] %iface% \
+        elsif (execable("/sbin/dhcpcd"))
+
+  down
+    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient3"))
+    dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient"))
+    cat /var/run/udhcpc.%iface%.pid | xargs -i kill -TERM {} \
+        elsif (execable("/sbin/udhcpc"))
+    dhcpcd -k %iface% \
+        elsif (execable("/sbin/dhcpcd"))
+
+    ifconfig %iface% down
 @ 
 
 
