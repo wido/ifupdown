@@ -2,7 +2,7 @@ ifupdown (0.7~alpha5+really0.6.13) unstable; urgency=low
 
   * Clean up SysV symlinks on upgrade (Closes: #637804).
 
- -- Andrew O. Shadoura <bugzilla@tut.by>  Sun, 14 Aug 2011 21:36:02 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 14 Aug 2011 21:36:02 +0300
 
 ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
 
@@ -11,7 +11,7 @@ ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
   * Don't install ifupdown.init on runlevels 0 and 6.
   * Add Vcs-Hg field.
 
- -- Andrew O. Shadoura <bugzilla@tut.by>  Sat, 13 Aug 2011 20:05:15 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sat, 13 Aug 2011 20:05:15 +0300
 
 ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
 
@@ -21,7 +21,7 @@ ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
     - Fix init script dependencies (Closes: #607713).
   * Report the correct version number on --version.
 
- -- Andrew O. Shadoura <bugzilla@tut.by>  Sun, 07 Aug 2011 15:38:26 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 07 Aug 2011 15:38:26 +0300
 
 ifupdown (0.7~alpha5+really0.6.10) unstable; urgency=low
 
