@@ -1,3 +1,10 @@
+ifupdown (0.7~alpha5+really0.6.14) unstable; urgency=low
+
+  * Create /etc/network/interfaces correctly (Closes: #638718).
+  * Correct the spelling of the maintainer's last name.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 22 Aug 2011 23:02:50 +0300
+
 ifupdown (0.7~alpha5+really0.6.13) unstable; urgency=low
 
   * Clean up SysV symlinks on upgrade (Closes: #637804).
