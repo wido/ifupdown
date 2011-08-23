@@ -10,6 +10,7 @@ ifupdown (0.7~beta1) experimental; urgency=low
     variable values.
   * Accept VLAN interface names (Closes: #632902).
   * Update test cases.
+  * Correct the spelling of the maintainer's last name.
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Fri, 17 Jun 2011 20:32:41 +0300
 
