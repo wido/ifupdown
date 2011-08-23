@@ -1,5 +1,5 @@
 CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7alpha"'
-CC := gcc
+CC ?= gcc
 ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 BASEDIR ?= $(DESTDIR)
