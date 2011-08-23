@@ -64,3 +64,10 @@ override_dh_auto_test:
 	fi
 endif
 endif
+
+override_dh_gencontrol:
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+	dh_gencontrol -- -V'net:Depends=iproute (>= 20071016-1)' -V'net:Suggests=net-tools'
+else
+	dh_gencontrol -- -V'net:Depends=net-tools' -V'net:Suggests='
+endif
