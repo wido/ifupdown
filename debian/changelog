@@ -11,7 +11,7 @@ ifupdown (0.7~beta1) experimental; urgency=low
   * Accept VLAN interface names (Closes: #632902).
   * Update test cases.
   * Correct the spelling of the maintainer's last name.
-  * Add partial kFreeBSD support.
+  * Add partial kFreeBSD support (Closes: #630512).
   * Drop 'ifupdown-clean' init script (not needed any more with /run).
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Tue, 23 Aug 2011 11:49:19 +0300
