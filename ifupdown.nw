@@ -4858,6 +4858,76 @@ method dhcp
     ifconfig %iface% down
 @ 
 
+\subsection{IPv6 Address Family}
+
+<<inet6.defn>>=
+architecture kfreebsd
+
+method loopback
+  description
+    This method may be used to define the IPv6 loopback interface.
+  up
+    ifconfig %iface% inet6 ::1
+  down
+    ifconfig %iface% down
+
+method static
+  description
+    This method may be used to define interfaces with statically assigned
+    IPv6 addresses.
+
+  options
+    address address        -- Address (colon delimited) *required*
+    netmask mask           -- Netmask (number of bits, eg 64) *required*
+    gateway address        -- Default gateway (colon delimited)
+    media type             -- Medium type, driver dependent
+    hwaddress address      -- Hardware address
+    mtu size               -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    ifconfig %iface% [[media %media%]] [[link %hwaddress%]] [[mtu %mtu%]] up
+    ifconfig %iface% inet6 %address%/%netmask%
+    [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] 
+
+  down
+    ifconfig %iface% down
+
+method manual
+  description
+    This method may be used to define interfaces for which no configuration
+    is done by default.  Such interfaces can be configured manually by
+    means of *up* and *down* commands or /etc/network/if-*.d scripts.
+
+  up
+
+  down
+
+method dhcp
+  description
+    This method may be used to obtain network interface configuration via
+    stateful DHCPv6 with dhclient.  In stateful DHCPv6, the DHCP server is
+    responsible for assigning addresses to clients.
+
+  options
+    hwaddress address      -- Hardware address
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    ifconfig %iface% [[link %hwaddress%]] up
+    dhclient -6 -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+
+  down
+    dhclient -6 -r -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+    ifconfig %iface% down
+
+@ 
 
 \begin{flushleft}
 \bibliography{biblio}
