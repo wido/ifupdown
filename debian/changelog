@@ -6,11 +6,13 @@ ifupdown (0.7~beta1) experimental; urgency=low
   * Add initial DHCPv6 support.
   * Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
   * Support per-architecture build-time rule definitions.
-  * Add %sysctl_iface% variable.
+  * Add a syntax (%iface/a/b%) to perform character replacement over
+    variable values.
   * Accept VLAN interface names (Closes: #632902).
   * Update test cases.
+  * Correct the spelling of the maintainer's last name.
 
- -- Andrew O. Shadoura <bugzilla@tut.by>  Fri, 17 Jun 2011 20:32:41 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Fri, 17 Jun 2011 20:32:41 +0300
 
 ifupdown (0.7~alpha5.1) experimental; urgency=low
 
@@ -35,7 +37,7 @@ ifupdown (0.7~alpha5) experimental; urgency=low
   * Fix some compilation warnings.
   * Update test cases.
 
- -- Andrew O. Shadoura <bugzilla@tut.by>  Thu, 09 Jun 2011 00:07:09 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 09 Jun 2011 00:07:09 +0300
 
 ifupdown (0.7~alpha4) experimental; urgency=low
 
@@ -63,7 +65,7 @@ ifupdown (0.7~alpha4) experimental; urgency=low
   * Drop dependency on net-tools; suggest it instead.
   * Bump Standards-Version to 3.9.2.
 
- -- Andrew O. Shadoura <bugzilla@tut.by>  Wed, 08 Jun 2011 12:10:14 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Wed, 08 Jun 2011 12:10:14 +0300
 
 ifupdown (0.7~alpha3) experimental; urgency=low
 
