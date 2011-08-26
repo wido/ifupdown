@@ -96,10 +96,10 @@ if [ "$1" = "configure" ] ; then
   if [ -f /etc/network/interfaces ] ; then
     # TODO: This should be handled with debconf and the script
     # could introduce the line there directly
-    if ! grep -q "^[[:space:]]*iface[[:space:]]\+lo[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces ; then
+    if ! grep -q "^[[:space:]]*iface[[:space:]]\+lo0\?[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces ; then
       report_warn "No 'iface lo' definition found in /etc/network/interfaces"
     fi
-    if ! grep -q "^[[:space:]]*auto[[:space:]].*\<lo\>" /etc/network/interfaces ; then
+    if ! grep -q "^[[:space:]]*\(allow-\|\)auto[[:space:]]\+\(.*[[:space:]]\+\|\)lo0\?\([[:space:]]\+\|$\)" /etc/network/interfaces ; then
       report_warn "No 'auto lo' statement found in /etc/network/interfaces"
     fi
   else  # ! -f /etc/network/interfaces
