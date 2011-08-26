@@ -267,7 +267,7 @@ of compiling source code.
 
 <<make options>>=
 CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7beta"'
-CC := gcc
+CC ?= gcc
 @ 
 
 \subsection{Graphics}
