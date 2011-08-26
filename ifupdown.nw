@@ -3926,12 +3926,15 @@ read_state (const char *argv0, const char *iface)
 @
 
 The second of these functions is a variant on the above used to grab a list
-of all currently up interfaces so we can tear them all down.
+of all currently up interfaces so we can tear them all down. Also, we reverse
+the order of the interfaces so we don't break so we don't break complex
+configurations with VLAN devices.
 
 <<main functions>>=
 static void
 read_all_state (const char *argv0, char ***ifaces, int *n_ifaces)
 {
+	int i;
 	<<open ifupdown state>>
 
 	*n_ifaces = 0;
@@ -3943,6 +3946,12 @@ read_all_state (const char *argv0, char ***ifaces, int *n_ifaces)
 		(*n_ifaces)++;
 		*ifaces = realloc (*ifaces, sizeof (**ifaces) * *n_ifaces);
 		(*ifaces)[(*n_ifaces)-1] = strdup (pch);
+	}
+
+	for (i = 0; i < ((*n_ifaces)/2); i++) {
+		char * temp = (*ifaces)[i];
+		(*ifaces)[i] = (*ifaces)[(*n_ifaces) - i - 1];
+		(*ifaces)[(*n_ifaces) - i - 1] = temp;
 	}
 
 	<<close ifupdown state>>
