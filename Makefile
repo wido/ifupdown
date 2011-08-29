@@ -1,4 +1,5 @@
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.15"'
+VERSION ?= 0.6
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 CC := gcc
 
 CFILES := addrfam.c execute.c config.c main.c archlinux.c

@@ -59,7 +59,7 @@ build-stamp: # configure
 	else \
 	  chmod a+rx defn2c.pl defn2man.pl makecdep.sh makenwdep.sh; \
 	fi
-	$(MAKE)
+	$(MAKE) VERSION=$(shell dpkg-parsechangelog|grep Version|cut -d' ' -f2|sed s/.*really//g)
 	touch build-stamp
 
 test: build
