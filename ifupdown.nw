@@ -224,7 +224,7 @@ of compiling source code.
 <<make options>>=
 VERSION ?= 0.6
 CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
-CC := gcc
+CC ?= gcc
 @ 
 
 \subsection{Graphics}
