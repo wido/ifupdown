@@ -10,14 +10,15 @@ report_err() { report "Error: $*" >&2 ; }
 # Create /etc/network/run 
 if [ "$1" = configure -a ! -d /etc/network/run ]; then
   if [ -e /etc/network/run -o -L /etc/network/run ]; then
-    echo "Renaming non-directory /etc/network/run to run.dpkg-old..."
-    mv /etc/network/run /etc/network/run.dpkg-old
+    echo "Removing non-directory /etc/network/run..."
+    rm -f /etc/network/run
+    [ -L /etc/network/run.dpkg-old ] && echo "Removing old symlink /etc/network/run.dpkg-old..." && rm -f /etc/network/run.dpkg-old
   fi
 
   # The best choice is to use /run/network
   # That must be supported everywhere
 
-  [ -d /run/network ] || mkdir /run/network
+  [ -d /run/network ] || mkdir -p /run/network
   ln -s /run/network /etc/network/run
 fi 
 
