@@ -1,3 +1,9 @@
+ifupdown (0.7~alpha5+really0.6.15) unstable; urgency=low
+
+  * Replace /etc/network/run.dpkg-old correctly.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 29 Aug 2011 11:00:17 +0300
+
 ifupdown (0.7~alpha5+really0.6.14) unstable; urgency=low
 
   * Create /etc/network/interfaces correctly (Closes: #638718).
