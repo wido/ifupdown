@@ -3723,6 +3723,28 @@ Bringing an interface up or taking it down can be done thusly:
 }
 @
 
+<<create pidfile>>=
+{
+	char * command;
+	<<set [[command]] to the base of the command name>>
+	snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "%s-%s.pid",
+		command, iface);
+	FILE * pidfile = fopen(pidfilename, "w");
+	if (pidfile) {
+		fprintf(pidfile, "%d", getpid());
+		fclose(pidfile);
+	} else {
+		fprintf(stderr, 
+			"%s: failed to open pid file %s: %s\n",
+			command, pidfilename, strerror(errno));
+	}
+}
+@ 
+
+<<remove pidfile>>=
+	unlink(pidfilename);
+@ 
+
 <<run commands for [[currif]]; set [[failed]] on error>>=
 {
 	currif->real_iface = iface;
@@ -3731,6 +3753,9 @@ Bringing an interface up or taking it down can be done thusly:
 		fprintf(stderr, "Configuring interface %s=%s (%s)\n", 
 			iface, liface, currif->address_family->name);
 	}
+
+	char pidfilename[100];
+	<<create pidfile>>
 
 	switch(cmds(currif)) {
 	    case -1:
@@ -3752,6 +3777,9 @@ Bringing an interface up or taking it down can be done thusly:
 	    	failed = 1;
 		/* what happened here? */
 	}
+
+	<<remove pidfile>>
+
 	currif->real_iface = NULL;
 }
 @ 
