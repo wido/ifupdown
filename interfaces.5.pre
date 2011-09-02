@@ -200,7 +200,16 @@ There exists for each of the above mentioned options a directory
 .IR /etc/network/if\-\fB<option>\fI.d/ 
 the scripts in which are run (with no arguments) using
 .BR run\-parts (8)
-after the option itself has been processed.
+after the option itself has been processed. Please note that as
+.BI post\-up
+and
+.BI pre\-down
+are aliases, no files in the corresponding directories are processed.
+Please use
+.IR if-up.d
+and
+.IR if-down.d
+directories instead.
 .P
 All of these commands have access to the following environment variables.
 .TP
