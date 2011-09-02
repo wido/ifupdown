@@ -106,6 +106,11 @@ The program does not configure network interfaces directly;
 it runs low level utilities such as
 .BR ip
 to do its dirty work.
+.P
+When invoked, 
+.BR ifdown " checks if " ifup
+is still running. In that case,
+.BR SIGTERM " is sent to ifup.
 .SH FILES
 .TP
 .I /etc/network/interfaces
@@ -114,7 +119,7 @@ See
 .BR interfaces (5)
 for more information.
 .TP
-.I /etc/network/run/ifstate
+.I /run/network/ifstate
 current state of network interfaces
 .SH KNOWN BUGS/LIMITATIONS
 The program keeps records of whether network interfaces are up or down.
@@ -135,7 +140,7 @@ to run configuration or deconfiguration commands despite what
 it considers the current state of the interface to be.
 .P
 The file
-.I /etc/network/run/ifstate
+.I /run/network/ifstate
 must be writable for
 .B ifup
 or
@@ -145,7 +150,7 @@ If that location is not writable
 (for example, because the root filesystem is mounted read-only
 for system recovery)
 then
-.I /etc/network/run/ifstate
+.I /run/network/ifstate
 should be made a symbolic link to a writable location.
 If that is not possible then you can use the
 .B \-\-force
