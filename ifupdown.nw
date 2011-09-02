@@ -3394,10 +3394,12 @@ extern int verbose;
 @
 
 <<main global variables>>=
+#define RUN_DIR "/etc/network/run/"
+
 int no_act = 0;
 int verbose = 0;
-char *statefile = "/etc/network/run/ifstate";
-char *tmpstatefile = "/etc/network/run/.ifstate.tmp";
+char *statefile = RUN_DIR "ifstate";
+char *tmpstatefile = RUN_DIR ".ifstate.tmp";
 @
 
 <<variables local to main>>=
