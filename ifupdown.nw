@@ -2543,6 +2543,7 @@ static int doit(char *str) {
 		int status;
 
 		fflush(NULL);
+		setpgid(0, 0);
 		switch(child = fork()) {
 		    case -1: /* failure */
 			return 0;
@@ -2623,8 +2624,30 @@ int iface_up(interface_defn *iface) {
 }
 @ 
 
+When bringing interface down, we check if there's [[ifup]] is still running
+and send [[SIGTERM]] to terminate it.
+
+<<terminate ifup if it's still running>>=
+char pidfilename[100];
+snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "ifup-%s.pid",
+	iface);
+FILE * pidfile = fopen(pidfilename, "r");
+if (pidfile) {
+	int pid;
+	if (fscanf(pidfile, "%d", &pid)) {
+		if (verbose) {
+			fprintf(stderr, "Terminating ifup (pid %d)\n", pid);
+		}
+		kill((pid_t) -pid, SIGTERM);
+	}
+	fclose(pidfile);
+}
+@ 
+
 <<execute functions>>=
 int iface_down(interface_defn *iface) {
+	<<terminate ifup if it's still running>>
+
 	if (!iface->method->down(iface,check)) return -1;
 
 	set_environ(iface, "stop", "pre-down");
