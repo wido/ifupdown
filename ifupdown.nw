@@ -3417,7 +3417,7 @@ extern int verbose;
 @
 
 <<main global variables>>=
-#define RUN_DIR "/etc/network/run/"
+#define RUN_DIR "/run/network/"
 
 int no_act = 0;
 int verbose = 0;
