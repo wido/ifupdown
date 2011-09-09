@@ -2836,6 +2836,8 @@ we have to return an error because an undefined variable was used in a
 non-optional part of the command.
 
 <<constant definitions>>=
+#define RUN_DIR "/run/network/"
+
 #define MAX_OPT_DEPTH 10
 @ 
 
@@ -3416,8 +3418,6 @@ extern int verbose;
 @
 
 <<main global variables>>=
-#define RUN_DIR "/run/network/"
-
 int no_act = 0;
 int verbose = 0;
 char *statefile = RUN_DIR "ifstate";
