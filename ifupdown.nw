@@ -2567,7 +2567,8 @@ In addition to the above, we also need a function to cope with running
 all the [[pre-up]] commands and so forth.
 
 <<exported symbols>>=
-int execute_all(interface_defn *ifd, execfn *exec, char *opt);
+int execute_options(interface_defn *ifd, execfn *exec, char *opt);
+int execute_scripts(interface_defn *ifd, execfn *exec, char *opt);
 @ 
 
 All we need to do for this is to iterate through the options in the
@@ -2579,9 +2580,8 @@ This function will generally have [[doit]] passed in as the [[exec]]
 parameter.
 
 <<execute functions>>=
-int execute_all(interface_defn *ifd, execfn *exec, char *opt) {
+int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 	int i;
-	char buf[100];
 	for (i = 0; i < ifd->n_options; i++) {
 		if (strcmp(ifd->option[i].name, opt) == 0) {
 			if (!(*exec)(ifd->option[i].value)) {
@@ -2589,7 +2589,11 @@ int execute_all(interface_defn *ifd, execfn *exec, char *opt) {
 			}
 		}
 	}
+	return 1;
+}
 
+int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
+	char buf[100];
 	snprintf(buf, sizeof(buf),
 		"run-parts --exit-on-error %s /etc/network/if-%s.d",
 		verbose ? "--verbose" : "", opt);
@@ -2612,12 +2616,14 @@ int iface_up(interface_defn *iface) {
 	if (!iface->method->up(iface,check)) return -1;
 
 	set_environ(iface, "start", "pre-up");
-	if (!execute_all(iface,doit,"pre-up")) return 0;
+	if (!execute_options(iface,doit,"pre-up")) return 0;
+	if (!execute_scripts(iface,doit,"pre-up")) return 0;
 
 	if (!iface->method->up(iface,doit)) return 0;
 
 	set_environ(iface, "start", "post-up");
-	if (!execute_all(iface,doit,"up")) return 0;
+	if (!execute_options(iface,doit,"up")) return 0;
+	if (!execute_scripts(iface,doit,"up")) return 0;
 
 	return 1;
 }
@@ -2650,12 +2656,14 @@ int iface_down(interface_defn *iface) {
 	if (!iface->method->down(iface,check)) return -1;
 
 	set_environ(iface, "stop", "pre-down");
-	if (!execute_all(iface,doit,"down")) return 0;
+	if (!execute_scripts(iface,doit,"down")) return 0;
+	if (!execute_options(iface,doit,"down")) return 0;
 
 	if (!iface->method->down(iface,doit)) return 0;
 
 	set_environ(iface, "stop", "post-down");
-	if (!execute_all(iface,doit,"post-down")) return 0;
+	if (!execute_scripts(iface,doit,"post-down")) return 0;
+	if (!execute_options(iface,doit,"post-down")) return 0;
 
 	return 1;
 }
