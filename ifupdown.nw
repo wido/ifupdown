@@ -2946,6 +2946,9 @@ case '%':
 		addstr(&result, &len, &pos, varvalue, strlen(varvalue));
 		free(varvalue);
 	} else {
+		if (opt_depth == 1) {
+			fprintf(stderr, "Missing required variable: %.*s\n", namelen, command);
+		}
 		okay[opt_depth - 1] = 0;
 	}
 
@@ -3791,7 +3794,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 	switch(cmds(currif)) {
 	    case -1:
-		printf("Don't seem to have all the variables for %s/%s.\n", 
+		fprintf(strerr, "Missing required configuration variables for interface %s/%s.\n", 
 			liface, currif->address_family->name);
 		failed = 1;
 		break;
@@ -3804,7 +3807,7 @@ Bringing an interface up or taking it down can be done thusly:
 		break;
 		/* successful */
 	    default:
-	    	printf("Unexpected value when configuring interface %s/%s considering it failed.\n", 
+	    	fprintf(stderr, "Unexpected value when configuring interface %s/%s; considering it failed.\n", 
 			liface, currif->address_family->name);
 	    	failed = 1;
 		/* what happened here? */
