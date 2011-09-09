@@ -2844,8 +2844,6 @@ we have to return an error because an undefined variable was used in a
 non-optional part of the command.
 
 <<constant definitions>>=
-#define RUN_DIR "/run/network/"
-
 #define MAX_OPT_DEPTH 10
 @ 
 
@@ -3424,6 +3422,10 @@ the various things. The only special note here is that we need to export
 extern int no_act;
 extern int verbose;
 @
+
+<<constant definitions>>=
+#define RUN_DIR "/run/network/"
+@ 
 
 <<main global variables>>=
 int no_act = 0;
