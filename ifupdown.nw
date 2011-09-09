@@ -4556,7 +4556,7 @@ method wvdial
     This method uses wvdial to configure a PPP interface. See that command
     for more details.
   options
-    provider name  -- Use /name/ as the provider (from /etc/ppp/peers).
+    provider name  -- Use /name/ as the provider (from /etc/wvdial.conf).
   up
     /sbin/start-stop-daemon --start -x /usr/bin/wvdial \
                       -p /var/run/wvdial.%iface%.pid -b -m -- [[ %provider% ]]
