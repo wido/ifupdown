@@ -4547,10 +4547,10 @@ method wvdial
     provider name  -- Use /name/ as the provider (from /etc/ppp/peers).
   up
     /sbin/start-stop-daemon --start -x /usr/bin/wvdial \
-                      -p /var/run/wvdial.%iface% -b -m -- [[ %provider% ]]
+                      -p /var/run/wvdial.%iface%.pid -b -m -- [[ %provider% ]]
   down
     /sbin/start-stop-daemon --stop -x /usr/bin/wvdial \
-                      -p /var/run/wvdial.%iface% -s 2
+                      -p /var/run/wvdial.%iface%.pid -s 2
 
 <<inet methods: ipv4ll>>=
 method ipv4ll
