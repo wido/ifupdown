@@ -2590,12 +2590,11 @@ int execute_all(interface_defn *ifd, execfn *exec, char *opt) {
 		}
 	}
 
-	snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d",
+	snprintf(buf, sizeof(buf),
+		"run-parts --exit-on-error %s /etc/network/if-%s.d",
 		verbose ? "--verbose" : "", opt);
 
-	(*exec)(buf); 
-
-	return 1;
+	return (*exec)(buf);
 }
 @ 
 
