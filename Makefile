@@ -2,13 +2,13 @@ VERSION ?= 0.6
 CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 CC ?= gcc
 
-CFILES := addrfam.c execute.c config.c main.c archlinux.c
-HFILES := header.h archlinux.h
+CFILES := addrfam.c execute.c config.c main.c archlinux.c archkfreebsd.c
+HFILES := header.h archlinux.h archkfreebsd.h
 PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o archkfreebsd.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 
