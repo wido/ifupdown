@@ -107,13 +107,13 @@ We shall begin with the template for the Makefile we shall use.
 <<Makefile>>=
 <<make options>>
 
-CFILES := addrfam.c execute.c config.c main.c archlinux.c
-HFILES := header.h archlinux.h
+CFILES := addrfam.c execute.c config.c main.c archlinux.c archkfreebsd.c
+HFILES := header.h archlinux.h archkfreebsd.h
 PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o archkfreebsd.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 
@@ -3818,6 +3818,7 @@ interfaces up and down.
 unsigned int mylinuxver();
 unsigned int mylinux(int,int,int);
 int execable(char *);
+int islinux();
 @
 
 <<archlinux.c>>=
@@ -3863,6 +3864,30 @@ int execable(char *program) {
 	}
 	return 0;
 }
+
+int islinux() {
+#ifdef __linux__
+	return 1;
+#else
+	return 0;
+#endif
+}
+@ 
+
+<<archkfreebsd.h>>=
+int iskfreebsd();
+@
+
+<<archkfreebsd.c>>=
+#include "archkfreebsd.h"
+
+int iskfreebsd() {
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+	return 1;
+#else
+	return 0;
+#endif
+}
 @ 
 
 \subsection{IPv4 Address Family}
@@ -3878,6 +3903,7 @@ extern address_family addr_inet;
 <<inet.defn>>=
 address_family inet
 architecture linux
+architecture kfreebsd
 
 <<inet methods>>
 @ 
@@ -3925,10 +3951,17 @@ method static
 	up
     route add -net %network%  \
         if ( mylinuxver() < mylinux(2,1,100) )
-    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]]
+    [[ /lib/freebsd/route add default %gateway% ]] \
+        if ( iskfreebsd() )
+    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]] \
+        elsif ( 1 )
+
 
   down
-    [[ route del default gw %gateway% [[metric %metric%]] %iface% ]]
+    [[ /lib/freebsd/route del default %gateway% ]] \
+        if ( iskfreebsd() )
+    [[ route del default gw %gateway% [[metric %metric%]] %iface% ]] \
+        elsif ( 1 )
     ifconfig %iface% down
 @
 
@@ -4058,6 +4091,7 @@ extern address_family addr_inet6;
 <<inet6.defn>>=
 address_family inet6
 architecture linux
+architecture kfreebsd
 
 method loopback
   description
@@ -4086,7 +4120,10 @@ method static
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     ifconfig %iface% [[media %media%]] [[hw %hwaddress%]] [[mtu %mtu%]] up
     ifconfig %iface% add %address%/%netmask%
-    [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] 
+    [[ /lib/freebsd/route add -inet6 ::/0 %gateway% ]] \
+        if ( iskfreebsd() )
+    [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] \
+        elsif ( 1 )
 
   down
     ifconfig %iface% down
