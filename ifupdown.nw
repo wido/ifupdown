@@ -4423,7 +4423,7 @@ method static
 
   down
     [[ ip route del default via %gateway% [[metric %metric%]] dev %iface% 2>&1 1>/dev/null || true ]]
-    ip -4 addr flush dev %iface%
+    ip -4 addr flush dev %iface% label %iface%
     ip link set dev %iface% down
 @
 
