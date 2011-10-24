@@ -4416,7 +4416,7 @@ method static
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
-	[[peer %pointopoint%]] dev %iface%
+	[[peer %pointopoint%]] dev %iface% label %iface%
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
 
     [[ ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
