@@ -3764,20 +3764,24 @@ Bringing an interface up or taking it down can be done thusly:
 	<<set [[command]] to the base of the command name>>
 	snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "%s-%s.pid",
 		command, iface);
-	FILE * pidfile = fopen(pidfilename, "w");
-	if (pidfile) {
-		fprintf(pidfile, "%d", getpid());
-		fclose(pidfile);
-	} else {
-		fprintf(stderr, 
-			"%s: failed to open pid file %s: %s\n",
-			command, pidfilename, strerror(errno));
+	if (!no_act) {
+		FILE * pidfile = fopen(pidfilename, "w");
+		if (pidfile) {
+			fprintf(pidfile, "%d", getpid());
+			fclose(pidfile);
+		} else {
+			fprintf(stderr, 
+				"%s: failed to open pid file %s: %s\n",
+				command, pidfilename, strerror(errno));
+		}
 	}
 }
 @ 
 
 <<remove pidfile>>=
-	unlink(pidfilename);
+	if (!no_act) {
+		unlink(pidfilename);
+	}
 @ 
 
 <<run commands for [[currif]]; set [[failed]] on error>>=
