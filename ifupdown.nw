@@ -3794,7 +3794,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 	switch(cmds(currif)) {
 	    case -1:
-		fprintf(strerr, "Missing required configuration variables for interface %s/%s.\n", 
+		fprintf(stderr, "Missing required configuration variables for interface %s/%s.\n", 
 			liface, currif->address_family->name);
 		failed = 1;
 		break;
