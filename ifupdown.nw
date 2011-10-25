@@ -4411,13 +4411,15 @@ method static
                                    Note the spelling of "point-to".
     hwaddress address           -- Link local address.
     mtu size                    -- MTU size
+    scope                       -- Address validity scope. Possible values: \
+                                   global, link, host
 
   conversion
     hwaddress cleanup_hwaddress
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
-	[[peer %pointopoint%]] dev %iface% label %iface%
+	[[peer %pointopoint%]] [[scope %scope%]] dev %iface% label %iface%
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
 
     [[ ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
@@ -4650,6 +4652,8 @@ method static
     accept_ra int          -- Accept router advertisements (0=off, 1=on)
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
+    scope                  -- Address validity scope. Possible values: \
+                              global, site, link, host
 
   conversion
     hwaddress cleanup_hwaddress
@@ -4661,7 +4665,7 @@ method static
     sysctl net.ipv6.conf.%iface/.//%.autoconf=0
     [[sysctl net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
-    ip -6 addr add %address%[[/%netmask%]] dev %iface%
+    ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface%
     [[ ip -6 route add default via %gateway% dev %iface% ]]
 
   down
