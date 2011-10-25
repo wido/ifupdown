@@ -1,4 +1,5 @@
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7beta"'
+VERSION ?= 0.7~beta
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 CC ?= gcc
 ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 

@@ -34,6 +34,8 @@
 #
 ######################################################################
 
+export VERSION := $(shell dpkg-parsechangelog|grep Version|cut -d' ' -f2|sed s/.*really//g)
+
 %:
 	dh $@
 

@@ -266,7 +266,8 @@ conservative, so we'll encourage it to use a more entertaining method
 of compiling source code.
 
 <<make options>>=
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.7beta"'
+VERSION ?= 0.7~beta
+CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 CC ?= gcc
 @ 
 
