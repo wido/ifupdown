@@ -3999,7 +3999,7 @@ read_state (const char *argv0, const char *iface)
 
 The second of these functions is a variant on the above used to grab a list
 of all currently up interfaces so we can tear them all down. Also, we reverse
-the order of the interfaces so we don't break so we don't break complex
+the order of the interfaces so we don't break complex
 configurations with VLAN devices.
 
 <<main functions>>=
