@@ -2636,7 +2636,8 @@ and send [[SIGTERM]] to terminate it.
 <<terminate ifup if it's still running>>=
 char pidfilename[100];
 snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "ifup-%s.pid",
-	iface);
+	iface->real_iface);
+if (no_act) return;
 FILE * pidfile = fopen(pidfilename, "r");
 if (pidfile) {
 	int pid;
@@ -2647,6 +2648,7 @@ if (pidfile) {
 		kill((pid_t) -pid, SIGTERM);
 	}
 	fclose(pidfile);
+	unlink(pidfilename);
 }
 @ 
 
@@ -3764,7 +3766,7 @@ Bringing an interface up or taking it down can be done thusly:
 	char * command;
 	<<set [[command]] to the base of the command name>>
 	snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "%s-%s.pid",
-		command, iface);
+		command, currif->real_iface);
 	if (!no_act) {
 		FILE * pidfile = fopen(pidfilename, "w");
 		if (pidfile) {
