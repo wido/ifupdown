@@ -16,6 +16,7 @@ ifupdown (0.7~beta2) experimental; urgency=low
   * Fix wvdial options description (Closes: #534181).
   * Specify interface label (Closes: #645813).
   * Add address scope option for static IPv4 and IPv6 setups.
+  * Use FreeBSD version of route, thanks to Robert Millan (Closes: #646291).
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 13 Nov 2011 23:20:11 +0100
 
