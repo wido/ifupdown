@@ -4912,10 +4912,10 @@ method static
     ifconfig %iface% %address% [[netmask %netmask%]] [[broadcast %broadcast%]] \
 	[[pointopoint %pointopoint%]] [[media %media%]] [[mtu %mtu%]] \
 	up
-    [[ route add default gw %gateway% [[metric %metric%]] %iface% ]]
+    [[ /lib/freebsd/route add default %gateway% ]]
 
   down
-    [[ route del default gw %gateway% [[metric %metric%]] %iface% 2>&1 1>/dev/null || true ]]
+    [[ /lib/freebsd/route del default %gateway% 2>&1 1>/dev/null || true ]]
     ifconfig %iface% down
 @
 
