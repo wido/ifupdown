@@ -1,3 +1,24 @@
+ifupdown (0.7~beta2) experimental; urgency=low
+
+  * Put interfaces down in the reverse order than they were
+    brought up (Closes: #477650).
+  * Fix postinst issues with loopback interface naming
+    (Closes: #572396, #545250).
+  * Remove old .dpkg-old symlink (Closes: #639612).
+  * Document some details on processing /etc/network/if-*.d directories.
+  * Terminate ifup if it's still running when doing ifdown.
+  * Finally migrate to /run/network.
+  * Use FHS names for wvdial pid files (Closes: #255222).
+  * Stop on run-parts failure (Closes: #547587).
+  * Execute scripts before interface options on *-down (Closes: #346459).
+  * Display missing variable name in the error message; make it also a bit
+    less obscure (Closes: #502630).
+  * Fix wvdial options description (Closes: #534181).
+  * Specify interface label (Closes: #645813).
+  * Add address scope option for static IPv4 and IPv6 setups.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 13 Nov 2011 23:20:11 +0100
+
 ifupdown (0.7~beta1) experimental; urgency=low
 
   * Update the examples (Closes: #630551).
