@@ -469,6 +469,7 @@ struct method {
 	char *name;
 	command_set *up, *down;
 	conversion *conversions;
+	option_default *defaults;
 };
 @ 
 
@@ -488,6 +489,7 @@ value is the result of conversion, as follows:
 
 <<type definitions>>=
 typedef struct conversion conversion;
+typedef struct option_default option_default;
 @
 
 <<structure definitions>>=
@@ -495,6 +497,11 @@ struct conversion {
 	char *option;
 	char *newoption;
 	void (*fn)(char **);
+};
+
+struct option_default {
+	char *option;
+	char *value;
 };
 @
 
@@ -626,7 +633,7 @@ foreach $method (keys %methods) {
 	{
 		"$method",
 		_${method}_up, _${method}_down,
-		_${method}_conv,
+		_${method}_conv, _${method}_default
 	},
 EOF
 }
@@ -805,7 +812,6 @@ sub get_method {
 	nextline;
 	<<output code for description>>
 	<<output code for options list>>
-	<<prepare variables list>>
 	<<output code for conversions>>
 	<<output code for up commands>>
 	<<output code for down commands>>
@@ -844,19 +850,22 @@ options created by the conversions.
 if (match($line, "options", $indent)) {
 	@options = get_options();
 }
-@ 
-
-<<prepare variables list>>=
+print "static option_default _${method}_default[] = {\n";
 if (@options) {
 	foreach my $o (@options) {
-		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S.*)$/) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[(\S[^]]*)\]\s*)?$/) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
 			push @variables, $opt;
+			if ($5) {
+				print "\t{ \"$opt\", \"$5\" },\n";
+			}
 		}
 	}
 }
+print "\t{ NULL, NULL }\n";
+print "};\n";
 @ 
 
 Checking the various relevant components of each method is fairly
@@ -896,7 +905,7 @@ if (match($line, "conversion", $indent)) {
 		}
 	}
 }
-print "\t\t{ NULL, NULL, NULL },\n";
+print "\t\{ NULL, NULL, NULL }\n";
 print "};\n";
 @
 
@@ -1121,10 +1130,11 @@ print ".B Options\n";
 print ".RS\n";
 if (@options) {
 	foreach my $o (@options) {
-		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S.*)$/) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[(\S[^]]*)\]\s*)?$/) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
+			$dsc .= ($5) ? " Default value: $5" : "";
 			print ".TP\n";
 			print ".BI $opt";
 			print " \" $optargs\"" unless($optargs =~ m/^\s*$/);
