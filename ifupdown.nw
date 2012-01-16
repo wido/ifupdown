@@ -4237,11 +4237,20 @@ interfaces up and down.
 \subsection{Common functions}
 <<common functions declarations>>=
 int execable(char *);
+#define iface_is_link() _iface_is_link(ifd->real_iface)
+int _iface_is_link(char *);
 void cleanup_hwaddress(char **pparam);
 void make_hex_address(char **pparam);
 @ 
 
 <<common functions implementations>>=
+int _iface_is_link(char *iface) {
+	printf("Testing %s... ", iface);
+	int i = !(strchr(iface, ':') || strchr(iface, '.'));
+	printf("%d\n", i);
+	return i;
+}
+
 int execable(char *program) {
 	struct stat buf;
 
@@ -4439,7 +4448,8 @@ method static
   down
     [[ ip route del default via %gateway% [[metric %metric%]] dev %iface% 2>&1 1>/dev/null || true ]]
     ip -4 addr flush dev %iface% label %iface%
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+		if (iface_is_link())
 @
 
 <<inet methods: manual>>=
@@ -4502,7 +4512,8 @@ method dhcp
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+		if (iface_is_link())
 @ 
 
 <<inet methods: bootp>>=
@@ -4523,7 +4534,7 @@ method bootp
 
   down
     ip link set dev %iface% down \
-        if (execable("/sbin/ip"))
+        if (execable("/sbin/ip") && iface_is_link())
     ifconfig %iface% down \
         elsif (1)
 @ 
@@ -4636,7 +4647,8 @@ method auto
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
     ip -6 addr flush dev %iface% scope global
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+		if (iface_is_link())
 
 method loopback
   description
@@ -4682,7 +4694,8 @@ method static
 
   down
     ip -6 addr flush dev %iface% scope global
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+		if (iface_is_link())
 
 method manual
   description
@@ -4716,7 +4729,8 @@ method dhcp
   down
     dhclient -6 -r -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    ip link set dev %iface% down
+    ip link set dev %iface% down \
+		if (iface_is_link())
 
 method v4tunnel
   description
