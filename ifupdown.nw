@@ -4245,9 +4245,7 @@ void make_hex_address(char **pparam);
 
 <<common functions implementations>>=
 int _iface_is_link(char *iface) {
-	printf("Testing %s... ", iface);
 	int i = !(strchr(iface, ':') || strchr(iface, '.'));
-	printf("%d\n", i);
 	return i;
 }
 
