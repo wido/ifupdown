@@ -4485,10 +4485,10 @@ method dhcp
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
-    dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-        if (execable("/sbin/dhclient3"))
     dhclient -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
-        elsif (execable("/sbin/dhclient"))
+        if (execable("/sbin/dhclient"))
+    dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
     udhcpc -n -p /var/run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
@@ -4499,10 +4499,10 @@ method dhcp
         elsif (execable("/sbin/dhcpcd"))
 
   down
-    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-        if (execable("/sbin/dhclient3"))
     dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
-        elsif (execable("/sbin/dhclient"))
+        if (execable("/sbin/dhclient"))
+    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient3"))
     pump -i %iface% -r \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
     cat /var/run/udhcpc.%iface%.pid | xargs -i kill -TERM {} \
@@ -4963,10 +4963,10 @@ method dhcp
 
   up
     [[ifconfig %iface% link %hwaddress%]]
-    dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-        if (execable("/sbin/dhclient3"))
     dhclient -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
-        elsif (execable("/sbin/dhclient"))
+        if (execable("/sbin/dhclient"))
+    dhclient3 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient3"))
     udhcpc -n -p /var/run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
         elsif (execable("/sbin/udhcpc"))
@@ -4975,10 +4975,10 @@ method dhcp
         elsif (execable("/sbin/dhcpcd"))
 
   down
-    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-        if (execable("/sbin/dhclient3"))
     dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
-        elsif (execable("/sbin/dhclient"))
+        if (execable("/sbin/dhclient"))
+    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+        elsif (execable("/sbin/dhclient3"))
     cat /var/run/udhcpc.%iface%.pid | xargs -i kill -TERM {} \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
