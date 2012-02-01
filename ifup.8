@@ -37,11 +37,13 @@ A summary of options is included below.
 .BR \-a ", " \-\-all
 If given to \fBifup\fP, affect all interfaces marked \fBauto\fP.
 Interfaces are brought up in the order in which they are defined
-in /etc/network/interfaces.
+in
+.IR /etc/network/interfaces .
 If given to \fBifdown\fP, affect all defined interfaces.
 Interfaces are brought down in the order in which they are
 currently listed in the state file. Only interfaces defined
-in /etc/network/interfaces will be brought down.
+in
+.IR /etc/network/interfaces " will be brought down."
 .TP
 .B \-\-force
 Force configuration or deconfiguration of the interface.
@@ -52,18 +54,24 @@ Show summary of options.
 \fB\-\-allow=\fR\fICLASS\fR
 Only allow interfaces listed in an
 .I allow\-CLASS
-line in /etc/network/interfaces to be acted upon.
+line in 
+.IR /etc/network/interfaces " to be acted upon."
 .TP
 \fB\-i\fR \fIFILE\fR, \fB\-\-interfaces=\fR\fIFILE\fR
 Read interface definitions from 
 .I FILE
-instead of from /etc/network/interfaces.
+instead of from
+.IR /etc/network/interfaces "."
 .TP
-\fB\-e\fR \fIPATTERN\fR, \fB\-\-exclude=\fR\fIPATTERN\fR
+.BI \-e " PATTERN\fR, " "\-\-exclude=" PATTERN
 Exclude interfaces from the list of interfaces to operate on by the \fIPATTERN\fR.
 Notice that the \fIPATTERN\fR can be a full interface name or substrings that
 match interfaces. Users could easily have unexpected behaviour
 if they use a small string to do the match.
+.TP
+.BI \-o " OPTION" "\fB=" VALUE
+Set \fIOPTION\fR to \fIVALUE\fR as though it were in
+.IR /etc/network/interfaces "."
 .TP
 .BR \-n ", " \-\-no\-act
 Don't configure any interfaces or run any "up" or "down" commands.
@@ -166,7 +174,7 @@ alone does not bring down interfaces
 that disappear as a result of hardware being removed.
 To automate the configuration of network interfaces you need to
 install other packages such as
-.BR hotplug (8)
+.BR udev (7)
 or
 .BR ifplugd (8).
 .SH AUTHOR
