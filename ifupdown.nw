@@ -1276,14 +1276,36 @@ a new structure and add it at the end of our array of variables,
 increasing the size of the array first if necessary.
 
 <<exported symbols>>=
-void add_variable(char *filename, char *name, char *value, 
+variable * set_variable(char *filename, char *name, char *value, 
+		variable **var, int *n_vars, int *max_vars);
+void convert_variables(char *filename, conversion *conversions, 
 		variable **var, int *n_vars, int *max_vars);
 @
 
 <<config functions>>=
-void add_variable(char *filename, char *name, char *value, 
+variable * set_variable(char *filename, char *name, char *value, 
 		variable **var, int *n_vars, int *max_vars)
 {
+	if (strcmp(name, "pre-up") != 0
+    	&& strcmp(name, "up") != 0
+	    && strcmp(name, "down") != 0
+	    && strcmp(name, "post-down") != 0)
+	{
+		int j;
+		for (j = 0; j < *n_vars; j++) {
+			if (strcmp((*var)[j].name, name) == 0)
+			{
+				free((*var)[j].value);
+				(*var)[j].value = strdup(value);
+				if (!(*var)[j].name) {
+				    <<report internal error and die>>
+				}
+
+				return &((*var)[j]);
+			}
+		}
+	}
+
 	if (*n_vars >= *max_vars) {
 		variable *new_var;
 		*max_vars += 10;
@@ -1306,6 +1328,29 @@ void add_variable(char *filename, char *name, char *value,
 	}
 
 	(*n_vars)++;
+	return &((*var)[(*n_vars) - 1]);
+}
+
+void convert_variables(char *filename, conversion *conversions,
+		variable **var, int *n_vars, int *max_vars)
+{
+	conversion *c;
+	for (c = conversions; c && c->option && c->fn; c++) {
+		int j;
+		for (j = 0; j < *n_vars; j++) {
+			if (strcmp((*var)[j].name, c->option) == 0)
+			{
+				if (c->newoption) {
+					variable *o = set_variable(filename, c->newoption, (*var)[j].value,
+						var, n_vars, max_vars);
+					c->fn(&o->value);
+				} else {
+					variable *o = &((*var)[j]);
+					c->fn(&o->value);
+				}
+			}
+		}
+	}
 }
 @
 
@@ -2007,7 +2052,6 @@ with.
 <<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>
 <<check for duplicate options>>
 <<add option>>
-<<convert option if necessary>>
 @
 
 <<convert [[post-up]] and [[pre-down]] aliases to [[up]] and [[down]]>>=
@@ -2041,36 +2085,12 @@ if (strcmp(firstword, "pre-down") == 0) {
 }
 @ 
 
-Given the previous definition of [[add_variable()]] adding an option
+Given the previous definition of [[set_variable()]] adding an option
 is straightforward.
 
 <<add option>>=
-add_variable(filename, firstword, rest,
+set_variable(filename, firstword, rest,
 	 &currif->option, &currif->n_options, &currif->max_options);
-@
-
-If it is necessary, convert the option. If the conversion specifies a new option name,
-add a new option of that name prior to calling the conversion function. Also, we allow
-more than one conversion for the one variable to happen, so we iterate over the whole list
-of them and do not break the loop after the first match.
-
-<<convert option if necessary>>=
-{
-	conversion *c;
-	variable *o = &currif->option[currif->n_options - 1];
-	for (c = currif->method->conversions; c && c->option && c->fn; c++) {
-		if (strcmp(c->option, o->name) == 0) {
-			if (c->newoption) {
-				add_variable(filename, c->newoption, rest,
-					&currif->option, &currif->n_options, &currif->max_options);
-				variable *o2 = &currif->option[currif->n_options - 1];
-				c->fn(&o2->value);
-			} else {
-				c->fn(&o->value);
-			}
-		}
-	}
-}
 @
 
 \subsubsection{Auto and Allow Lines}
@@ -3595,7 +3615,7 @@ case 'o':
 		strcpy(name, "down");
 	}
 	
-	add_variable(argv[0], name, val, &option, &n_options, &max_options);
+	set_variable(argv[0], name, val, &option, &n_options, &max_options);
 	free(name);
 
 	break;
@@ -3753,6 +3773,8 @@ Bringing an interface up or taking it down can be done thusly:
 
 			<<add options from command line to [[currif]]>>
 
+			<<convert options>>
+
 			<<run commands for [[currif]]; set [[failed]] on error>>
 
 			if (failed) break;
@@ -3851,25 +3873,20 @@ Adding the options from the command line is tedious, but simple:
 }
 @
 
+Convert the options:
+
+<<convert options>>=
+{
+	convert_variables(argv[0], currif->method->conversions,
+		&currif->option, &currif->n_options,
+		&currif->max_options);
+}
+@
+
 <<add [[option[i]]] to [[currif]]>>=
 {
-	int j = currif->n_options;
-	if (strcmp(option[i].name, "pre-up") != 0
-    	    && strcmp(option[i].name, "up") != 0
-	    && strcmp(option[i].name, "down") != 0
-	    && strcmp(option[i].name, "post-down") != 0)
-	{
-		for (j = 0; j < currif->n_options; j++) {
-			if (strcmp(currif->option[j].name, 
-			           option[i].name) == 0) 
-			{
-				currif->option[j].value = option[i].value;
-				break;
-			}
-		}
-	}
-	if (j == currif->n_options) {
-		add_variable(argv[0], option[i].name, option[i].value,
+	if (1) {
+		set_variable(argv[0], option[i].name, option[i].value,
 			&currif->option, &currif->n_options, 
 			&currif->max_options);
 	}

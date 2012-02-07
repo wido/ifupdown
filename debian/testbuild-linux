@@ -246,9 +246,62 @@ ip route add 2000::/3 via ::192.88.99.1 dev tunnel
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
+cat >tests/testcase.8 <<EOF
+# RUN: -a
+auto eth1 eth1:1
+iface eth1 inet static
+  address 1.2.3.4
+  netmask 255.255.255.0
+  up echo hi
+  post-up echo hello
+
+iface eth1:1 inet static
+  address 1.5.3.4
+  netmask 255.255.255.0
+  up echo hihi
+  post-up echo hellolo
+EOF
+cat >tests/up.8 <<EOF
+====stdout====
+====stderr====
+Configuring interface eth1=eth1 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.0  	  dev eth1 label eth1
+ip link set dev eth1   up
+
+echo hi
+echo hello
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth1:1=eth1:1 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.5.3.4/255.255.255.0  	  dev eth1:1 label eth1:1
+ip link set dev eth1:1   up
+
+echo hihi
+echo hellolo
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+EOF
+
+cat >tests/testcase.9 <<EOF
+# RUN: tunnel -o local=2.3.4.5
+iface tunnel inet6 6to4
+  local 1.2.3.4
+EOF
+cat >tests/up.9 <<EOF
+====stdout====
+====stderr====
+Configuring interface tunnel=tunnel (inet6)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+ip tunnel add tunnel mode sit remote any local 2.3.4.5        
+ip link set tunnel up 
+ip addr add 2002:0203:0405::1/16 dev tunnel
+ip route add 2000::/3 via ::192.88.99.1 dev tunnel
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+EOF
 
 result=true
-for test in 1 2 3 4 5 6 7; do
+for test in 1 2 3 4 5 6 7 8 9; do
         args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
         ./ifup -nv --force -i tests/testcase.$test $args \
                 >tests/up-res-out.$test 2>tests/up-res-err.$test || 
