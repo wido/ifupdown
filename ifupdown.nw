@@ -3771,6 +3771,8 @@ Bringing an interface up or taking it down can be done thusly:
 		if (strcmp(liface, currif->logical_iface) == 0) {
 			okay = 1;
 
+			<<add default options to [[currif]]>>
+
 			<<add options from command line to [[currif]]>>
 
 			<<convert options>>
@@ -3857,6 +3859,20 @@ Bringing an interface up or taking it down can be done thusly:
 	currif->real_iface = NULL;
 }
 @ 
+
+Before adding any options from the command line we set the default options if
+they've not been set already:
+
+<<add default options to [[currif]]>>=
+{
+	option_default *o;
+	for (o = currif->method->defaults; o && o->option && o->value; o++) {
+		set_variable(argv[0], o->option, o->value,
+			&currif->option, &currif->n_options, 
+			&currif->max_options);
+	}
+}
+@
 
 Adding the options from the command line is tedious, but simple:
 
