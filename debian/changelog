@@ -1,3 +1,14 @@
+ifupdown (0.7~unreleased) experimental; urgency=low
+
+  * Prefer isc-dhcp-client to dhcp3-client (also closes: #422885).
+  * Let dhclient fail when no lease can be acquired (Closes: #420784).
+  * Raise command-line options priority over /etc/network/interfaces
+    (Closes: #657743).
+  * Prevent aliases and VLANs from putting the main interface down
+    (Closes: #656270).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 13 Feb 2012 21:13:41 +0300
+
 ifupdown (0.7~beta2) experimental; urgency=low
 
   * Put interfaces down in the reverse order than they were
