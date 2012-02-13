@@ -3867,9 +3867,21 @@ they've not been set already:
 {
 	option_default *o;
 	for (o = currif->method->defaults; o && o->option && o->value; o++) {
-		set_variable(argv[0], o->option, o->value,
-			&currif->option, &currif->n_options, 
-			&currif->max_options);
+		int j;
+		int found = 0;
+		for (j = 0; j < currif->n_options; j++) {
+			if (strcmp(currif->option[j].name, 
+			           o->option) == 0) 
+			{
+				found = 1;
+				break;
+			}
+		}
+		if (!found) {
+			set_variable(argv[0], o->option, o->value,
+				&currif->option, &currif->n_options, 
+				&currif->max_options);
+		}
 	}
 }
 @
