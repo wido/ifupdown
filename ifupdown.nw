@@ -4456,7 +4456,7 @@ method static
   options
     address address             -- Address (dotted quad/netmask) *required*
     netmask mask                -- Netmask (dotted quad or CIDR)
-    broadcast broadcast_address -- Broadcast address (dotted quad)
+    broadcast broadcast_address -- Broadcast address (dotted quad, + or -) [+]
     metric metric               -- Routing metric for default gateway (integer)
     gateway address             -- Default gateway (dotted quad)
     pointopoint address         -- Address of other end point (dotted quad). \
