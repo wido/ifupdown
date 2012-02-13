@@ -4550,7 +4550,7 @@ method dhcp
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% -r \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
-    cat /var/run/udhcpc.%iface%.pid | xargs -i kill -TERM {} \
+    kill -USR2 $(cat /var/run/udhcpc.%iface%.pid); kill -TERM $(cat /var/run/udhcpc.%iface%.pid) \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
@@ -5024,7 +5024,7 @@ method dhcp
         if (execable("/sbin/dhclient"))
     dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient3"))
-    cat /var/run/udhcpc.%iface%.pid | xargs -i kill -TERM {} \
+    kill -USR2 $(cat /var/run/udhcpc.%iface%.pid); kill -TERM $(cat /var/run/udhcpc.%iface%.pid) \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
