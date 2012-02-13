@@ -4530,13 +4530,13 @@ method dhcp
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
-    dhclient -1 -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    dhclient3 -1 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -1 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
-    udhcpc -n -p /var/run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
+    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
         elsif (execable("/sbin/udhcpc") && mylinuxver() >= mylinux(2,2,0))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
@@ -4544,13 +4544,13 @@ method dhcp
         elsif (execable("/sbin/dhcpcd"))
 
   down
-    dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% -r \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
-    kill -USR2 $(cat /var/run/udhcpc.%iface%.pid); kill -TERM $(cat /var/run/udhcpc.%iface%.pid) \
+    kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid) \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
@@ -4632,10 +4632,10 @@ method wvdial
     provider name  -- Use /name/ as the provider (from /etc/wvdial.conf).
   up
     /sbin/start-stop-daemon --start -x /usr/bin/wvdial \
-                      -p /var/run/wvdial.%iface%.pid -b -m -- [[ %provider% ]]
+                      -p /run/wvdial.%iface%.pid -b -m -- [[ %provider% ]]
   down
     /sbin/start-stop-daemon --stop -x /usr/bin/wvdial \
-                      -p /var/run/wvdial.%iface%.pid -s 2
+                      -p /run/wvdial.%iface%.pid -s 2
 
 <<inet methods: ipv4ll>>=
 method ipv4ll
@@ -4686,7 +4686,7 @@ method auto
     sysctl net.ipv6.conf.%iface/.//%.accept_ra=1
     sysctl net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
-    dhclient -6 -1 -S -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
     ip -6 addr flush dev %iface% scope global
@@ -4766,11 +4766,11 @@ method dhcp
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[ip link set dev %iface% address %hwaddress%]]
     sysctl net.ipv6.conf.%iface/.//%.accept_ra=0
-    dhclient -6 -1 -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
-    dhclient -6 -r -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
     ip link set dev %iface% down \
 		if (iface_is_link())
@@ -5008,11 +5008,11 @@ method dhcp
 
   up
     [[ifconfig %iface% link %hwaddress%]]
-    dhclient -1 -v -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    dhclient3 -1 -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -1 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient3"))
-    udhcpc -n -p /var/run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
+    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
@@ -5020,11 +5020,11 @@ method dhcp
         elsif (execable("/sbin/dhcpcd"))
 
   down
-    dhclient -v -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    dhclient3 -r -pf /var/run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient3"))
-    kill -USR2 $(cat /var/run/udhcpc.%iface%.pid); kill -TERM $(cat /var/run/udhcpc.%iface%.pid) \
+    kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid) \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
@@ -5093,11 +5093,11 @@ method dhcp
 
   up
     ifconfig %iface% [[link %hwaddress%]] up
-    dhclient -6 -1 -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
-    dhclient -6 -r -pf /var/run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
     ifconfig %iface% down
 
