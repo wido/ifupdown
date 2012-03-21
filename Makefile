@@ -1,5 +1,6 @@
 VERSION ?= 0.7~beta
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
+CFLAGS := -Wall -W $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS) -D'IFUPDOWN_VERSION="$(VERSION)"'
+LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
 CC ?= gcc
 ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
