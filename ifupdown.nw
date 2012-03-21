@@ -34,8 +34,8 @@ later version.
 
 \section{Introduction}
 
-This source defines the commands [[ifup]] and [[ifdown]], used to
-manipulate interfaces in an easily controllable manner.
+This source defines the commands [[ifup]], [[ifdown]], and [[ifquery]], used
+to manipulate interfaces in an easily controllable manner.
 
 \subsection{Assumed Knowledge}
 
@@ -164,7 +164,7 @@ MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 default : executables
 all : executables docs
 
-executables : ifup ifdown ifup.8 ifdown.8 interfaces.5
+executables : ifup ifdown ifquery ifup.8 ifdown.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
 .PHONY : executables 
@@ -177,9 +177,9 @@ docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 <<generated dependency inclusion>>
 @ 
 
-We shall build exactly two executables, [[ifup]] and [[ifdown]], which
-will in truth simply be two names for a single binary, albeit with
-different functionality.
+We shall build exactly three executables, [[ifup]], [[ifdown]] and
+[[ifquery]], which will in truth simply be three names for a single binary,
+albeit with different functionality.
 
 <<executable targets>>=
 ifup: $(OBJ)
@@ -187,9 +187,12 @@ ifup: $(OBJ)
 
 ifdown: ifup
 	ln -sf ifup ifdown
+
+ifquery: ifup
+	ln -sf ifup ifquery
 @ 
 
-Both of these executables have a manpage. Since they're actually the
+All three of these executables have a manpage. Since they're actually the
 same executable, what could be more appropriate than them having the
 same manpage too?
 
@@ -198,7 +201,7 @@ interfaces.5: interfaces.5.pre $(MAN)
 	sed $(foreach man,$(MAN),-e '/^##ADDRESSFAM##$$/r $(man)') \
 	     -e '/^##ADDRESSFAM##$$/d' < $< > $@	
 
-ifdown.8: ifup.8
+ifdown.8 ifquery.8: ifup.8
 	ln -sf $< $@
 
 %.5.ps: %.5
@@ -219,12 +222,13 @@ install :
 	install -m 0755 -d     ${BASEDIR}/sbin
 	install -m 0755 ifup   ${BASEDIR}/sbin
 	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifdown	
+	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifquery
 
 clean :
 	rm -f *.aux *.toc *.log *.bbl *.blg *.ps *.eps *.pdf
 	rm -f *.o *.d $(patsubst %.defn,%.c,$(DEFNFILES)) *~
 	rm -f $(patsubst %.defn,%.man,$(DEFNFILES))
-	rm -f ifup ifdown interfaces.5 ifdown.8
+	rm -f ifup ifdown ifquery interfaces.5 ifdown.8 ifquery.8
 	rm -f ifupdown.dvi *.ps{,.gz}
 
 clobber : clean
@@ -2290,6 +2294,12 @@ fairly direct result run some executable.
 	\item [[iface_up()]] and [[iface_down()]] which will actually
 	configure or deconfigure an interface.
 
+	\item [[iface_list()]] which permits querying a list of known
+	interfaces by class.
+
+	\item [[iface_query()]], to query configuration details about a
+	specific interface by name.
+
 	\item [[execute()]] which will take an interface definition and
 	a command and fill in the details from the first into the
 	second, and the execute the result. This is basically just a
@@ -2633,13 +2643,15 @@ int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
 }
 @ 
 
-\subsubsection{[[iface_up()]] and [[iface_down()]]}
+\subsubsection{[[iface_up()]], [[iface_down()]], [[iface_list()]], and [[iface_query()]]}
 
 Our functions, then are:
 
 <<exported symbols>>=
 int iface_up(interface_defn *iface);
 int iface_down(interface_defn *iface);
+int iface_list(interface_defn *iface);
+int iface_query(interface_defn *iface);
 @ 
 
 <<execute functions>>=
@@ -2701,6 +2713,23 @@ int iface_down(interface_defn *iface) {
 	return 1;
 }
 @ 
+
+<<execute functions>>=
+int iface_list(interface_defn *iface) {
+	printf("%s\n",iface->real_iface);
+	return 0;
+}
+@
+
+<<execute functions>>=
+int iface_query(interface_defn *iface) {
+	int i;
+	for (i = 0; i < iface->n_options; i++) {
+		printf("%s: %s\n",iface->option[i].name, iface->option[i].value);
+	}
+	return 0;
+}
+@
 
 \subsection{Command Parsing}
 
@@ -3279,7 +3308,8 @@ Now, after all the above modules, our main program doesn't have too
 much to do: it just has to interpret arguments and coordinate the
 intervening modules. Since we're being ``smart'', as well as parsing
 arguments, we'll decide whether the interface is going up or down
-depending on whether we were called as [[ifup]] or [[ifdown]].
+depending on whether we were called as [[ifup]] or [[ifdown]], or if we're
+querying /etc/network/interfaces (when called as [[ifquery]]).
 
 <<main>>=
 int main(int argc, char **argv) {
@@ -3369,15 +3399,25 @@ if (strcmp(command, "ifup")==0) {
 	cmds = iface_up;
 } else if (strcmp(command, "ifdown")==0) {
 	cmds = iface_down;
+} else if (strcmp(command, "ifquery")==0) {
+	cmds = iface_query;
 } else {
-	fprintf(stderr,"This command should be called as ifup or ifdown\n");
+	fprintf(stderr,"This command should be called as ifup, ifdown, or ifquery\n");
 	exit(1);
 }
 @ 
 
 In addition, since our later behaviour varies depending on whether we're
-bringing interfaces up or taking them down we'll define two chunks to assist
-with this, namely:
+bringing interfaces up, taking them down, or querying /etc/network/interfaces,
+we'll define four chunks to assist with this, namely:
+
+<<we're querying an interface's config>>=
+(cmds == iface_query)
+@
+
+<<we're listing known interfaces>>=
+(cmds == iface_list)
+@
 
 <<we're bringing interfaces up>>=
 (cmds == iface_up)
@@ -3446,6 +3486,7 @@ struct option long_opts[] = {
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"force",       no_argument,       NULL,  2 },
 	{"option",      required_argument, NULL, 'o'},
+	{"list",        no_argument,       NULL, 'l'},
 	{0,0,0,0}
 };
 @ 
@@ -3474,6 +3515,7 @@ char *tmpstatefile = RUN_DIR ".ifstate.tmp";
 int do_all = 0;
 int run_mappings = 1;
 int force = 0;
+int list = 0;
 char *allow_class = NULL;
 char *interfaces = "/etc/network/interfaces";
 char *excludeint = NULL ;
@@ -3487,7 +3529,7 @@ like so:
 
 <<main function declarations>>=
 static void usage(char *execname);
-static void help(char *execname);
+static void help(char *execname, int (*cmds)(interface_defn *));
 static void version(char *execname);
 @ 
 
@@ -3515,8 +3557,12 @@ static void version(char *execname) {
 @ 
 
 <<main functions>>=
-static void help(char *execname) {
-	printf("Usage: %s <options> <ifaces...>\n\n", execname);
+static void help(char *execname, int (*cmds)(interface_defn *)) {
+	printf("Usage: %s <options> <ifaces...>\n", execname);
+	if (<<we're listing known interfaces>>
+	    || <<we're querying an interface's config>>)
+		printf("       %s <options> --list\n", execname);
+	printf("\n");
 	printf("Options:\n");
 	printf("\t-h, --help\t\tthis help\n");
 	printf("\t-V, --version\t\tcopyright and version information\n");
@@ -3524,13 +3570,20 @@ static void help(char *execname) {
 	printf("\t--allow CLASS\t\tignore non-\"allow-CLASS\" interfaces\n");
 	printf("\t-i, --interfaces FILE\tuse FILE for interface definitions\n");
 	printf("\t-e, --exclude PATTERN\texclude interfaces from the list of\n\t\t\t\tinterfaces to operate on by a PATTERN\n");
-	printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
+	if (!<<we're listing known interfaces>>
+	    && !<<we're querying an interface's config>>)
+		printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
 	printf("\t\t\t\t(note that this option doesn't disable mappings)\n");
 	printf("\t-v, --verbose\t\tprint out what would happen before doing it\n");
 	printf("\t-o OPTION=VALUE\t\tset OPTION to VALUE as though it were in\n");
 	printf("\t\t\t\t/etc/network/interfaces\n");
 	printf("\t--no-mappings\t\tdon't run any mappings\n");
-	printf("\t--force\t\t\tforce de/configuration\n");
+	if (!<<we're listing known interfaces>>
+	    && !<<we're querying an interface's config>>)
+		printf("\t--force\t\t\tforce de/configuration\n");
+	if (<<we're listing known interfaces>>
+	    || <<we're querying an interface's config>>)
+		printf("\t--list\t\t\tlist all matching known interfaces\n");
 	exit(0);
 }
 @ 
@@ -3578,6 +3631,8 @@ case 3:
 @ 
 <<[[getopt]] possibilities>>=
 case 'n':
+        if (<<we're listing known interfaces>> || <<we're querying an interface's config>>)
+		usage(argv[0]);
 	no_act = 1;
 	break;
 @ 
@@ -3588,6 +3643,8 @@ case 1:
 @ 
 <<[[getopt]] possibilities>>=
 case 2:
+        if (<<we're listing known interfaces>> || <<we're querying an interface's config>>)
+		usage(argv[0]);
 	force = 1;
 	break;
 @
@@ -3621,12 +3678,20 @@ case 'o':
 	break;
 }
 @ 
+<<[[getopt]] possibilities>>=
+case 'l':
+        if (!<<we're querying an interface's config>>)
+		usage(argv[0]);
+	list = 1;
+	cmds = iface_list;
+	break;
+@ 
 
 And we also have a help option and a version option:
 
 <<[[getopt]] possibilities>>=
 case 'h':
-	help(argv[0]);
+	help(argv[0],cmds);
 	break;
 @ 
 <<[[getopt]] possibilities>>=
@@ -3651,13 +3716,19 @@ told to do both, and we won't accept not being told to do one or the
 other. We can test these two cases as follows:
 
 <<check unreasonable arguments>>=
-if (argc - optind > 0 && do_all) {
+if (argc - optind > 0 && (do_all || list)) {
 	usage(argv[0]);
 }
 @ 
 
 <<check unreasonable arguments>>=
-if (argc - optind == 0 && !do_all) {
+if (argc - optind == 0 && !do_all && !list) {
+	usage(argv[0]);
+}
+@ 
+
+<<check unreasonable arguments>>=
+if (do_all && <<we're querying an interface's config>>) {
 	usage(argv[0]);
 }
 @ 
@@ -3764,7 +3835,7 @@ Bringing an interface up or taking it down can be done thusly:
 	interface_defn *currif;
 	int okay = 0;
 	int failed = 0; 
-	
+
 	<<update ifupdown state>>
 
 	for (currif = defn->ifaces; currif; currif = currif->next) {
@@ -3966,8 +4037,9 @@ i = 0; i < n_target_ifaces; i++
 We initialise this based on our command line arguments.
 
 <<determine target interfaces>>=
-if (do_all) {
-	if (<<we're bringing interfaces up>>) {
+if (do_all || list) {
+	if (<<we're listing known interfaces>>
+            || <<we're bringing interfaces up>>) {
 		allowup_defn *autos = find_allowup(defn, "auto");
 		target_iface = autos ? autos->interfaces : NULL;
 		n_target_ifaces = autos ? autos->n_interfaces : 0;
@@ -4246,7 +4318,9 @@ not up, or uping one that's not down).
 		}
 		strncpy(liface, current_state, 80);
 		liface[79] = 0;
-	} else {
+	} else if (!<<we're listing known interfaces>>
+	           && !<<we're querying an interface's config>>)
+	{
 		assert(0);
 	}
 }
@@ -4270,7 +4344,9 @@ interfaces up and down.
 		}
 	} else if (<<we're taking interfaces down>>) {
 		update_state (argv[0], iface, NULL);
-	} else {
+	} else if (!<<we're listing known interfaces>>
+	           && !<<we're querying an interface's config>>)
+	{
 		assert(0);
 	}
 }
