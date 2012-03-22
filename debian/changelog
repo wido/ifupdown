@@ -6,8 +6,20 @@ ifupdown (0.7~unreleased) experimental; urgency=low
     (Closes: #657743).
   * Prevent aliases and VLANs from putting the main interface down
     (Closes: #656270).
+  * Make iproute2 calculate the broadcast address (LP: #924880).
+  * Shut udhcpc down correctly (Closes: #338348).
+  * Update the rules according to /run migration.
+  * Pass hardening flags from dpkg-buildflags (Closes: #661243).
+  * Implement ifquery interface (Closes: #568479).
+  * Call hook scripts when processing all interfaces:
+    - If ifupdown is called with --all option, before doing anything
+      to interfaces, it calls all the hook scripts (pre-up or down) with
+      IFACE set to "--all", LOGICAL set to the current --allow
+      parameter (or "auto" if it's not set), ADDRFAM="meta" and
+      METHOD="none".
+  * Also closes: #535226.
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 13 Feb 2012 21:13:41 +0300
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 22 Mar 2012 19:49:34 +0100
 
 ifupdown (0.7~beta2) experimental; urgency=low
 
