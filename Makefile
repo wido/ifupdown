@@ -19,7 +19,7 @@ MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 default : executables
 all : executables docs
 
-executables : ifup ifdown ifup.8 ifdown.8 interfaces.5
+executables : ifup ifdown ifquery ifup.8 ifdown.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
 .PHONY : executables 
@@ -29,12 +29,13 @@ install :
 	install -m 0755 -d     ${BASEDIR}/sbin
 	install -m 0755 ifup   ${BASEDIR}/sbin
 	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifdown	
+	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifquery
 
 clean :
 	rm -f *.aux *.toc *.log *.bbl *.blg *.ps *.eps *.pdf
 	rm -f *.o *.d $(patsubst %.defn,%.c,$(DEFNFILES)) *~
 	rm -f $(patsubst %.defn,%.man,$(DEFNFILES))
-	rm -f ifup ifdown interfaces.5 ifdown.8
+	rm -f ifup ifdown ifquery interfaces.5 ifdown.8 ifquery.8
 	rm -f ifupdown.dvi *.ps{,.gz}
 
 clobber : clean
@@ -47,11 +48,14 @@ ifup: $(OBJ)
 
 ifdown: ifup
 	ln -sf ifup ifdown
+
+ifquery: ifup
+	ln -sf ifup ifquery
 interfaces.5: interfaces.5.pre $(MAN)
 	sed $(foreach man,$(MAN),-e '/^##ADDRESSFAM##$$/r $(man)') \
 	     -e '/^##ADDRESSFAM##$$/d' < $< > $@	
 
-ifdown.8: ifup.8
+ifdown.8 ifquery.8: ifup.8
 	ln -sf $< $@
 
 %.5.ps: %.5
