@@ -137,6 +137,7 @@ structure definitions, exported interfaces and so on.
 <<structure definitions>>
 <<constant definitions>>
 <<exported symbols>>
+<<address family declarations>>
 
 #endif /* HEADER_H */
 @ 
@@ -157,9 +158,10 @@ PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
+DEFNFILES += meta.defn
 
 default : executables
 all : executables docs
@@ -517,8 +519,6 @@ a single exported array.
 <<addrfam.c>>=
 #include <stdlib.h>
 #include "header.h"
-
-<<address family declarations>>
 
 address_family *addr_fams[] = {
 	<<address family references>>
@@ -2649,20 +2649,28 @@ int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
 Our functions, then are:
 
 <<exported symbols>>=
+int iface_preup(interface_defn *iface);
+int iface_postup(interface_defn *iface);
 int iface_up(interface_defn *iface);
+int iface_predown(interface_defn *iface);
+int iface_postdown(interface_defn *iface);
 int iface_down(interface_defn *iface);
 int iface_list(interface_defn *iface);
 int iface_query(interface_defn *iface);
 @ 
 
 <<execute functions>>=
-int iface_up(interface_defn *iface) {
+int iface_preup(interface_defn *iface) {
 	if (!iface->method->up(iface,check)) return -1;
 
 	set_environ(iface, "start", "pre-up");
 	if (!execute_options(iface,doit,"pre-up")) return 0;
 	if (!execute_scripts(iface,doit,"pre-up")) return 0;
 
+	return 1;
+}
+
+int iface_postup(interface_defn *iface) {
 	if (!iface->method->up(iface,doit)) return 0;
 
 	set_environ(iface, "start", "post-up");
@@ -2670,6 +2678,12 @@ int iface_up(interface_defn *iface) {
 	if (!execute_scripts(iface,doit,"up")) return 0;
 
 	return 1;
+}
+
+int iface_up(interface_defn *iface) {
+	int result = iface_preup(iface);
+	if (result != 1) return result;
+	return iface_postup(iface);
 }
 @ 
 
@@ -2696,7 +2710,7 @@ if (pidfile) {
 @ 
 
 <<execute functions>>=
-int iface_down(interface_defn *iface) {
+int iface_predown(interface_defn *iface) {
 	<<terminate ifup if it's still running>>
 
 	if (!iface->method->down(iface,check)) return -1;
@@ -2705,6 +2719,10 @@ int iface_down(interface_defn *iface) {
 	if (!execute_scripts(iface,doit,"down")) return 0;
 	if (!execute_options(iface,doit,"down")) return 0;
 
+	return 1;
+}
+
+int iface_postdown(interface_defn *iface) {
 	if (!iface->method->down(iface,doit)) return 0;
 
 	set_environ(iface, "stop", "post-down");
@@ -2712,6 +2730,12 @@ int iface_down(interface_defn *iface) {
 	if (!execute_options(iface,doit,"post-down")) return 0;
 
 	return 1;
+}
+
+int iface_down(interface_defn *iface) {
+	int result = iface_predown(iface);
+	if (result != 1) return result;
+	return iface_postdown(iface);
 }
 @ 
 
@@ -3758,6 +3782,7 @@ A broad overview of what we'll actually be doing is as follows:
 
 <<run commands for appropriate interfaces>>=
 <<determine target interfaces>>
+<<run pre-up and pre-down scripts for all>>
 {
 	int i;
 	for (<<each target interface, [[i]]>>) {
@@ -3784,6 +3809,7 @@ A broad overview of what we'll actually be doing is as follows:
 		<<bring interface up/down and update ifupdown state>>
 	}
 }
+<<run post-up and post-down scripts for all>>
 @
 
 We'll leave determining the appropriate target interfaces and dealing
@@ -3929,6 +3955,55 @@ Bringing an interface up or taking it down can be done thusly:
 	<<remove pidfile>>
 
 	currif->real_iface = NULL;
+}
+@ 
+
+Before bringing interfaces up or putting them down, we may want to call some
+scripts interested in being notified when all the interfaces are going to
+be brought up:
+
+<<run pre-up and pre-down scripts for all>>=
+interface_defn meta_iface = {
+    .next = NULL,
+    .real_iface = "--all",
+    .address_family = &addr_meta,
+    .method = &(addr_meta.method[0]),
+    .automatic = 1,
+    .max_options = 0,
+    .n_options = 0,
+    .option = NULL
+};
+
+if (do_all) {
+    meta_iface.logical_iface = allow_class ? allow_class : "auto";
+
+    int okay = 0;
+    if (<<we're bringing interfaces up>>) {
+	okay = iface_preup(&meta_iface);
+    }
+    if (<<we're taking interfaces down>>) {
+	okay = iface_predown(&meta_iface);
+    }
+    if (!okay) {
+	fprintf(stderr, "%s: pre-%s script failed.\n", argv[0], &argv[0][2]);
+	exit(1);
+    }
+}
+@ 
+
+<<run post-up and post-down scripts for all>>=
+if (do_all) {
+    int okay = 0;
+    if (<<we're bringing interfaces up>>) {
+	okay = iface_postup(&meta_iface);
+    }
+    if (<<we're taking interfaces down>>) {
+	okay = iface_postdown(&meta_iface);
+    }
+    if (!okay) {
+	fprintf(stderr, "%s: pre-%s script failed.\n", argv[0], &argv[0][2]);
+	exit(1);
+    }
 }
 @ 
 
@@ -5179,6 +5254,27 @@ method dhcp
     ifconfig %iface% down
 
 @ 
+
+\section{Internal address metafamily}
+
+<<address family declarations>>=
+extern address_family addr_meta;
+@ 
+
+<<address family references>>=
+&addr_meta, 
+@ 
+
+<<meta.defn>>=
+address_family meta
+architecture any
+
+method none
+	description
+	up
+	down
+@ 
+
 
 \begin{flushleft}
 \bibliography{biblio}

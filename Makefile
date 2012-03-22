@@ -12,9 +12,10 @@ PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
+DEFNFILES += meta.defn
 
 default : executables
 all : executables docs
