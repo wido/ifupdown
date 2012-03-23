@@ -3802,7 +3802,7 @@ A broad overview of what we'll actually be doing is as follows:
 		if (<<we're [[--exclude]]ing this interface>>)  
 			continue;
 
-		if (<<we're bringing interfaces up>> && run_mappings) {
+		if ((<<we're bringing interfaces up>> || <<we're querying an interface's config>>) && run_mappings) {
 			<<run mappings>>
 		}
 
