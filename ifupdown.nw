@@ -3977,7 +3977,7 @@ interface_defn meta_iface = {
 if (do_all) {
     meta_iface.logical_iface = allow_class ? allow_class : "auto";
 
-    int okay = 0;
+    int okay = 1;
     if (<<we're bringing interfaces up>>) {
 	okay = iface_preup(&meta_iface);
     }
@@ -3993,7 +3993,7 @@ if (do_all) {
 
 <<run post-up and post-down scripts for all>>=
 if (do_all) {
-    int okay = 0;
+    int okay = 1;
     if (<<we're bringing interfaces up>>) {
 	okay = iface_postup(&meta_iface);
     }
