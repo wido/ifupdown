@@ -17,6 +17,8 @@ ifupdown (0.7~unreleased) experimental; urgency=low
       IFACE set to "--all", LOGICAL set to the current --allow
       parameter (or "auto" if it's not set), ADDRFAM="meta" and
       METHOD="none".
+  * Update test suite.
+  * Bump Standards-Version to 3.9.3.
   * Also closes: #535226.
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 22 Mar 2012 19:49:34 +0100
