@@ -3,7 +3,7 @@ Section: admin
 Priority: important
 Maintainer: Andrew O. Shadura <bugzilla@tut.by>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Build-Depends: debhelper (>= 7.0.50~), noweb
 Vcs-Hg: http://anonscm.debian.org/hg/collab-maint/ifupdown/
 Vcs-Browser: http://anonscm.debian.org/hg/collab-maint/ifupdown/
