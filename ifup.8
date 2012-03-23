@@ -3,6 +3,8 @@
 ifup \- bring a network interface up
 .PP
 ifdown \- take a network interface down
+.PP
+ifquery \- parse interface configuration
 .SH SYNOPSIS
 .B ifup 
 [\fB\-nv\fR]
@@ -25,12 +27,30 @@ ifdown \- take a network interface down
 [\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
 [\fB\-\-allow\fR \fICLASS\fR]
 \fB\-a\fR|\fIIFACE\fR...
+.PP
+.B ifquery
+[\fB\-nv\fR]
+[\fB\-\-no\-act\fR]
+[\fB\-\-verbose\fR]
+[\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
+[\fB\-\-allow\fR \fICLASS\fR]
+\fB\-a\fR|\fIIFACE\fR...
+.PP
+.B ifquery
+\fB\-l\fR|\fB\-\-list\fR
+[\fB\-nv\fR]
+[\fB\-\-no\-act\fR]
+[\fB\-\-verbose\fR]
+[\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
+[\fB\-\-allow\fR \fICLASS\fR]
+\fB\-a\fR|\fIIFACE\fR...
 .SH DESCRIPTION
 The
 .BR ifup " and " ifdown
 commands may be used to configure (or, respectively, deconfigure) network
 interfaces based on interface definitions in the file
-.IR /etc/network/interfaces .
+.IR /etc/network/interfaces ". "
+.BR ifquery " command may be used to parse interfaces configuration."
 .SH OPTIONS
 A summary of options is included below.
 .TP
@@ -86,6 +106,10 @@ Show copyright and version information.
 .TP
 .BR \-v ", " \-\-verbose
 Show commands as they are executed.
+.TP
+.BR \-l ", " \-\-list
+For \fBifquery\fR, list all the interfaces which match the specified class.
+If no class specified, prints all the interfaces listed as \fBauto\fR.
 .SH EXAMPLES
 .TP
 .B ifup -a
@@ -106,6 +130,13 @@ as logical interface
 .TP
 .B ifdown -a
 Bring down all interfaces that are currently up.
+.TP
+.B ifquery -l
+Print names of all interfaces specified with \fBauto\fR keyword.
+.B ifquery eth0
+Display the interface options as specified in the \fBifupdown\fR
+configuration. Each key-value pair is printed out on individual
+line using "\fB: \fR" as separator.
 .SH NOTES
 .BR ifup " and " ifdown
 are actually the same program called by different names.
