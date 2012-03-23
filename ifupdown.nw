@@ -2636,11 +2636,12 @@ int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 
 int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
 	char buf[100];
-	snprintf(buf, sizeof(buf),
-		"run-parts --exit-on-error %s /etc/network/if-%s.d",
+	snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d",
 		verbose ? "--verbose" : "", opt);
 
-	return (*exec)(buf);
+	(*exec)(buf); 
+
+	return 1;
 }
 @ 
 
