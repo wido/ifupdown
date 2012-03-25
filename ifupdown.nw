@@ -2694,7 +2694,6 @@ and send [[SIGTERM]] to terminate it.
 char pidfilename[100];
 snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "ifup-%s.pid",
 	iface->real_iface);
-if (no_act) return;
 FILE * pidfile = fopen(pidfilename, "r");
 if (pidfile) {
 	int pid;
@@ -2711,7 +2710,9 @@ if (pidfile) {
 
 <<execute functions>>=
 int iface_predown(interface_defn *iface) {
-	<<terminate ifup if it's still running>>
+	if (!no_act) {
+	    <<terminate ifup if it's still running>>
+	}
 
 	if (!iface->method->down(iface,check)) return -1;
 
