@@ -2695,7 +2695,6 @@ and send [[SIGTERM]] to terminate it.
 char pidfilename[100];
 snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "ifup-%s.pid",
 	iface->real_iface);
-if (no_act) return;
 FILE * pidfile = fopen(pidfilename, "r");
 if (pidfile) {
 	int pid;
@@ -2712,7 +2711,9 @@ if (pidfile) {
 
 <<execute functions>>=
 int iface_predown(interface_defn *iface) {
-	<<terminate ifup if it's still running>>
+	if (!no_act) {
+	    <<terminate ifup if it's still running>>
+	}
 
 	if (!iface->method->down(iface,check)) return -1;
 
@@ -5216,10 +5217,12 @@ method static
 
   up
     ifconfig %iface% [[media %media%]] [[link %hwaddress%]] [[mtu %mtu%]] up
-    ifconfig %iface% inet6 %address%/%netmask%
-    [[ route -A inet6 add ::/0 gw %gateway% %iface% ]] 
+    ifconfig %iface% inet6 %address%/%netmask% alias
+    [[ /lib/freebsd/route add -inet6 ::/0 %gateway% ]]
 
   down
+    [[ /lib/freebsd/route -n del -inet6 ::/0 2>&1 1>/dev/null || true ]]
+    [[ ifconfig %iface% inet6 %address% -alias ]]
     ifconfig %iface% down
 
 method manual
