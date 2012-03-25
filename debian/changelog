@@ -11,12 +11,14 @@ ifupdown (0.7~unreleased) experimental; urgency=low
   * Update the rules according to /run migration.
   * Pass hardening flags from dpkg-buildflags (Closes: #661243).
   * Implement ifquery interface (Closes: #568479).
+  * Make ifquery process mappings (LP: #850166).
   * Call hook scripts when processing all interfaces:
     - If ifupdown is called with --all option, before doing anything
       to interfaces, it calls all the hook scripts (pre-up or down) with
       IFACE set to "--all", LOGICAL set to the current --allow
       parameter (or "auto" if it's not set), ADDRFAM="meta" and
       METHOD="none".
+  * Fix IPv6 issue on kFreeBSD.
   * Update test suite.
   * Bump Standards-Version to 3.9.3.
   * Also closes: #535226.
