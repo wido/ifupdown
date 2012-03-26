@@ -121,4 +121,8 @@ if [ -x "/etc/init.d/ifupdown-clean" ]; then
     rm -f /etc/init.d/ifupdown-clean
 fi
 
+if [ -e "/etc/default/ifupdown" ]; then
+    rm -f /etc/default/ifupdown
+fi
+
 #DEBHELPER#
