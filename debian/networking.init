@@ -86,6 +86,19 @@ stop)
 	fi
 	;;
 
+reload)
+	process_options
+
+	log_action_begin_msg "Reloading network interfaces configuration"
+    state=$(cat /run/network/ifstate)
+	ifdown -a --exclude=lo || true
+	if ifup --exclude=lo $state ; then
+	    log_action_end_msg $?
+	else
+	    log_action_end_msg $?
+	fi
+	;;
+
 force-reload|restart)
 	process_options
 
