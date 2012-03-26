@@ -12,7 +12,7 @@ Package: ifupdown
 Architecture: any
 Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base, initscripts (>= 2.88dsf-13.3)
 Suggests: isc-dhcp-client | dhcp-client, ppp, rdnssd, ${net:Suggests}
-Replaces: netbase (<< 4.00)
+Replaces: netbase (<= 4.47)
 Conflicts: dhcp-client (<< 3.0)
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to
