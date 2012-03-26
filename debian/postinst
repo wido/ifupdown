@@ -111,18 +111,9 @@ if [ "$1" = "configure" ] ; then
   fi
 fi
 
-if [ -x "/etc/init.d/ifupdown" ]; then
-    update-rc.d -f ifupdown remove >/dev/null || exit $?
-    rm -f /etc/init.d/ifupdown
-fi
-
-if [ -x "/etc/init.d/ifupdown-clean" ]; then
-    update-rc.d -f ifupdown-clean remove >/dev/null || exit $?
-    rm -f /etc/init.d/ifupdown-clean
-fi
-
-if [ -e "/etc/default/ifupdown" ]; then
-    rm -f /etc/default/ifupdown
+if dpkg --compare-versions "$2" le "0.7~+" ; then
+    update-rc.d -f ifupdown remove >/dev/null || true
+    update-rc.d -f ifupdown-clean remove >/dev/null || true
 fi
 
 #DEBHELPER#

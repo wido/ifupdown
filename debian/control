@@ -10,6 +10,7 @@ Vcs-Browser: http://anonscm.debian.org/hg/collab-maint/ifupdown/
 
 Package: ifupdown
 Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
 Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base, initscripts (>= 2.88dsf-13.3)
 Suggests: isc-dhcp-client | dhcp-client, ppp, rdnssd, ${net:Suggests}
 Replaces: netbase (<= 4.47)
