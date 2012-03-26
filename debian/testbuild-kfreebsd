@@ -117,7 +117,7 @@ run-parts --verbose /etc/network/if-up.d
 Configuring interface eth0=eth0 (inet6)
 run-parts --verbose /etc/network/if-pre-up.d
 ifconfig eth0    up
-ifconfig eth0 inet6 3ffe:ffff:100:f101::1/64
+ifconfig eth0 inet6 3ffe:ffff:100:f101::1/64 alias
 
 run-parts --verbose /etc/network/if-up.d
 EOF
