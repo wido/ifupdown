@@ -111,7 +111,7 @@ if [ "$1" = "configure" ] ; then
   fi
 fi
 
-if dpkg --compare-versions "$2" le "0.7~+" ; then
+if dpkg --compare-versions "$2" lt "0.7" ; then
     update-rc.d -f ifupdown remove >/dev/null || true
     update-rc.d -f ifupdown-clean remove >/dev/null || true
 fi
