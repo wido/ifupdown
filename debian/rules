@@ -43,7 +43,7 @@ override_dh_auto_configure:
 	chmod a+rx makecdep.sh makenwdep.sh
 
 override_dh_installinit:
-	dh_installinit --name=ifupdown --no-start -- start 39 S .
+	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
 
 override_dh_auto_clean:
 	$(MAKE) clean
