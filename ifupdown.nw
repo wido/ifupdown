@@ -3592,7 +3592,7 @@ static void help(char *execname, int (*cmds)(interface_defn *)) {
 	printf("Options:\n");
 	printf("\t-h, --help\t\tthis help\n");
 	printf("\t-V, --version\t\tcopyright and version information\n");
-	printf("\t-a, --all\t\tde/configure all interfaces marked \"auto\"\n");
+	printf("\t-a, --all\t\tprocess all interfaces marked \"auto\"\n");
 	printf("\t--allow CLASS\t\tignore non-\"allow-CLASS\" interfaces\n");
 	printf("\t-i, --interfaces FILE\tuse FILE for interface definitions\n");
 	printf("\t-e, --exclude PATTERN\texclude interfaces from the list of\n\t\t\t\tinterfaces to operate on by a PATTERN\n");
@@ -3620,7 +3620,7 @@ Now, the meat of argument parsing is done with [[getopt()]] and a
 <<parse arguments>>=
 for(;;) {
 	int c;
-	c = getopt_long(argc, argv, "e:s:i:o:hVvna", long_opts, NULL);
+	c = getopt_long(argc, argv, "e:s:i:o:hVvnal", long_opts, NULL);
 	if (c == EOF) break;
 
 	switch(c) {
