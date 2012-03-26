@@ -1,24 +1,40 @@
 #!/bin/sh -e
 ### BEGIN INIT INFO
-# Provides:          networking
+# Provides:          networking ifupdown
 # Required-Start:    mountkernfs $local_fs
 # Required-Stop:     $local_fs
-# Should-Start:      ifupdown
-# Should-Stop:       ifupdown
 # Default-Start:     S
 # Default-Stop:      0 6
 # Short-Description: Raise network interfaces.
 ### END INIT INFO
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+RUN_DIR="/run/network"
+IFSTATE="$RUN_DIR/ifstate"
 
 [ -x /sbin/ifup ] || exit 0
+[ -x /sbin/ifdown ] || exit 0
 
 . /lib/lsb/init-functions
 
 process_options() {
     [ -e /etc/network/options ] || return 0
     log_warning_msg "/etc/network/options still exists and it will be IGNORED! Read README.Debian of netbase."
+}
+
+check_ifstate() {
+    if [ ! -d "$RUN_DIR" ] ; then
+	if ! mkdir -p "$RUN_DIR" ; then
+	    log_failure_msg "can't create $RUN_DIR"
+	    exit 1
+	fi
+    fi
+    if [ ! -r "$IFSTATE" ] ; then
+	if ! :> "$IFSTATE" ; then
+	    log_failure_msg "can't initialise $IFSTATE"
+	    exit 1
+	fi
+    fi
 }
 
 check_network_file_systems() {
@@ -65,6 +81,7 @@ check_network_swap() {
 case "$1" in
 start)
 	process_options
+	check_ifstate
 
 	log_action_begin_msg "Configuring network interfaces"
 	if ifup -a; then

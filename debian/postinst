@@ -113,6 +113,7 @@ fi
 
 if [ -x "/etc/init.d/ifupdown" ]; then
     update-rc.d -f ifupdown remove >/dev/null || exit $?
+    rm -f /etc/init.d/ifupdown
 fi
 
 if [ -x "/etc/init.d/ifupdown-clean" ]; then
