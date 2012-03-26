@@ -90,7 +90,7 @@ reload)
 	process_options
 
 	log_action_begin_msg "Reloading network interfaces configuration"
-    state=$(cat /run/network/ifstate)
+	state=$(cat /run/network/ifstate)
 	ifdown -a --exclude=lo || true
 	if ifup --exclude=lo $state ; then
 	    log_action_end_msg $?
