@@ -234,7 +234,7 @@ clean :
 	rm -f ifupdown.dvi *.ps{,.gz}
 
 clobber : clean
-	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES)
+	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES) arch*
 
 distclean : clobber
 	rm -f makecdep.sh makenwdep.sh Makefile
