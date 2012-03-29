@@ -4393,6 +4393,13 @@ not up, or uping one that's not down).
 		}
 		strncpy(liface, current_state, 80);
 		liface[79] = 0;
+	} else if (<<we're querying an interface's config>>) {
+		if (current_state != NULL) {
+			strncpy(liface, current_state, 80);
+			liface[79] = 0;
+			run_mappings = 0;
+		}
+
 	} else if (!<<we're listing known interfaces>>
 	           && !<<we're querying an interface's config>>)
 	{
