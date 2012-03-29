@@ -12,6 +12,8 @@ ifupdown (0.7~unreleased) experimental; urgency=low
   * Pass hardening flags from dpkg-buildflags (Closes: #661243).
   * Implement ifquery interface (Closes: #568479).
   * Make ifquery process mappings (LP: #850166).
+  * Support cross-compilation, move Debian-specific things out of
+    the Makefile (Closes: #666084).
   * Take networking init script over from netbase package.
     - Add reload action which reconfigures all interfaces currently
       configured.
