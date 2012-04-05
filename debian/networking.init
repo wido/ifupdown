@@ -9,7 +9,7 @@
 # Description:       Prepare /run/network directory, ifstate file and raise network interfaces, or take them down.
 ### END INIT INFO
 
-PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+PATH="/sbin:/bin"
 RUN_DIR="/run/network"
 IFSTATE="$RUN_DIR/ifstate"
 
