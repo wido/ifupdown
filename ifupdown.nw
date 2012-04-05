@@ -148,7 +148,7 @@ We shall begin with the template for the Makefile we shall use.
 
 <<Makefile>>=
 <<make options>>
-ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+ARCH ?= linux
 
 BASEDIR ?= $(DESTDIR)
 
@@ -234,7 +234,7 @@ clean :
 	rm -f ifupdown.dvi *.ps{,.gz}
 
 clobber : clean
-	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES)
+	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES) arch*
 
 distclean : clobber
 	rm -f makecdep.sh makenwdep.sh Makefile
@@ -273,9 +273,7 @@ of compiling source code.
 
 <<make options>>=
 VERSION ?= 0.7~beta
-CFLAGS := -Wall -W $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS) -D'IFUPDOWN_VERSION="$(VERSION)"'
-LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
-CC ?= gcc
+CFLAGS ?= -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 @ 
 
 \subsection{Graphics}
@@ -4396,6 +4394,13 @@ not up, or uping one that's not down).
 		}
 		strncpy(liface, current_state, 80);
 		liface[79] = 0;
+	} else if (<<we're querying an interface's config>>) {
+		if (current_state != NULL) {
+			strncpy(liface, current_state, 80);
+			liface[79] = 0;
+			run_mappings = 0;
+		}
+
 	} else if (!<<we're listing known interfaces>>
 	           && !<<we're querying an interface's config>>)
 	{

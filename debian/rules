@@ -35,6 +35,12 @@
 ######################################################################
 
 export VERSION := $(shell dpkg-parsechangelog|grep Version|cut -d' ' -f2|sed s/.*really//g)
+export CFLAGS := -Wall -W $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS) -D'IFUPDOWN_VERSION="$(VERSION)"'
+export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
+ifeq "$(origin CC)" "default"
+export CC := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)-gcc
+endif
+export ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 
 %:
 	dh $@
