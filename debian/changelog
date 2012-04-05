@@ -17,6 +17,9 @@ ifupdown (0.7~unreleased) experimental; urgency=low
   * Take networking init script over from netbase package.
     - Add reload action which reconfigures all interfaces currently
       configured.
+    - Add LSB Description field.
+    - Remove /usr from PATH.
+    - Merge ifupdown initscript in.
   * Remove /etc/default/ifupdown.
   * Call hook scripts when processing all interfaces:
     - If ifupdown is called with --all option, before doing anything
