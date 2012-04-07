@@ -120,7 +120,7 @@ reload)
 force-reload|restart)
 	process_options
 
-	log_warning_msg "Running $0 $1 is deprecated because it may not enable again some interfaces"
+	log_warning_msg "Running $0 $1 is deprecated because it may not re-enable some interfaces"
 	log_action_begin_msg "Reconfiguring network interfaces"
 	ifdown -a --exclude=lo || true
 	if ifup -a --exclude=lo; then
