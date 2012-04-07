@@ -4059,11 +4059,9 @@ Convert the options:
 
 <<add [[option[i]]] to [[currif]]>>=
 {
-	if (1) {
-		set_variable(argv[0], option[i].name, option[i].value,
-			&currif->option, &currif->n_options, 
-			&currif->max_options);
-	}
+	set_variable(argv[0], option[i].name, option[i].value,
+		&currif->option, &currif->n_options, 
+		&currif->max_options);
 }
 @
 
