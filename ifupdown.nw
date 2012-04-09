@@ -3924,7 +3924,9 @@ Bringing an interface up or taking it down can be done thusly:
 	currif->real_iface = iface;
 
 	if (verbose) {
-		fprintf(stderr, "Configuring interface %s=%s (%s)\n", 
+		fprintf(stderr, "%s interface %s=%s (%s)\n", 
+			<<we're querying an interface's config>> ? "Querying" :
+			"Configuring",
 			iface, liface, currif->address_family->name);
 	}
 
