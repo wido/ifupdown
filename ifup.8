@@ -59,6 +59,8 @@ If given to \fBifup\fP, affect all interfaces marked \fBauto\fP.
 Interfaces are brought up in the order in which they are defined
 in
 .IR /etc/network/interfaces .
+Combined with \fB-\-allow\fP, acts on all interfaces of a specified class
+instead.
 If given to \fBifdown\fP, affect all defined interfaces.
 Interfaces are brought down in the order in which they are
 currently listed in the state file. Only interfaces defined
@@ -134,6 +136,9 @@ Bring down all interfaces that are currently up.
 .TP
 .B ifquery -l
 Print names of all interfaces specified with \fBauto\fR keyword.
+.TP
+.B ifquery -l --allow=hotplug
+Print names of all interfaces specified with \fBallow-hotplug\fR keyword.
 .TP
 .B ifquery eth0
 Display the interface options as specified in the \fBifupdown\fR

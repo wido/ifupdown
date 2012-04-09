@@ -4114,7 +4114,7 @@ We initialise this based on our command line arguments.
 if (do_all || list) {
 	if (<<we're listing known interfaces>>
             || <<we're bringing interfaces up>>) {
-		allowup_defn *autos = find_allowup(defn, "auto");
+		allowup_defn *autos = find_allowup(defn, allow_class ? allow_class : "auto");
 		target_iface = autos ? autos->interfaces : NULL;
 		n_target_ifaces = autos ? autos->n_interfaces : 0;
 	} else if (<<we're taking interfaces down>>) {
