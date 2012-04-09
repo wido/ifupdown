@@ -127,7 +127,7 @@ force-reload|restart)
 	;;
 
 *)
-	echo "Usage: /etc/init.d/networking {start|stop}"
+	echo "Usage: /etc/init.d/networking {start|stop|reload|restart|force-reload}"
 	exit 1
 	;;
 esac
