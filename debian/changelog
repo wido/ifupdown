@@ -11,7 +11,14 @@ ifupdown (0.7~unreleased) experimental; urgency=low
   * Update the rules according to /run migration.
   * Pass hardening flags from dpkg-buildflags (Closes: #661243).
   * Implement ifquery interface (Closes: #568479).
-  * Make ifquery process mappings (LP: #850166).
+    - Make ifquery process mappings (LP: #850166).
+    - Ensure ifquery always has no_act turned on.
+  * Change --all behaviour:
+    - If ifup or ifquery is called with the --all option, if doesn't just
+      bring up all interfaces marked as "auto", but all interfaces of a
+      specified class, "auto" by default. For the most uses, this doesn't
+      change anything, but lets all the interfaces of a specific class to be
+      brought up or queried.
   * Support cross-compilation, move Debian-specific things out of
     the Makefile (Closes: #666084).
   * Take networking init script over from netbase package.
@@ -20,15 +27,19 @@ ifupdown (0.7~unreleased) experimental; urgency=low
     - Add LSB Description field.
     - Remove /usr from PATH.
     - Merge ifupdown initscript in.
+    - Improve warning messages.
+    - Don't use redirection hacks when parsing /proc/mounts and /proc/swap.
+    - Document all supported subcommands.
   * Remove /etc/default/ifupdown.
   * Call hook scripts when processing all interfaces:
-    - If ifupdown is called with --all option, before doing anything
-      to interfaces, it calls all the hook scripts (pre-up or down) with
-      IFACE set to "--all", LOGICAL set to the current --allow
-      parameter (or "auto" if it's not set), ADDRFAM="meta" and
-      METHOD="none".
+    - If ifupdown is called with the --all option, before or after doing
+      anything to the interfaces, it calls all the hook scripts (pre-up or
+      down) with IFACE set to "--all", LOGICAL set to the current class
+      specified by the --allow option (or "auto" if it's not set),
+      ADDRFAM="meta" and METHOD="none".
   * Fix IPv6 issue on kFreeBSD.
   * Update test suite.
+  * Improve manual pages.
   * Bump Standards-Version to 3.9.3.
   * Also closes: #535226.
 
