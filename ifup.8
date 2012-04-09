@@ -63,7 +63,8 @@ If given to \fBifdown\fP, affect all defined interfaces.
 Interfaces are brought down in the order in which they are
 currently listed in the state file. Only interfaces defined
 in
-.IR /etc/network/interfaces " will be brought down."
+.I /etc/network/interfaces
+will be brought down.
 .TP
 .B \-\-force
 Force configuration or deconfiguration of the interface.
@@ -91,7 +92,7 @@ if they use a small string to do the match.
 .TP
 .BI \-o " OPTION" "\fB=" VALUE
 Set \fIOPTION\fR to \fIVALUE\fR as though it were in
-.IR /etc/network/interfaces "."
+.IR /etc/network/interfaces .
 .TP
 .BR \-n ", " \-\-no\-act
 Don't configure any interfaces or run any "up" or "down" commands.
@@ -139,7 +140,10 @@ Display the interface options as specified in the \fBifupdown\fR
 configuration. Each key-value pair is printed out on individual
 line using "\fB: \fR" as separator.
 .SH NOTES
-.BR ifup ", " ifdown ", and " ifquery
+.BR ifup ,
+.BR ifdown ,
+and
+.BR ifquery
 are actually the same program called by different names.
 .P
 The program does not configure network interfaces directly;
