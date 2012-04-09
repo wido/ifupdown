@@ -46,7 +46,6 @@ check_network_file_systems() {
 	exit 0
     fi
 
-    exec 9<&0 < /proc/mounts
     while read DEV MTPT FSTYPE REST; do
 	case $DEV in
 	/dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)
@@ -60,14 +59,12 @@ check_network_file_systems() {
 	    exit 0
 	    ;;
 	esac
-    done
-    exec 0<&9 9<&-
+    done < /proc/mounts
 }
 
 check_network_swap() {
     [ -e /proc/swaps ] || return 0
 
-    exec 9<&0 < /proc/swaps
     while read DEV MTPT FSTYPE REST; do
 	case $DEV in
 	/dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)
@@ -75,8 +72,7 @@ check_network_swap() {
 	    exit 0
 	    ;;
 	esac
-    done
-    exec 0<&9 9<&-
+    done < /proc/swaps
 }
 
 case "$1" in
