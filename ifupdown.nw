@@ -3425,6 +3425,7 @@ if (strcmp(command, "ifup")==0) {
 	cmds = iface_down;
 } else if (strcmp(command, "ifquery")==0) {
 	cmds = iface_query;
+	no_act = 1;
 } else {
 	fprintf(stderr,"This command should be called as ifup, ifdown, or ifquery\n");
 	exit(1);
