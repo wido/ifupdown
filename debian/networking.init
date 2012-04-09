@@ -20,7 +20,7 @@ IFSTATE="$RUN_DIR/ifstate"
 
 process_options() {
     [ -e /etc/network/options ] || return 0
-    log_warning_msg "/etc/network/options still exists and it will be IGNORED! Read README.Debian of netbase."
+    log_warning_msg "/etc/network/options still exists and it will be IGNORED! Read /usr/share/doc/netbase/README.Debian."
 }
 
 check_ifstate() {
