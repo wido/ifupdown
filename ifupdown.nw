@@ -3865,6 +3865,14 @@ Bringing an interface up or taking it down can be done thusly:
 
 	<<update ifupdown state>>
 
+	if (<<we're listing known interfaces>>) {
+	    currif = defn->ifaces;
+	    currif->real_iface = iface;
+	    cmds(currif);
+	    currif->real_iface = NULL;
+	    continue;
+	}
+
 	for (currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(liface, currif->logical_iface) == 0) {
 			okay = 1;
