@@ -30,6 +30,10 @@ ifupdown (0.7~unreleased) experimental; urgency=low
     - Improve warning messages.
     - Don't use redirection hacks when parsing /proc/mounts and /proc/swap.
     - Document all supported subcommands.
+    - On start, try to configure hotplug interfaces if they seem to be ready.
+      Ignore errors if they fail to configure for some reason (for example,
+      if the interface happens to be renamed by udev before it's fully
+      configured).
   * Remove /etc/default/ifupdown.
   * Call hook scripts when processing all interfaces:
     - If ifupdown is called with the --all option, before or after doing
@@ -41,7 +45,8 @@ ifupdown (0.7~unreleased) experimental; urgency=low
   * Update test suite.
   * Improve manual pages.
   * Bump Standards-Version to 3.9.3.
-  * Also closes: #535226.
+  * Also closes: #535226:
+    - In 0.7~alpha5, "auto" method has been added.
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 22 Mar 2012 19:49:34 +0100
 
