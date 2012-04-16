@@ -81,7 +81,13 @@ start)
 	check_ifstate
 
 	log_action_begin_msg "Configuring network interfaces"
-	if ifup -a; then
+	if ifup -a && {
+		if [ -d /sys/class/net ]
+		then
+			ifup $({ ifquery --list --allow=hotplug ; ls /sys/class/net } | sort | uniq -d) || true
+		fi
+	}
+	then
 	    log_action_end_msg $?
 	else
 	    log_action_end_msg $?
