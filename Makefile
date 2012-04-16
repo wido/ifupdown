@@ -18,7 +18,7 @@ DEFNFILES += meta.defn
 default : executables
 all : executables docs
 
-executables : ifup ifdown ifquery ifup.8 ifdown.8 interfaces.5
+executables : ifup ifdown ifquery ifup.8 ifdown.8 ifquery.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
 .PHONY : executables 
