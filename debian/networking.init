@@ -84,7 +84,13 @@ start)
 	if ifup -a && {
 		if [ -d /sys/class/net ]
 		then
-			ifup $( ( ifquery --list --allow=hotplug ; ls /sys/class/net ) | sort | uniq -d) || true
+			ifup $(for iface in $(ifquery --list --allow=hotplug)
+					do
+						if [ -f "/sys/class/net/$iface" ]
+						then
+							echo "$iface"
+						fi
+					done) || true
 		fi
 	}
 	then
