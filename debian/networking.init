@@ -86,7 +86,7 @@ start)
 		then
 			ifup $(for iface in $(ifquery --list --allow=hotplug)
 					do
-						if [ -f "/sys/class/net/$iface" ]
+						if [ -e "/sys/class/net/$iface" ]
 						then
 							echo "$iface"
 						fi
