@@ -1,8 +1,11 @@
 ifupdown (0.7~rc2+experimental) experimental; urgency=low
 
-  * Try to bring hotplug interfaces up on initscript restart action as well.
+  * Try to bring hotplug interfaces up on initscript restart
+    action as well.
+  * Don't call ifup when there are no interfaces to bring up
+    (Closes: #670145).
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 23 Apr 2012 13:46:49 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 23 Apr 2012 14:36:28 +0200
 
 ifupdown (0.7~rc1+experimental) experimental; urgency=low
 
