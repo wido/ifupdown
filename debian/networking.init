@@ -75,24 +75,30 @@ check_network_swap() {
     done < /proc/swaps
 }
 
+ifup_hotplug () {
+    if [ -d /sys/class/net ]
+    then
+	    ifaces=$(for iface in $(ifquery --list --allow=hotplug)
+			    do
+				    if [ -e "/sys/class/net/$iface" ]
+				    then
+					    echo "$iface"
+				    fi
+			    done)
+	    if [ -n "$ifaces" ]
+	    then
+		ifup $ifaces || true
+	    fi
+    fi
+}
+
 case "$1" in
 start)
 	process_options
 	check_ifstate
 
 	log_action_begin_msg "Configuring network interfaces"
-	if ifup -a && {
-		if [ -d /sys/class/net ]
-		then
-			ifup $(for iface in $(ifquery --list --allow=hotplug)
-					do
-						if [ -e "/sys/class/net/$iface" ]
-						then
-							echo "$iface"
-						fi
-					done) || true
-		fi
-	}
+	if ifup -a && ifup_hotplug
 	then
 	    log_action_end_msg $?
 	else
@@ -131,18 +137,7 @@ force-reload|restart)
 	log_warning_msg "Running $0 $1 is deprecated because it may not re-enable some interfaces"
 	log_action_begin_msg "Reconfiguring network interfaces"
 	ifdown -a --exclude=lo || true
-	if ifup -a --exclude=lo && {
-		if [ -d /sys/class/net ]
-		then
-			ifup $(for iface in $(ifquery --list --allow=hotplug)
-					do
-						if [ -e "/sys/class/net/$iface" ]
-						then
-							echo "$iface"
-						fi
-					done) || true
-		fi
-	}
+	if ifup -a --exclude=lo && ifup_hotplug
 	then
 	    log_action_end_msg $?
 	else
