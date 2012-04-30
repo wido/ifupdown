@@ -244,11 +244,11 @@ Additionally, all options given in an interface definition stanza are
 exported to the environment in upper case with "IF_" prepended and with
 hyphens converted to underscores and non\-alphanumeric characters discarded.
 .P
-When ifupdown is being called with \fB\-\-all\fR option, before doing anything
+When ifupdown is being called with the \fB\-\-all\fR option, before doing anything
 to interfaces, if calls all the hook scripts (\fIpre-up\fR or \fIdown\fR) with
 \fBIFACE\fR set to "\-\-all", \fBLOGICAL\fR set to the current value of \-\-allow
 parameter (or "auto" if it's not set), \fBADDRFAM\fR="meta" and \fBMETHOD\fR="none".
-After all the interfaces have been brought up or taken down, appropriate scripts
+After all the interfaces have been brought up or taken down, the appropriate scripts
 (\fIup\fR or \fIpost-down\fR) are executed.
 ##ADDRESSFAM##
 .SH KNOWN BUGS/LIMITATIONS

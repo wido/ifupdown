@@ -166,7 +166,7 @@ DEFNFILES += meta.defn
 default : executables
 all : executables docs
 
-executables : ifup ifdown ifquery ifup.8 ifdown.8 interfaces.5
+executables : ifup ifdown ifquery ifup.8 ifdown.8 ifquery.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
 .PHONY : executables 
@@ -3426,6 +3426,7 @@ if (strcmp(command, "ifup")==0) {
 	cmds = iface_down;
 } else if (strcmp(command, "ifquery")==0) {
 	cmds = iface_query;
+	no_act = 1;
 } else {
 	fprintf(stderr,"This command should be called as ifup, ifdown, or ifquery\n");
 	exit(1);
@@ -3865,6 +3866,14 @@ Bringing an interface up or taking it down can be done thusly:
 
 	<<update ifupdown state>>
 
+	if (<<we're listing known interfaces>>) {
+	    currif = defn->ifaces;
+	    currif->real_iface = iface;
+	    cmds(currif);
+	    currif->real_iface = NULL;
+	    continue;
+	}
+
 	for (currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(liface, currif->logical_iface) == 0) {
 			okay = 1;
@@ -3924,7 +3933,9 @@ Bringing an interface up or taking it down can be done thusly:
 	currif->real_iface = iface;
 
 	if (verbose) {
-		fprintf(stderr, "Configuring interface %s=%s (%s)\n", 
+		fprintf(stderr, "%s interface %s=%s (%s)\n", 
+			<<we're querying an interface's config>> ? "Querying" :
+			"Configuring",
 			iface, liface, currif->address_family->name);
 	}
 
@@ -4060,11 +4071,9 @@ Convert the options:
 
 <<add [[option[i]]] to [[currif]]>>=
 {
-	if (1) {
-		set_variable(argv[0], option[i].name, option[i].value,
-			&currif->option, &currif->n_options, 
-			&currif->max_options);
-	}
+	set_variable(argv[0], option[i].name, option[i].value,
+		&currif->option, &currif->n_options, 
+		&currif->max_options);
 }
 @
 
@@ -4116,7 +4125,7 @@ We initialise this based on our command line arguments.
 if (do_all || list) {
 	if (<<we're listing known interfaces>>
             || <<we're bringing interfaces up>>) {
-		allowup_defn *autos = find_allowup(defn, "auto");
+		allowup_defn *autos = find_allowup(defn, allow_class ? allow_class : "auto");
 		target_iface = autos ? autos->interfaces : NULL;
 		n_target_ifaces = autos ? autos->n_interfaces : 0;
 	} else if (<<we're taking interfaces down>>) {
