@@ -4164,7 +4164,7 @@ interface down while it's investigating matters), we need to maintain a
 statefile between invocations to keep track of which physical interfaces
 were mapped to which logical ones.  This file also serves to record
 which interfaces have been configured so far, and which haven't.  It
-is stored in [[/etc/network/run/ifstate]].
+is stored in [[/run/network/ifstate]].
 
 Because different interfaces may be brought up and down at the same time,
 it's important that all updates to the state file are atomic and that we
