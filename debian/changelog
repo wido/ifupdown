@@ -108,6 +108,60 @@ ifupdown (0.7~alpha5.1) experimental; urgency=low
 
  -- Roger Leigh <rleigh@debian.org>  Tue, 14 Jun 2011 18:44:11 +0100
 
+ifupdown (0.7~alpha5+really0.6.16) unstable; urgency=low
+
+  * Use FreeBSD version of route, thanks to Robert Millan
+    for the patch (Closes: #646291).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 23 Oct 2011 21:10:44 +0300
+
+ifupdown (0.7~alpha5+really0.6.15) unstable; urgency=low
+
+  * Replace /etc/network/run.dpkg-old correctly (Closes: #639612).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 29 Aug 2011 11:00:17 +0300
+
+ifupdown (0.7~alpha5+really0.6.14) unstable; urgency=low
+
+  * Create /etc/network/interfaces correctly (Closes: #638718).
+  * Correct the spelling of the maintainer's last name.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 22 Aug 2011 23:02:50 +0300
+
+ifupdown (0.7~alpha5+really0.6.13) unstable; urgency=low
+
+  * Clean up SysV symlinks on upgrade (Closes: #637804).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 14 Aug 2011 21:36:02 +0300
+
+ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
+
+  * Fix init script dependencies so we don't try to remove state
+    file before the root filesystem is remounted R/W (Closes: #637435).
+  * Don't install ifupdown.init on runlevels 0 and 6.
+  * Add Vcs-Hg field.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sat, 13 Aug 2011 20:05:15 +0300
+
+ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
+
+  * Backport the fixes for the following bugs from 0.7 branch:
+    - Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
+    - Remove Default-Stop from the LSB headers (Closes: #630506).
+    - Fix init script dependencies (Closes: #607713).
+  * Report the correct version number on --version.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 07 Aug 2011 15:38:26 +0300
+
+ifupdown (0.7~alpha5+really0.6.10) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * No source changes.
+  * Bump version to replace 0.7~alpha5 which was uploaded to
+    unstable (rather than experimental) by mistake (Closes: #630501).
+
+ -- Roger Leigh <rleigh@debian.org>  Tue, 14 Jun 2011 17:48:20 +0100
+
 ifupdown (0.7~alpha5) experimental; urgency=low
 
   * Set PHASE variable (Closes: #629821).
@@ -186,60 +240,6 @@ ifupdown (0.7~alpha2) experimental; urgency=low
   * Bump DH_COMPAT to 4 (from 1!)
 
  -- Anthony Towns <aj@azure.humbug.org.au>  Mon, 18 Jun 2007 15:47:21 +0100
-
-ifupdown (0.7~alpha5+really0.6.16) unstable; urgency=low
-
-  * Use FreeBSD version of route, thanks to Robert Millan
-    for the patch (Closes: #646291).
-
- -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 23 Oct 2011 21:10:44 +0300
-
-ifupdown (0.7~alpha5+really0.6.15) unstable; urgency=low
-
-  * Replace /etc/network/run.dpkg-old correctly (Closes: #639612).
-
- -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 29 Aug 2011 11:00:17 +0300
-
-ifupdown (0.7~alpha5+really0.6.14) unstable; urgency=low
-
-  * Create /etc/network/interfaces correctly (Closes: #638718).
-  * Correct the spelling of the maintainer's last name.
-
- -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 22 Aug 2011 23:02:50 +0300
-
-ifupdown (0.7~alpha5+really0.6.13) unstable; urgency=low
-
-  * Clean up SysV symlinks on upgrade (Closes: #637804).
-
- -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 14 Aug 2011 21:36:02 +0300
-
-ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
-
-  * Fix init script dependencies so we don't try to remove state
-    file before the root filesystem is remounted R/W (Closes: #637435).
-  * Don't install ifupdown.init on runlevels 0 and 6.
-  * Add Vcs-Hg field.
-
- -- Andrew O. Shadura <bugzilla@tut.by>  Sat, 13 Aug 2011 20:05:15 +0300
-
-ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
-
-  * Backport the fixes for the following bugs from 0.7 branch:
-    - Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
-    - Remove Default-Stop from the LSB headers (Closes: #630506).
-    - Fix init script dependencies (Closes: #607713).
-  * Report the correct version number on --version.
-
- -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 07 Aug 2011 15:38:26 +0300
-
-ifupdown (0.7~alpha5+really0.6.10) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * No source changes.
-  * Bump version to replace 0.7~alpha5 which was uploaded to
-    unstable (rather than experimental) by mistake (Closes: #630501).
-
- -- Roger Leigh <rleigh@debian.org>  Tue, 14 Jun 2011 17:48:20 +0100
 
 ifupdown (0.6.10) unstable; urgency=low
 
