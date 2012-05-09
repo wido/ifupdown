@@ -1,3 +1,1 @@
 ifupdown: init.d-script-possible-missing-stop etc/init.d/networking 1
-ifupdown: init.d-script-missing-dependency-on-remote_fs etc/init.d/networking: required-start
-ifupdown: init.d-script-missing-dependency-on-remote_fs etc/init.d/networking: required-stop
