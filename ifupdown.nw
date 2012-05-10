@@ -4724,6 +4724,7 @@ method static
   conversion
     hwaddress cleanup_hwaddress
     address compute_v4_mask =netmask?
+    address compute_v4_addr
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
