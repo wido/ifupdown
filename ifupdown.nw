@@ -1167,6 +1167,7 @@ headers. Please move along, there's nothing to see here.
 @ 
 
 <<config headers>>=
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -1276,7 +1277,11 @@ struct variable {
 We'll define a function to help us build arrays of these [[variables]].
 It's fairly straightforward: to add a variable, we simply construct
 a new structure and add it at the end of our array of variables,
-increasing the size of the array first if necessary.
+increasing the size of the array first if necessary. [[set_variable]]
+function adds a variable if it doesn't exist yet, or updates one which
+is already set but only if the variable name doesn't end with a question
+mark. If [[set_variable]] didn't do anything to the variable, it returns
+NULL.
 
 <<exported symbols>>=
 variable * set_variable(char *filename, char *name, char *value, 
@@ -1289,6 +1294,18 @@ void convert_variables(char *filename, conversion *conversions,
 variable * set_variable(char *filename, char *name, char *value, 
 		variable **var, int *n_vars, int *max_vars)
 {
+	/*
+	 * if name ends with '?', don't update
+	 * the variable if it already exists
+	 */
+	bool dont_update = false;
+
+	size_t len = strlen(name);
+
+	if (name[len - 1] == '?') {
+	    dont_update = true;
+	    len--;
+	}
 	if (strcmp(name, "pre-up") != 0
     	&& strcmp(name, "up") != 0
 	    && strcmp(name, "down") != 0
@@ -1296,12 +1313,16 @@ variable * set_variable(char *filename, char *name, char *value,
 	{
 		int j;
 		for (j = 0; j < *n_vars; j++) {
-			if (strcmp((*var)[j].name, name) == 0)
+			if (strncmpz(name, (*var)[j].name, len) == 0)
 			{
+				if (dont_update) {
+					return NULL;
+				}
+
 				free((*var)[j].value);
 				(*var)[j].value = strdup(value);
 				if (!(*var)[j].value) {
-				    <<report internal error and die>>
+					<<report internal error and die>>
 				}
 
 				return &((*var)[j]);
@@ -1319,7 +1340,7 @@ variable * set_variable(char *filename, char *name, char *value,
 		*var = new_var;
 	}
 
-	(*var)[*n_vars].name = strdup(name);
+	(*var)[*n_vars].name = strndup(name, len);
 	(*var)[*n_vars].value = strdup(value);
 
 	if (!(*var)[*n_vars].name) {
@@ -1346,7 +1367,8 @@ void convert_variables(char *filename, conversion *conversions,
 				if (c->newoption) {
 					variable *o = set_variable(filename, c->newoption, (*var)[j].value,
 						var, n_vars, max_vars);
-					c->fn(&o->value);
+					if (o)
+						c->fn(&o->value);
 				} else {
 					variable *o = &((*var)[j]);
 					c->fn(&o->value);
@@ -3091,7 +3113,7 @@ The slightly tricky thing we do here is use a [[strncmpz]] function,
 which allows us to check that a string represented by a [[char*]] and
 a length is the same as a [[NUL]] terminated string.
 
-<<execute function declarations>>=
+<<exported symbols>>=
 int strncmpz(char *l, char *r, size_t llen);
 @ 
 
