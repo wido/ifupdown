@@ -158,7 +158,7 @@ PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o link.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 DEFNFILES += meta.defn
@@ -2589,12 +2589,12 @@ child's environment as discussed previously, and we make use of two
 external globals, [[no_act]] and [[verbose]] and modify our behaviour
 based on those.
 
-<<execute function declarations>>=
-static int doit(char *str);
+<<exported symbols>>=
+int doit(char *str);
 @
 
 <<execute functions>>=
-static int doit(char *str) {
+int doit(char *str) {
 	assert(str);
 
 	if (verbose || no_act) {
@@ -3897,6 +3897,7 @@ Bringing an interface up or taking it down can be done thusly:
 
 	for (currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(liface, currif->logical_iface) == 0) {
+			<<configure the link>>
 			okay = 1;
 
 			<<add default options to [[currif]]>>
@@ -3922,6 +3923,12 @@ Bringing an interface up or taking it down can be done thusly:
 	}
 }
 @
+
+<<configure the link>>=
+	if (!okay && <<we're bringing interfaces up>>) {
+		if (!addr_link.method[0].up(currif, doit)) break;
+	}
+@ 
 
 <<create pidfile>>=
 {
@@ -5380,6 +5387,21 @@ method none
 	down
 @ 
 
+\section{Link pseudo address family}
+
+<<exported symbols>>=
+extern address_family addr_link;
+@ 
+
+<<link.defn>>=
+address_family link
+architecture any
+
+method none
+	description
+	up
+	down
+@ 
 
 \begin{flushleft}
 \bibliography{biblio}
