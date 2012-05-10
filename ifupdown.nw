@@ -501,7 +501,9 @@ typedef struct option_default option_default;
 struct conversion {
 	char *option;
 	char *newoption;
-	void (*fn)(interface_defn *, char **);
+	void (*fn)(interface_defn *, char **, int, char **);
+	int argc;
+	char ** argv;
 };
 
 struct option_default {
@@ -897,7 +899,17 @@ if (match($line, "conversion", $indent)) {
 	while (nextline && match($line, "", "$indent  ")) {
 		my $foo = $line;
 		$foo =~ s/^\s+//;
-		my ($option, $fn, $newoption) = split(/ /, $foo);
+		$foo =~ m/^\s*(\S+)\s+(\([^)]+\)|\S+)\s*(\S+)?\s*$/;
+		my $option = $1;
+		my $fn = $2;
+		my $newoption = $3;
+		if ($fn =~ m/^\((.*)\)$/) {
+			my @params = split(/ /, $1);
+			$fn = shift(@params);
+			$fn .= (", ".scalar(@params).", &{\"".join("\", \"", @params)."\"}");
+		} else {
+			$fn .= ", 0, NULL";
+		}
 		if ($newoption) {
 			$newoption =~ s/^=//;
 			die "Duplicate option use: $newoption (from $method/$option)" if (grep $_ eq $newoption, @variables);
@@ -908,7 +920,7 @@ if (match($line, "conversion", $indent)) {
 		}
 	}
 }
-print "\t\{ NULL, NULL, NULL }\n";
+print "\t\{ NULL, NULL, NULL, 0, NULL }\n";
 print "};\n";
 @
 
@@ -1368,10 +1380,10 @@ void convert_variables(char *filename, conversion *conversions,
 					variable *o = set_variable(filename, c->newoption, ifd->option[j].value,
 						&ifd->option, &ifd->n_options, &ifd->max_options);
 					if (o)
-						c->fn(ifd, &o->value);
+						c->fn(ifd, &o->value, c->argc, c->argv);
 				} else {
 					variable *o = &(ifd->option[j]);
-					c->fn(ifd, &o->value);
+					c->fn(ifd, &o->value, c->argc, c->argv);
 				}
 			}
 		}
@@ -4481,13 +4493,19 @@ int execable(char *);
 #define iface_is_link() (!_iface_has(ifd->real_iface, ":."))
 #define iface_has(s) _iface_has(ifd->real_iface, (s))
 int _iface_has(char *, char *);
-void cleanup_hwaddress(interface_defn *ifd, char **pparam);
-void make_hex_address(interface_defn *ifd, char **pparam);
-void compute_v4_addr(interface_defn *ifd, char **pparam);
-void compute_v4_mask(interface_defn *ifd, char **pparam);
+void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void make_hex_address(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void compute_v4_addr(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void compute_v4_mask(interface_defn *ifd, char **pparam, int argc, char ** argv);
 @ 
 
 <<common functions implementations>>=
+#ifdef __GNUC__
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
+#endif
+
 int _iface_has(char *iface, char *delims) {
 	char _iface[80];
 	strncpy(_iface, iface, sizeof(_iface));
@@ -4506,7 +4524,7 @@ int execable(char *program) {
 	return 0;
 }
 
-void cleanup_hwaddress(interface_defn *ifd, char **pparam) {
+void cleanup_hwaddress(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char ** argv UNUSED) {
 	char *rest = *pparam;
 		/* we're shrinking the text, so no realloc needed */
 	char *space = strchr(rest, ' ');
@@ -4527,7 +4545,7 @@ void cleanup_hwaddress(interface_defn *ifd, char **pparam) {
 	}
 }
 
-void make_hex_address(interface_defn *ifd, char **pparam)
+void make_hex_address(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char ** argv UNUSED)
 {
 	char addrcomp[4];
 	int maxlen = strlen("0000:0000");
@@ -4545,7 +4563,7 @@ void make_hex_address(interface_defn *ifd, char **pparam)
 
 #include <arpa/inet.h>
 
-void compute_v4_addr(interface_defn *ifd, char **pparam)
+void compute_v4_addr(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char ** argv UNUSED)
 {
 	char s[INET_ADDRSTRLEN * 2 + 2]; /* 2 is for slash and \0 */
 	strncpy(s, *pparam, sizeof(s));
@@ -4558,7 +4576,7 @@ void compute_v4_addr(interface_defn *ifd, char **pparam)
 	strcpy(*pparam, token);
 }
 
-void compute_v4_mask(interface_defn *ifd, char **pparam)
+void compute_v4_mask(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char ** argv UNUSED)
 {
 	char s[INET_ADDRSTRLEN * 2 + 2]; /* 2 is for slash and \0 */
 	strncpy(s, *pparam, sizeof(s));
