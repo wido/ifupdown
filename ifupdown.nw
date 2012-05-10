@@ -4493,8 +4493,8 @@ int _iface_has(char *iface, char *delims) {
 	strncpy(_iface, iface, sizeof(_iface));
 	_iface[sizeof(_iface) - 1] = 0;
 	strtok(_iface, delims);
-	int i = strtok(NULL, delims);
-	return (i != NULL);
+	void * token = strtok(NULL, delims);
+	return (token != NULL);
 }
 
 int execable(char *program) {
