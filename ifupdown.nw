@@ -4517,6 +4517,7 @@ void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char ** arg
 void make_hex_address(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void compute_v4_addr(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void compute_v4_mask(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void get_token(interface_defn *ifd, char **pparam, int argc, char ** argv);
 @ 
 
 <<common functions implementations>>=
@@ -4636,6 +4637,31 @@ void compute_v4_mask(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 	if (inet_ntop(AF_INET, &mask, s, sizeof(s)) == NULL) return;
 	*pparam = realloc(*pparam, strlen(s) + 1);
 	strcpy(*pparam, s);
+}
+
+void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char ** argv)
+{
+	if (argc == 0) return;
+
+	int token_no;
+	if (argc == 1) {
+		token_no = 0;
+	} else {
+		token_no = atoi(argv[1]);
+	}
+
+	char * s = strdup(*pparam);
+	char * token = strtok(s, argv[0]);
+	while (token_no > 0) {
+		token = strtok(NULL, argv[0]);
+		token_no--;
+	}
+	if (token) {
+	    strcpy(*pparam, token);
+	} else {
+	    *pparam[0] = 0;
+	}
+	free(s);
 }
 
 @ 
@@ -5436,9 +5462,12 @@ address_family link
 architecture any
 
 method none
-	description
-	up
-	down
+  description
+  conversion
+    iface (get_token . 0) =link
+    iface (get_token . 1) =vlan_id
+  up
+  down
 @ 
 
 \begin{flushleft}
