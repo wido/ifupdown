@@ -501,7 +501,7 @@ typedef struct option_default option_default;
 struct conversion {
 	char *option;
 	char *newoption;
-	void (*fn)(char **);
+	void (*fn)(interface_defn *, char **);
 };
 
 struct option_default {
@@ -1287,7 +1287,7 @@ NULL.
 variable * set_variable(char *filename, char *name, char *value, 
 		variable **var, int *n_vars, int *max_vars);
 void convert_variables(char *filename, conversion *conversions, 
-		variable **var, int *n_vars, int *max_vars);
+		interface_defn *ifd);
 @
 
 <<config functions>>=
@@ -1355,23 +1355,23 @@ variable * set_variable(char *filename, char *name, char *value,
 	return &((*var)[(*n_vars) - 1]);
 }
 
-void convert_variables(char *filename, conversion *conversions,
-		variable **var, int *n_vars, int *max_vars)
+void convert_variables(char *filename, conversion *conversions, 
+		interface_defn *ifd)
 {
 	conversion *c;
 	for (c = conversions; c && c->option && c->fn; c++) {
 		int j;
-		for (j = 0; j < *n_vars; j++) {
-			if (strcmp((*var)[j].name, c->option) == 0)
+		for (j = 0; j < ifd->n_options; j++) {
+			if (strcmp(ifd->option[j].name, c->option) == 0)
 			{
 				if (c->newoption) {
-					variable *o = set_variable(filename, c->newoption, (*var)[j].value,
-						var, n_vars, max_vars);
+					variable *o = set_variable(filename, c->newoption, ifd->option[j].value,
+						&ifd->option, &ifd->n_options, &ifd->max_options);
 					if (o)
-						c->fn(&o->value);
+						c->fn(ifd, &o->value);
 				} else {
-					variable *o = &((*var)[j]);
-					c->fn(&o->value);
+					variable *o = &(ifd->option[j]);
+					c->fn(ifd, &o->value);
 				}
 			}
 		}
@@ -4084,9 +4084,7 @@ Convert the options:
 
 <<convert options>>=
 {
-	convert_variables(argv[0], currif->method->conversions,
-		&currif->option, &currif->n_options,
-		&currif->max_options);
+	convert_variables(argv[0], currif->method->conversions, currif);
 }
 @
 
@@ -4470,13 +4468,15 @@ interfaces up and down.
 \section{Architecture-dependent functions}
 \subsection{Common functions}
 <<common functions declarations>>=
+#include "header.h"
+
 int execable(char *);
 #define iface_is_link() _iface_is_link(ifd->real_iface)
 int _iface_is_link(char *);
-void cleanup_hwaddress(char **pparam);
-void make_hex_address(char **pparam);
-void compute_v4_addr(char **pparam);
-void compute_v4_mask(char **pparam);
+void cleanup_hwaddress(interface_defn *ifd, char **pparam);
+void make_hex_address(interface_defn *ifd, char **pparam);
+void compute_v4_addr(interface_defn *ifd, char **pparam);
+void compute_v4_mask(interface_defn *ifd, char **pparam);
 @ 
 
 <<common functions implementations>>=
@@ -4494,7 +4494,7 @@ int execable(char *program) {
 	return 0;
 }
 
-void cleanup_hwaddress(char **pparam) {
+void cleanup_hwaddress(interface_defn *ifd, char **pparam) {
 	char *rest = *pparam;
 		/* we're shrinking the text, so no realloc needed */
 	char *space = strchr(rest, ' ');
@@ -4515,7 +4515,7 @@ void cleanup_hwaddress(char **pparam) {
 	}
 }
 
-void make_hex_address(char **pparam)
+void make_hex_address(interface_defn *ifd, char **pparam)
 {
 	char addrcomp[4];
 	int maxlen = strlen("0000:0000");
@@ -4533,7 +4533,7 @@ void make_hex_address(char **pparam)
 
 #include <arpa/inet.h>
 
-void compute_v4_addr(char **pparam)
+void compute_v4_addr(interface_defn *ifd, char **pparam)
 {
 	char * s = strdup(*pparam);
 	char * token = strtok(s, "/");
@@ -4543,7 +4543,7 @@ void compute_v4_addr(char **pparam)
 	strcpy(*pparam, token);
 }
 
-void compute_v4_mask(char **pparam)
+void compute_v4_mask(interface_defn *ifd, char **pparam)
 {
 	char * s = strdup(*pparam);
 	char * token = strtok(s, "/");
