@@ -3948,7 +3948,17 @@ Bringing an interface up or taking it down can be done thusly:
 
 <<configure the link>>=
 	if (!okay && <<we're bringing interfaces up>>) {
-		if (!addr_link.method[0].up(currif, doit)) break;
+		interface_defn link = {
+		    .real_iface = iface,
+		    .max_options = 0,
+		    .address_family = &addr_link,
+		    .method = &(addr_link.method[0]),
+		    .n_options = 0,
+		    .option = NULL
+		};
+		convert_variables(argv[0], link.method->conversions, &link);
+
+		if (!link.method->up(&link, doit)) break;
 	}
 @ 
 
