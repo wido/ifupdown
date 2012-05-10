@@ -4535,7 +4535,10 @@ void make_hex_address(interface_defn *ifd, char **pparam)
 
 void compute_v4_addr(interface_defn *ifd, char **pparam)
 {
-	char * s = strdup(*pparam);
+	char s[INET_ADDRSTRLEN * 2 + 2]; /* 2 is for slash and \0 */
+	strncpy(s, *pparam, sizeof(s));
+	s[sizeof(s) - 1] = 0;
+
 	char * token = strtok(s, "/");
 	if (!token) return;
 
@@ -4545,7 +4548,10 @@ void compute_v4_addr(interface_defn *ifd, char **pparam)
 
 void compute_v4_mask(interface_defn *ifd, char **pparam)
 {
-	char * s = strdup(*pparam);
+	char s[INET_ADDRSTRLEN * 2 + 2]; /* 2 is for slash and \0 */
+	strncpy(s, *pparam, sizeof(s));
+	s[sizeof(s) - 1] = 0;
+
 	char * token = strtok(s, "/");
 	if (!token) return;
 
@@ -4577,10 +4583,9 @@ void compute_v4_mask(interface_defn *ifd, char **pparam)
 		mask.s_addr = htonl(~((1L << (32 - maskwidth)) - 1));
 	}
 
-	char mask_str[INET_ADDRSTRLEN];
-	if (inet_ntop(AF_INET, &mask, mask_str, INET6_ADDRSTRLEN) == NULL) return;
-	*pparam = realloc(*pparam, strlen(mask_str) + 1);
-	strcpy(*pparam, mask_str);
+	if (inet_ntop(AF_INET, &mask, s, sizeof(s)) == NULL) return;
+	*pparam = realloc(*pparam, strlen(s) + 1);
+	strcpy(*pparam, s);
 }
 
 @ 
