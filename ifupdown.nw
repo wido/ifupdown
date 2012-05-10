@@ -1300,7 +1300,7 @@ variable * set_variable(char *filename, char *name, char *value,
 			{
 				free((*var)[j].value);
 				(*var)[j].value = strdup(value);
-				if (!(*var)[j].name) {
+				if (!(*var)[j].value) {
 				    <<report internal error and die>>
 				}
 
