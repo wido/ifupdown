@@ -1372,6 +1372,16 @@ void convert_variables(char *filename, conversion *conversions,
 {
 	conversion *c;
 	for (c = conversions; c && c->option && c->fn; c++) {
+		if (strcmp(c->option, "iface") == 0) {
+			if (c->newoption) {
+				variable *o = set_variable(filename, c->newoption, ifd->real_iface,
+					&ifd->option, &ifd->n_options, &ifd->max_options);
+				if (o)
+					c->fn(ifd, &o->value, c->argc, c->argv);
+				continue;
+			}
+		}
+
 		int j;
 		for (j = 0; j < ifd->n_options; j++) {
 			if (strcmp(ifd->option[j].name, c->option) == 0)
