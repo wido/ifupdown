@@ -906,7 +906,7 @@ if (match($line, "conversion", $indent)) {
 		if ($fn =~ m/^\((.*)\)$/) {
 			my @params = split(/ /, $1);
 			$fn = shift(@params);
-			$fn .= (", ".scalar(@params).", &{\"".join("\", \"", @params)."\"}");
+			$fn .= (", ".scalar(@params).", (char * []){\"".join("\", \"", @params)."\"}");
 		} else {
 			$fn .= ", 0, NULL";
 		}
