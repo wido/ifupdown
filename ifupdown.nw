@@ -4475,6 +4475,8 @@ int execable(char *);
 int _iface_is_link(char *);
 void cleanup_hwaddress(char **pparam);
 void make_hex_address(char **pparam);
+void compute_v4_addr(char **pparam);
+void compute_v4_mask(char **pparam);
 @ 
 
 <<common functions implementations>>=
@@ -4527,6 +4529,58 @@ void make_hex_address(char **pparam)
 	*pparam = realloc(*pparam, maxlen + 1);
 	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
 		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
+}
+
+#include <arpa/inet.h>
+
+void compute_v4_addr(char **pparam)
+{
+	char * s = strdup(*pparam);
+	char * token = strtok(s, "/");
+	if (!token) return;
+
+	*pparam = realloc(*pparam, strlen(token) + 1);
+	strcpy(*pparam, token);
+}
+
+void compute_v4_mask(char **pparam)
+{
+	char * s = strdup(*pparam);
+	char * token = strtok(s, "/");
+	if (!token) return;
+
+	uint8_t addr[sizeof(struct in_addr)];
+	struct in_addr mask;
+	if (inet_pton(AF_INET, token, &addr) != 1) return;
+	token = strtok(NULL, "/");
+	int maskwidth = -1;
+	if (!token) {
+		if (addr[0] <= 127) {
+		    maskwidth = 8;
+		} else if ((addr[0] >= 128) && (addr[0] <= 191)) {
+		    maskwidth = 16;
+		} else if ((addr[0] >= 192) && (addr[0] <= 223)) {
+		    maskwidth = 24;
+		} else {
+		    maskwidth = 32;
+		}
+	} else {
+		switch (inet_pton(AF_INET, token, &mask)) {
+			case -1:
+				return;
+
+			case 0:
+				if (sscanf(token, "%d", &maskwidth) != 1) return;
+		}
+	}
+	if (maskwidth != -1) {
+		mask.s_addr = htonl(~((1L << (32 - maskwidth)) - 1));
+	}
+
+	char mask_str[INET_ADDRSTRLEN];
+	if (inet_ntop(AF_INET, &mask, mask_str, INET6_ADDRSTRLEN) == NULL) return;
+	*pparam = realloc(*pparam, strlen(mask_str) + 1);
+	strcpy(*pparam, mask_str);
 }
 
 @ 
@@ -4669,6 +4723,7 @@ method static
 
   conversion
     hwaddress cleanup_hwaddress
+    address compute_v4_mask =netmask?
 
   up
     ip addr add %address%[[/%netmask%]] [[broadcast %broadcast%]] \
