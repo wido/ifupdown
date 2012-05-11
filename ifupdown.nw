@@ -3936,6 +3936,8 @@ Bringing an interface up or taking it down can be done thusly:
 		}
 	}
 
+	<<deconfigure the link>>
+
 	if (!okay && !force) {
 		fprintf(stderr, "Ignoring unknown interface %s=%s.\n", 
 			iface, liface);
@@ -3959,6 +3961,23 @@ Bringing an interface up or taking it down can be done thusly:
 		convert_variables(argv[0], link.method->conversions, &link);
 
 		if (!link.method->up(&link, doit)) break;
+		if (link.option) free(link.option);
+	}
+@ 
+
+<<deconfigure the link>>=
+	if (okay && <<we're taking interfaces down>>) {
+		interface_defn link = {
+		    .real_iface = iface,
+		    .max_options = 0,
+		    .address_family = &addr_link,
+		    .method = &(addr_link.method[0]),
+		    .n_options = 0,
+		    .option = NULL
+		};
+		convert_variables(argv[0], link.method->conversions, &link);
+
+		if (!link.method->down(&link, doit)) break;
 		if (link.option) free(link.option);
 	}
 @ 
