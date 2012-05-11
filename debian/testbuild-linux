@@ -266,6 +266,7 @@ ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::1/64 dev eth0
 
 run-parts --exit-on-error --verbose /etc/network/if-up.d
+if test -d /sys/class/net/eth0 -a             ! -d /sys/class/net/eth0.1 ;     then         ip link set up dev eth0;         ip link add link eth0 name eth0.1 type vlan id 1;     fi
 Configuring interface eth0.1=eth0.1 (inet6)
 run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
