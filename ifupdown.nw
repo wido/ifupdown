@@ -3959,6 +3959,7 @@ Bringing an interface up or taking it down can be done thusly:
 		convert_variables(argv[0], link.method->conversions, &link);
 
 		if (!link.method->up(&link, doit)) break;
+		if (link.option) free(link.option);
 	}
 @ 
 
