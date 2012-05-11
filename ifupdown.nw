@@ -5468,6 +5468,12 @@ method none
     iface (get_token . 0) =link
     iface (get_token . 1) =vlan_id
   up
+    if test -d /sys/class/net/%link% -a \
+            ! -d /sys/class/net/%iface% ; \
+    then \
+        ip link set up dev %link%; \
+        ip link add link %link% name %iface% type vlan id %vlan_id%; \
+    fi if (iface_has(".") && execable("/sbin/ip"))
   down
 @ 
 
