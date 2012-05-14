@@ -3910,10 +3910,29 @@ Bringing an interface up or taking it down can be done thusly:
 	<<update ifupdown state>>
 
 	if (<<we're listing known interfaces>>) {
-	    currif = defn->ifaces;
-	    currif->real_iface = iface;
-	    cmds(currif);
-	    currif->real_iface = NULL;
+	    for (currif = defn->ifaces; currif; currif = currif->next) {
+		    if (strcmp(liface, currif->logical_iface) == 0) {
+			okay = 1;
+		    }
+	    }
+	    if (!okay) {
+		    mapping_defn *currmap;
+		    for (currmap = defn->mappings; currmap; currmap = currmap->next) {
+			    int i;
+			    for (i = 0; i < currmap->n_matches; i++) {
+				    <<[[continue]] unless mapping matches>>
+				    okay = 1;
+				    break;
+			    }
+		    }
+	    }
+	    if (okay) {
+		    currif = defn->ifaces;
+		    currif->real_iface = iface;
+		    cmds(currif);
+		    currif->real_iface = NULL;
+	    }
+	    okay = 0;
 	    continue;
 	}
 
