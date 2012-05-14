@@ -1,5 +1,6 @@
 ifupdown (0.7~rc3) unstable; urgency=low
 
+  * Upload to unstable.
   * Don't refer to README from netbase any more.
   * Internal changes:
     - Make set_variable() able to set variables conditionally.
