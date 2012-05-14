@@ -1,3 +1,24 @@
+ifupdown (0.7~rc3) unstable; urgency=low
+
+  * Don't refer to README from netbase any more.
+  * Internal changes:
+    - Make set_variable() able to set variables conditionally.
+    - Improve conversions interface.
+    - Add some support for interface link configuration.
+    - Don't leak memory in some functions.
+  * Configure VLANs automatically (Closes: #520436).
+  * Calculate netmask internally, so even if a user haven't supplied
+    one or have used CIDR notation, hook scripts will have it properly
+    specified.
+  * Declare Breaks/Replaces relationship against netbase << 5.0.
+  * Merge changes from Ubuntu (thanks to Stéphane Graber):
+    - Mark package as Multi-Arch: foreign.
+    - Update statefile paths in the 'contrib' scripts and in the
+      noweb source.
+  * Update tests.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 14 May 2012 11:42:08 +0200
+
 ifupdown (0.7~rc2+experimental) experimental; urgency=low
 
   * Try to bring hotplug interfaces up on initscript restart
