@@ -9,7 +9,7 @@ ifupdown (0.7~rc3) unstable; urgency=low
   * Configure VLANs automatically (Closes: #520436).
   * Calculate netmask internally, so even if a user haven't supplied
     one or have used CIDR notation, hook scripts will have it properly
-    specified.
+    specified in IF_NETMASK environment variable.
   * Declare Breaks/Replaces relationship against netbase << 5.0.
   * Merge changes from Ubuntu (thanks to Stéphane Graber):
     - Mark package as Multi-Arch: foreign.
