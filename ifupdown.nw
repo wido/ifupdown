@@ -5480,7 +5480,7 @@ extern address_family addr_link;
 
 <<link.defn>>=
 address_family link
-architecture any
+architecture linux
 
 method none
   description
@@ -5495,7 +5495,15 @@ method none
         ip link add link %link% name %iface% type vlan id %vlan_id%; \
     fi if (iface_has(".") && execable("/sbin/ip"))
   down
-    ip link del %iface% if (iface_has(".") && execable("/sbin/ip"))
+    ip link del %iface% if (iface_has("."))
+
+architecture kfreebsd
+
+method none
+  description
+  up
+  down
+
 @ 
 
 \begin{flushleft}
