@@ -5493,7 +5493,7 @@ method none
     then \
         ip link set up dev %link%; \
         ip link add link %link% name %iface% type vlan id %vlan_id%; \
-    fi if (iface_has(".") && execable("/sbin/ip"))
+    fi if (iface_has("."))
   down
     ip link del %iface% if (iface_has("."))
 
