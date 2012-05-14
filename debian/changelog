@@ -15,6 +15,7 @@ ifupdown (0.7~rc3) unstable; urgency=low
     - Mark package as Multi-Arch: foreign.
     - Update statefile paths in the 'contrib' scripts and in the
       noweb source.
+  * Temporarily unapply patch for #547587.
   * Update tests.
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 14 May 2012 11:42:08 +0200
