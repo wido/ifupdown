@@ -2,14 +2,14 @@
 ifupdown
 ========
 
-ifup and ifdown are two utilities to assist with basic interface
+ifupdown is a set of utilities to assist with basic interface
 manipulation.
 
 
 Building
 --------
 
-To build from CVS, you need to generate the tangled sources from the
+To build from Mercurial, you need to generate the tangled sources from the
 literate source. To do this, you'll need Norman Ramsey's noweb program
 (nowebm.deb for Debian users). The following instructions should be enough
 to build from nothing but ifupdown.nw.
