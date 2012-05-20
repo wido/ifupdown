@@ -2125,7 +2125,14 @@ if (strcmp(firstword, "pre-down") == 0) {
         {
 		for (i = 0; i < currif->n_options; i++) {
 			if (strcmp(currif->option[i].name, firstword) == 0) {
-				<<report duplicate option and die>>
+				size_t l = strlen(currif->option[i].value);
+				currif->option[i].value = realloc(currif->option[i].value, l + strlen(rest) + 2); /* 2 for NL and NULL */
+				if (!currif->option[i].value) {
+					<<report internal error and die>>
+				}
+
+				currif->option[i].value[l] = '\n';
+				strcpy(&(currif->option[i].value[l + 1]), rest);
 			}
 		}
 	}
@@ -2285,11 +2292,6 @@ return NULL;
 <<report [[iface_name]] as [[allow_up]] duplicate, die>>=
 fprintf(stderr, "%s:%d: interface %s declared allow-%s twice\n", 
 	filename, line, iface_name, allow_up->when);
-return NULL;
-@
-
-<<report duplicate option and die>>=
-fprintf(stderr, "%s:%d: duplicate option\n", filename, line);
 return NULL;
 @
 
@@ -2678,11 +2680,12 @@ int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 
 int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
 	char buf[100];
-	snprintf(buf, sizeof(buf),
-		"run-parts --exit-on-error %s /etc/network/if-%s.d",
+	snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d",
 		verbose ? "--verbose" : "", opt);
 
-	return (*exec)(buf);
+	(*exec)(buf); 
+
+	return 1;
 }
 @ 
 
@@ -5498,7 +5501,7 @@ extern address_family addr_link;
 
 <<link.defn>>=
 address_family link
-architecture any
+architecture linux
 
 method none
   description
@@ -5511,9 +5514,17 @@ method none
     then \
         ip link set up dev %link%; \
         ip link add link %link% name %iface% type vlan id %vlan_id%; \
-    fi if (iface_has(".") && execable("/sbin/ip"))
+    fi if (iface_has("."))
   down
-    ip link del %iface% if (iface_has(".") && execable("/sbin/ip"))
+    ip link del %iface% if (iface_has("."))
+
+architecture kfreebsd
+
+method none
+  description
+  up
+  down
+
 @ 
 
 \begin{flushleft}
