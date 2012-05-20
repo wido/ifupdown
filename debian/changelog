@@ -48,8 +48,8 @@ ifupdown (0.7~rc1+experimental) experimental; urgency=low
   * Change --all behaviour:
     - If ifup or ifquery is called with the --all option, if doesn't just
       bring up all interfaces marked as "auto", but all interfaces of a
-      specified class, "auto" by default. For the most uses, this doesn't
-      change anything, but lets all the interfaces of a specific class to be
+      specified class, "auto" by default. For most uses, this doesn't
+      change anything, but lets all the interfaces of a specific class be
       brought up or queried.
   * Support cross-compilation, move Debian-specific things out of
     the Makefile (Closes: #666084).
