@@ -3559,7 +3559,7 @@ struct option long_opts[] = {
 	{"all",         no_argument,       NULL, 'a'},
 	{"allow",	required_argument, NULL,  3 },
 	{"interfaces",  required_argument, NULL, 'i'},
-	{"exclude",     required_argument, NULL, 'x'},
+	{"exclude",     required_argument, NULL, 'X'},
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"force",       no_argument,       NULL,  2 },
@@ -3727,7 +3727,7 @@ case 2:
 	break;
 @
 <<[[getopt]] possibilities>>=
-case 'e':
+case 'X':
 	excludeint = strdup(optarg);
 	break;
 @ 
