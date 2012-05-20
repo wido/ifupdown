@@ -2295,11 +2295,6 @@ fprintf(stderr, "%s:%d: interface %s declared allow-%s twice\n",
 return NULL;
 @
 
-<<report duplicate option and die>>=
-fprintf(stderr, "%s:%d: duplicate option\n", filename, line);
-return NULL;
-@
-
 <<report duplicate script in mapping and die>>=
 fprintf(stderr, "%s:%d: duplicate script in mapping\n", filename, line);
 return NULL;
