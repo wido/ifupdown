@@ -3553,7 +3553,7 @@ struct option long_opts[] = {
 	{"all",         no_argument,       NULL, 'a'},
 	{"allow",	required_argument, NULL,  3 },
 	{"interfaces",  required_argument, NULL, 'i'},
-	{"exclude",     required_argument, NULL, 'e'},
+	{"exclude",     required_argument, NULL, 'x'},
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"force",       no_argument,       NULL,  2 },
