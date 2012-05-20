@@ -2125,7 +2125,14 @@ if (strcmp(firstword, "pre-down") == 0) {
         {
 		for (i = 0; i < currif->n_options; i++) {
 			if (strcmp(currif->option[i].name, firstword) == 0) {
-				<<report duplicate option and die>>
+				size_t l = strlen(currif->option[i].value);
+				currif->option[i].value = realloc(currif->option[i].value, l + strlen(rest) + 2); /* 2 for NL and NULL */
+				if (!currif->option[i].value) {
+					<<report internal error and die>>
+				}
+
+				currif->option[i].value[l] = '\n';
+				strcpy(&(currif->option[i].value[l + 1]), rest);
 			}
 		}
 	}
