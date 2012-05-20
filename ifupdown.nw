@@ -2289,6 +2289,11 @@ fprintf(stderr, "%s:%d: unknown method\n", filename, line);
 return NULL;
 @
 
+<<report unknown interface and die>>=
+fprintf(stderr, "Unknown interface %s\n", iface);
+return 1;
+@
+
 <<report [[iface_name]] as [[allow_up]] duplicate, die>>=
 fprintf(stderr, "%s:%d: interface %s declared allow-%s twice\n", 
 	filename, line, iface_name, allow_up->when);
@@ -3365,6 +3370,7 @@ function. It's put together in a fairly straightforward way.
 Equally, there's nothing particularly special about our headers.
 
 <<main headers>>=
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -3849,7 +3855,8 @@ A broad overview of what we'll actually be doing is as follows:
 		if (<<we're [[--exclude]]ing this interface>>)  
 			continue;
 
-		if ((<<we're bringing interfaces up>> || <<we're querying an interface's config>>) && run_mappings) {
+		bool have_mapping = false;
+		if ((<<we're bringing interfaces up>> && run_mappings) || <<we're querying an interface's config>>) {
 			<<run mappings>>
 		}
 
@@ -3895,6 +3902,14 @@ Actually running a mapping is fairly straightforward, thanks to our
 previous handywork.
 
 <<run mapping>>=
+if (<<we're querying an interface's config>> && !run_mappings) {
+	if (verbose) {
+		fprintf(stderr, "Not running mapping scripts for %s\n",
+			liface);
+	}
+	have_mapping = true;
+	break;
+}
 if (verbose) {
 	fprintf(stderr, "Running mapping script %s on %s\n",
 		currmap->script, liface);
@@ -3959,6 +3974,17 @@ Bringing an interface up or taking it down can be done thusly:
 	}
 
 	<<deconfigure the link>>
+
+	if (!okay && <<we're querying an interface's config>>) {
+		if (!run_mappings) {
+			if (have_mapping) {
+				okay = 1;
+			}
+		}
+		if (!okay) {
+			<<report unknown interface and die>>
+		}
+	}
 
 	if (!okay && !force) {
 		fprintf(stderr, "Ignoring unknown interface %s=%s.\n", 
