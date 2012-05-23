@@ -1,3 +1,18 @@
+ifupdown (0.7~rc4) unstable; urgency=low
+
+  * Accept duplicate options in /etc/network/interfaces, join them using
+    newline as a delimiter.
+  * If an interface isn't defined, but mentioned in auto or allow statement,
+    don't mention it in ifquery output.
+  * Change shortcut for --exclude to -X (was -e previously).
+  * Make ifquery return false if interface isn't defined.
+  * Fix typos in the changelog.
+  * Calculate broadcast address internally.
+  * Update tests.
+  * Update README.
+
+ -- ... Mon, 14 May 2012 11:42:08 +0200
+
 ifupdown (0.7~rc3) unstable; urgency=low
 
   * Upload to unstable.
