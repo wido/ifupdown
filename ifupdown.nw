@@ -4835,6 +4835,26 @@ unsigned int mylinux(int maj, int rev, int min) {
 <<common functions implementations>>
 @ 
 
+\subsection{Hurd-specific functions}
+
+<<archhurd.h>>=
+/* no OS-specific functions yet */
+<<common functions declarations>>
+@
+
+<<archhurd.c>>=
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#include <sys/stat.h>
+
+#include "archhurd.h"
+
+<<common functions implementations>>
+@ 
+
 \section{Linux Address Families}
 \subsection{IPv4 Address Family}
 
@@ -5535,6 +5555,189 @@ method dhcp
 
 @ 
 
+\section{Hurd Address Families}
+\subsection{IPv4 Address Family}
+
+<<inet.defn>>=
+architecture hurd
+
+<<Hurd inet methods>>
+@ 
+
+<<Hurd inet methods>>=
+<<Hurd inet methods: loopback>>
+
+<<Hurd inet methods: static>>
+
+<<inet methods: manual>>
+
+<<Hurd inet methods: dhcp>>
+
+<<inet methods: bootp>>
+
+<<inet methods: ppp>>
+
+<<inet methods: wvdial>>
+
+<<inet methods: ipv4ll>>
+@ 
+
+<<Hurd inet methods: loopback>>=
+method loopback
+  description
+    This method may be used to define the IPv4 loopback interface.
+
+  up
+    inetutils-ifconfig --interface %iface% 127.0.0.1 --up
+
+  down
+    inetutils-ifconfig --interface %iface% --down
+@ 
+
+<<Hurd inet methods: static>>=
+method static
+  description
+    This method may be used to define Ethernet interfaces with statically
+    allocated IPv4 addresses.
+      
+  options
+    address address             -- Address (dotted quad/netmask) *required*
+    netmask mask                -- Netmask (dotted quad or CIDR)
+    broadcast broadcast_address -- Broadcast address (dotted quad)
+    metric metric               -- Routing metric for default gateway (integer)
+    gateway address             -- Default gateway (dotted quad)
+    pointopoint address         -- Address of other end point (dotted quad). \
+                                   Note the spelling of "point-to".
+    hwaddress address           -- Link local address (Not yet supported)
+    mtu size                    -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[Warning: Option hwaddress: %hwaddress% not yet supported]]
+    inetutils-ifconfig --interface %iface% --address %address% [[--netmask %netmask%]] \
+    [[--broadcast %broadcast%]] [[--mtu %mtu%]] --up
+    [[fsysopts /servers/socket/2 $(showtrans /servers/socket/2) --gateway %gateway% ]]
+
+  down
+    inetutils-ifconfig --interface %iface% --down
+@
+
+<<Hurd inet methods: dhcp>>=
+method dhcp
+  description
+    This method may be used to obtain an address via DHCP with any of
+    the tools: dhclient, udhcpc, dhcpcd.
+    (They have been listed in their order of precedence.)
+    If you have a complicated DHCP setup you should
+    note that some of these clients use their own configuration files
+    and do not obtain their configuration information via *ifup*.
+
+  options
+    hostname hostname       -- Hostname to be requested (dhcpcd, udhcpc)
+    leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
+    vendor vendor           -- Vendor class identifier (dhcpcd)
+    client client           -- Client identifier (dhcpcd, udhcpc)
+    hwaddress address       -- Hardware Address (Not yet supported)
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[Warning: Option hwaddress: %hwaddress% not yet supported]]
+    dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
+           [[-c %client%]] \
+        elsif (execable("/sbin/udhcpc"))
+    dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
+           [[-l %leasetime%]] %iface% \
+        elsif (execable("/sbin/dhcpcd"))
+
+  down
+    dhclient -v -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+    kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid) \
+        elsif (execable("/sbin/udhcpc"))
+    dhcpcd -k %iface% \
+        elsif (execable("/sbin/dhcpcd"))
+
+    ifconfig --interface %iface% --down
+@ 
+
+\subsection{IPv6 Address Family}
+
+<<inet6.defn>>=
+architecture hurd
+
+method loopback
+  description
+    This method may be used to define the IPv6 loopback interface.
+  up
+    [[FIXME: Add proper commands here for ipv6]]
+  down
+    [[FIXME: Add proper commands here for ipv6]]
+
+method static
+  description
+    This method may be used to define interfaces with statically assigned
+    IPv6 addresses.
+
+  options
+    address address        -- Address (colon delimited) *required*
+    netmask mask           -- Netmask (number of bits, eg 64) *required*
+    gateway address        -- Default gateway (colon delimited)
+    media type             -- Medium type, driver dependent
+    hwaddress address      -- Hardware address  (Not yet supported)
+    mtu size               -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[FIXME: Add proper commands here for ipv6]]
+    [[Warning: Option media: %media% not yet supported]]
+    [[Warning: Option hwaddress: %hwaddress% not yet supported]]
+
+  down
+    [[FIXME: Add proper commands here for ipv6]]
+
+method manual
+  description
+    This method may be used to define interfaces for which no configuration
+    is done by default.  Such interfaces can be configured manually by
+    means of *up* and *down* commands or /etc/network/if-*.d scripts.
+
+  up
+
+  down
+
+method dhcp
+  description
+    This method may be used to obtain network interface configuration via
+    stateful DHCPv6 with dhclient.  In stateful DHCPv6, the DHCP server is
+    responsible for assigning addresses to clients.
+
+  options
+    hwaddress address      -- Hardware address (Not yet supported)
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    [[Warning: Option hwaddress: %hwaddress% not yet supported]]
+    inetutils-ifconfig --interface %iface% --up
+    dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+
+  down
+    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (execable("/sbin/dhclient"))
+    inetutils-ifconfig --interface %iface% --down
+
+@ 
+
 \section{Internal address metafamily}
 
 <<address family declarations>>=
@@ -5581,6 +5784,13 @@ method none
     ip link del %iface% if (iface_has("."))
 
 architecture kfreebsd
+
+method none
+  description
+  up
+  down
+
+architecture hurd
 
 method none
   description
