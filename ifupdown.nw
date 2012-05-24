@@ -553,7 +553,7 @@ our C program.
 
 use strict;
 
-<<determine the target architecrure>>
+<<determine the target architecture>>
 
 # declarations
 <<defn2c variables>>
@@ -568,7 +568,7 @@ use strict;
 @ 
 
 First of all, we determine the target architecture by calling [[dpkg-architecture]] and stripping the trailing newline:
-<<determine the target architecrure>>=
+<<determine the target architecture>>=
 my $DEB_HOST_ARCH_OS = `dpkg-architecture -qDEB_HOST_ARCH_OS`;
 
 $DEB_HOST_ARCH_OS =~ s/\n//;
@@ -977,7 +977,7 @@ So we'll use a similar structure to [[defn2c.pl]].
 
 use strict;
 
-<<determine the target architecrure>>
+<<determine the target architecture>>
 
 # declarations
 <<defn2man variables>>
