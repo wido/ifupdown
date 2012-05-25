@@ -4651,6 +4651,7 @@ void make_hex_address(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED
 		return;
 
 	*pparam = realloc(*pparam, maxlen + 1);
+	if (*pparam == NULL) return;
 	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
 		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
 }
@@ -4667,6 +4668,7 @@ void compute_v4_addr(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 	if (!token) return;
 
 	*pparam = realloc(*pparam, strlen(token) + 1);
+	if (*pparam == NULL) return;
 	strcpy(*pparam, token);
 }
 
@@ -4709,6 +4711,7 @@ void compute_v4_mask(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 
 	if (inet_ntop(AF_INET, &mask, s, sizeof(s)) == NULL) return;
 	*pparam = realloc(*pparam, strlen(s) + 1);
+	if (*pparam == NULL) return;
 	strcpy(*pparam, s);
 }
 
@@ -4743,6 +4746,7 @@ void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, c
 	char buffer[INET_ADDRSTRLEN + 1];
 	if (inet_ntop(AF_INET, &addr, buffer, sizeof(buffer)) == NULL) return;
 	*pparam = realloc(*pparam, strlen(buffer) + 1);
+	if (*pparam == NULL) return;
 	strcpy(*pparam, buffer);
 }
 
