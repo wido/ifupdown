@@ -3963,9 +3963,13 @@ Bringing an interface up or taking it down can be done thusly:
 
 			<<add options from command line to [[currif]]>>
 
+			currif->real_iface = iface;
+
 			<<convert options>>
 
 			<<run commands for [[currif]]; set [[failed]] on error>>
+
+			currif->real_iface = NULL;
 
 			if (failed) break;
 			/* Otherwise keep going: this interface may have
@@ -4058,8 +4062,6 @@ Bringing an interface up or taking it down can be done thusly:
 
 <<run commands for [[currif]]; set [[failed]] on error>>=
 {
-	currif->real_iface = iface;
-
 	if (verbose) {
 		fprintf(stderr, "%s interface %s=%s (%s)\n", 
 			<<we're querying an interface's config>> ? "Querying" :
@@ -4092,8 +4094,6 @@ Bringing an interface up or taking it down can be done thusly:
 	}
 
 	<<remove pidfile>>
-
-	currif->real_iface = NULL;
 }
 @ 
 
