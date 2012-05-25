@@ -858,12 +858,12 @@ if (match($line, "options", $indent)) {
 print "static option_default _${method}_default[] = {\n";
 if (@options) {
 	foreach my $o (@options) {
-		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[(\S[^]]*)\]\s*)?$/) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[([^]]*)\]\s*)?$/) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
 			push @variables, $opt;
-			if ($5) {
+			if ($4) {
 				print "\t{ \"$opt\", \"$5\" },\n";
 			}
 		}
@@ -1145,7 +1145,7 @@ print ".B Options\n";
 print ".RS\n";
 if (@options) {
 	foreach my $o (@options) {
-		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[(\S[^]]*)\]\s*)?$/) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[([^]]*)\]\s*)?$/) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
@@ -3177,7 +3177,11 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	{
 		for (i = 0; i < ifd->n_options; i++) {
 			if (strncmpz(id, ifd->option[i].name, idlen) == 0) {
-				return strdup(ifd->option[i].value);
+				if (strlen(ifd->option[i].value) > 0) {
+					return strdup(ifd->option[i].value);
+				} else {
+					return NULL;
+				}
 			}
 		}
 	}
