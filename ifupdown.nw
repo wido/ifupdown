@@ -4590,6 +4590,7 @@ void make_hex_address(interface_defn *ifd, char **pparam, int argc, char ** argv
 void compute_v4_addr(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void compute_v4_mask(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void set_preferred_lft(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void get_token(interface_defn *ifd, char **pparam, int argc, char ** argv);
 @ 
 
@@ -4748,6 +4749,17 @@ void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, c
 	*pparam = realloc(*pparam, strlen(buffer) + 1);
 	if (*pparam == NULL) return;
 	strcpy(*pparam, buffer);
+}
+
+void set_preferred_lft(interface_defn *ifd, char **pparam, int argc UNUSED, char ** argv UNUSED)
+{
+	if (!ifd->real_iface) return;
+	if (iface_has(":")) {
+		char s[] = "0";
+		*pparam = realloc(*pparam, sizeof(s));
+		if (*pparam == NULL) return;
+		strcpy(*pparam, s);
+	}
 }
 
 void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char ** argv)
@@ -5159,9 +5171,11 @@ method static
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
     scope                  -- Address validity scope. Possible values: \
                               global, site, link, host
+    preferred-lifetime int -- Time that address remains preferred []
 
   conversion
     hwaddress cleanup_hwaddress
+    preferred-lifetime set_preferred_lft
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
@@ -5170,7 +5184,7 @@ method static
     sysctl net.ipv6.conf.%iface/.//%.autoconf=0
     [[sysctl net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
-    ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface%
+    ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
     [[ ip -6 route add default via %gateway% dev %iface% ]]
 
   down
