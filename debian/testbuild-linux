@@ -27,6 +27,7 @@ iface eth2 inet static
 EOF
 cat >tests/up.1 <<EOF
 ====stdout====
+Failed to bring up eth0.
 ====stderr====
 run-parts --verbose /etc/network/if-pre-up.d
 Configuring interface eth0=eth0 (inet)
@@ -53,6 +54,49 @@ ip link set dev eth2   up
 echo hi
 echo hello
 run-parts --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet6)
+run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+ip link set dev eth0   up
+ip -6 addr add 3ffe:ffff:100:f101::2/64  dev eth0 
+
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet6)
+run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+ip link set dev eth0   up
+ip -6 addr add 3ffe:ffff:100:f101::3/64  dev eth0 
+
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet6)
+run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+ip link set dev eth0   up
+ip -6 addr add 3ffe:ffff:100:f101::4  dev eth0 
+
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet6)
+run-parts --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+ip link set dev eth0   up
+ip -6 addr add 64  dev eth0 
+
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet6)
+Missing required variable: address
+Missing required configuration variables for interface eth0/inet6.
 run-parts --verbose /etc/network/if-up.d
 EOF
 
@@ -138,6 +182,17 @@ iface eth0 inet static
 iface eth0 inet6 static
   address 3ffe:ffff:100:f101::1
   netmask 64
+iface eth0 inet6 static
+  address 3ffe:ffff:100:f101::2/64
+iface eth0 inet6 static
+  address 3ffe:ffff:100:f101::3/64
+  netmask 64
+iface eth0 inet6 static
+  address 3ffe:ffff:100:f101::4/
+iface eth0 inet6 static
+  address /64
+iface eth0 inet6 static
+  address /
 EOF
 cat >tests/up.3 <<EOF
 ====stdout====
