@@ -5132,9 +5132,9 @@ method auto
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    sysctl net.ipv6.conf.%iface/.//%.accept_ra=1
-    sysctl net.ipv6.conf.%iface/.//%.autoconf=1
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
+    sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
     dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
@@ -5167,7 +5167,7 @@ method static
     hwaddress address      -- Hardware address
     mtu size               -- MTU size
     accept_ra int          -- Accept router advertisements (0=off, 1=on)
-    autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
+    autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on) [0]
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
     scope                  -- Address validity scope. Possible values: \
                               global, site, link, host
@@ -5179,10 +5179,9 @@ method static
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    [[sysctl net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
-    sysctl net.ipv6.conf.%iface/.//%.autoconf=0
-    [[sysctl net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
     [[ ip -6 route add default via %gateway% dev %iface% ]]
@@ -5216,8 +5215,8 @@ method dhcp
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[ip link set dev %iface% address %hwaddress%]]
-    sysctl net.ipv6.conf.%iface/.//%.accept_ra=0
+    sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=0
+    ip link set dev %iface% [[address %hwaddress%]] up
     dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
@@ -5248,7 +5247,7 @@ method v4tunnel
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up [[mtu %mtu%]]
-    [[ ip addr add %address%/%netmask% dev %iface% ]]
+    [[ ip addr add %address%[[/%netmask%]] dev %iface% ]]
     [[ ip route add %gateway% dev %iface% ]]
     [[ ip route add ::/0 via %gateway% dev %iface% ]]
 
