@@ -906,6 +906,11 @@ if (match($line, "conversion", $indent)) {
 		if ($fn =~ m/^\((.*)\)$/) {
 			my @params = split(/ /, $1);
 			$fn = shift(@params);
+			foreach (@params) {
+				if ($_ =~ m/^"(.*)"$/) {
+				    $_ = $1;
+				}
+			}
 			$fn .= (", ".scalar(@params).", (char * []){\"".join("\", \"", @params)."\"}");
 		} else {
 			$fn .= ", 0, NULL";
