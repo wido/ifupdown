@@ -623,6 +623,7 @@ doesn't particularly matter.
 
 <<defn2c variables>>=
 my %methods = ();
+my %ourmethods = ();
 @
 
 We'll use standard names, such as [[foo_up]], [[foo_down]], and
@@ -632,8 +633,9 @@ static to avoid name conflicts.
 
 <<output [[methods]] data structure>>=
 print "static method methods[] = {\n";
+%ourmethods = %methods if (our_arch());
 my $method;
-foreach $method (keys %methods) {
+foreach $method (keys %ourmethods) {
 	print <<EOF;
 	{
 		"$method",
@@ -775,9 +777,13 @@ was.
 
 <<defn2c subroutines>>=
 sub get_architecture {
-	%methods = () if (!our_arch());
+        %ourmethods = %methods if (our_arch());
 	$arch = $_[0];
-	print "#include \"arch${DEB_HOST_ARCH_OS}.h\"\n\n\n" if (our_arch());
+	if (!our_arch) {
+		%methods = ();
+	} else {
+		print "#include \"arch${DEB_HOST_ARCH_OS}.h\"\n\n\n";
+	}
 	nextline;
 }
 @ 
