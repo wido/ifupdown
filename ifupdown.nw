@@ -2513,7 +2513,7 @@ We can then go ahead and fill in the environment.
 
 <<add [[IF_]]option to environment>>=
 *(environend++) = setlocalenv("IF_%s=%s", iface->option[i].name,
-                              iface->option[i].value);
+                              iface->option[i].value ? iface->option[i].value : "");
 *environend = NULL;
 @
 
@@ -3177,6 +3177,9 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	{
 		for (i = 0; i < ifd->n_options; i++) {
 			if (strncmpz(id, ifd->option[i].name, idlen) == 0) {
+				if (!ifd->option[i].value) {
+				    return NULL;
+				}
 				if (strlen(ifd->option[i].value) > 0) {
 					return strdup(ifd->option[i].value);
 				} else {
