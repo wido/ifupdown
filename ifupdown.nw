@@ -864,12 +864,12 @@ if (match($line, "options", $indent)) {
 print "static option_default _${method}_default[] = {\n";
 if (@options) {
 	foreach my $o (@options) {
-		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[(\S[^]]*)\]\s*)?$/) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[([^]]*)\]\s*)?$/) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
 			push @variables, $opt;
-			if ($5) {
+			if ($4) {
 				print "\t{ \"$opt\", \"$5\" },\n";
 			}
 		}
@@ -912,6 +912,11 @@ if (match($line, "conversion", $indent)) {
 		if ($fn =~ m/^\((.*)\)$/) {
 			my @params = split(/ /, $1);
 			$fn = shift(@params);
+			foreach (@params) {
+				if ($_ =~ m/^"(.*)"$/) {
+				    $_ = $1;
+				}
+			}
 			$fn .= (", ".scalar(@params).", (char * []){\"".join("\", \"", @params)."\"}");
 		} else {
 			$fn .= ", 0, NULL";
@@ -1151,11 +1156,11 @@ print ".B Options\n";
 print ".RS\n";
 if (@options) {
 	foreach my $o (@options) {
-		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[(\S[^]]*)\]\s*)?$/) {
+		if ($o =~ m/^\s*(\S*)\s*(.*)\s+--\s+(\S[^[]*)(\s+\[([^]]*)\]\s*)?$/) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
-			$dsc .= ($5) ? " Default value: $5" : "";
+			$dsc .= (length($5)) ? ". Default value: \"$5\"" : "";
 			print ".TP\n";
 			print ".BI $opt";
 			print " \" $optargs\"" unless($optargs =~ m/^\s*$/);
@@ -2519,7 +2524,7 @@ We can then go ahead and fill in the environment.
 
 <<add [[IF_]]option to environment>>=
 *(environend++) = setlocalenv("IF_%s=%s", iface->option[i].name,
-                              iface->option[i].value);
+                              iface->option[i].value ? iface->option[i].value : "");
 *environend = NULL;
 @
 
@@ -3183,7 +3188,14 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	{
 		for (i = 0; i < ifd->n_options; i++) {
 			if (strncmpz(id, ifd->option[i].name, idlen) == 0) {
-				return strdup(ifd->option[i].value);
+				if (!ifd->option[i].value) {
+				    return NULL;
+				}
+				if (strlen(ifd->option[i].value) > 0) {
+					return strdup(ifd->option[i].value);
+				} else {
+					return NULL;
+				}
 			}
 		}
 	}
@@ -3969,9 +3981,13 @@ Bringing an interface up or taking it down can be done thusly:
 
 			<<add options from command line to [[currif]]>>
 
+			currif->real_iface = iface;
+
 			<<convert options>>
 
 			<<run commands for [[currif]]; set [[failed]] on error>>
+
+			currif->real_iface = NULL;
 
 			if (failed) break;
 			/* Otherwise keep going: this interface may have
@@ -4064,8 +4080,6 @@ Bringing an interface up or taking it down can be done thusly:
 
 <<run commands for [[currif]]; set [[failed]] on error>>=
 {
-	currif->real_iface = iface;
-
 	if (verbose) {
 		fprintf(stderr, "%s interface %s=%s (%s)\n", 
 			<<we're querying an interface's config>> ? "Querying" :
@@ -4098,8 +4112,6 @@ Bringing an interface up or taking it down can be done thusly:
 	}
 
 	<<remove pidfile>>
-
-	currif->real_iface = NULL;
 }
 @ 
 
@@ -4592,6 +4604,7 @@ void make_hex_address(interface_defn *ifd, char **pparam, int argc, char ** argv
 void compute_v4_addr(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void compute_v4_mask(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void set_preferred_lft(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void get_token(interface_defn *ifd, char **pparam, int argc, char ** argv);
 @ 
 
@@ -4653,6 +4666,7 @@ void make_hex_address(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED
 		return;
 
 	*pparam = realloc(*pparam, maxlen + 1);
+	if (*pparam == NULL) return;
 	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx",
 		addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
 }
@@ -4669,6 +4683,7 @@ void compute_v4_addr(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 	if (!token) return;
 
 	*pparam = realloc(*pparam, strlen(token) + 1);
+	if (*pparam == NULL) return;
 	strcpy(*pparam, token);
 }
 
@@ -4711,6 +4726,7 @@ void compute_v4_mask(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 
 	if (inet_ntop(AF_INET, &mask, s, sizeof(s)) == NULL) return;
 	*pparam = realloc(*pparam, strlen(s) + 1);
+	if (*pparam == NULL) return;
 	strcpy(*pparam, s);
 }
 
@@ -4745,7 +4761,19 @@ void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, c
 	char buffer[INET_ADDRSTRLEN + 1];
 	if (inet_ntop(AF_INET, &addr, buffer, sizeof(buffer)) == NULL) return;
 	*pparam = realloc(*pparam, strlen(buffer) + 1);
+	if (*pparam == NULL) return;
 	strcpy(*pparam, buffer);
+}
+
+void set_preferred_lft(interface_defn *ifd, char **pparam, int argc UNUSED, char ** argv UNUSED)
+{
+	if (!ifd->real_iface) return;
+	if (iface_has(":")) {
+		char s[] = "0";
+		*pparam = realloc(*pparam, sizeof(s));
+		if (*pparam == NULL) return;
+		strcpy(*pparam, s);
+	}
 }
 
 void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char ** argv)
@@ -4768,7 +4796,11 @@ void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char ** argv
 	if (token) {
 	    strcpy(*pparam, token);
 	} else {
-	    *pparam[0] = 0;
+	    if (argc == 3) {
+		*pparam = realloc(*pparam, strlen(argv[2]) + 1);
+		if (*pparam == NULL) return;
+		strcpy(*pparam, argv[2]);
+	    }
 	}
 	free(s);
 }
@@ -5138,9 +5170,9 @@ method auto
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    sysctl net.ipv6.conf.%iface/.//%.accept_ra=1
-    sysctl net.ipv6.conf.%iface/.//%.autoconf=1
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
+    sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
     dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
@@ -5167,28 +5199,31 @@ method static
 
   options
     address address        -- Address (colon delimited) *required*
-    netmask mask           -- Netmask (number of bits, eg 64) *required*
+    netmask mask           -- Netmask (number of bits, eg 64)
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
     hwaddress address      -- Hardware address
     mtu size               -- MTU size
     accept_ra int          -- Accept router advertisements (0=off, 1=on)
-    autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
+    autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on) [0]
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
     scope                  -- Address validity scope. Possible values: \
                               global, site, link, host
+    preferred-lifetime int -- Time that address remains preferred []
 
   conversion
     hwaddress cleanup_hwaddress
+    preferred-lifetime set_preferred_lft
+    address (get_token / 1 "") =netmask?
+    address (get_token / 0 "")
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    [[sysctl net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
-    sysctl net.ipv6.conf.%iface/.//%.autoconf=0
-    [[sysctl net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
-    ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface%
+    ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
     [[ ip -6 route add default via %gateway% dev %iface% ]]
 
   down
@@ -5220,8 +5255,8 @@ method dhcp
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[ip link set dev %iface% address %hwaddress%]]
-    sysctl net.ipv6.conf.%iface/.//%.accept_ra=0
+    sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=0
+    ip link set dev %iface% [[address %hwaddress%]] up
     dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
@@ -5237,7 +5272,7 @@ method v4tunnel
     the *ip* command from the *iproute* package.
 
   options
-    address address       -- Address (colon delimited)
+    address address       -- Address (colon delimited) *required*
     netmask mask          -- Netmask (number of bits, eg 64) 
     endpoint address      -- Address of other tunnel endpoint (IPv4 \
                              dotted quad) *required*
@@ -5252,7 +5287,7 @@ method v4tunnel
     ip tunnel add %iface% mode sit remote %endpoint% [[local %local%]] \
        [[ttl %ttl%]]
     ip link set %iface% up [[mtu %mtu%]]
-    [[ ip addr add %address%/%netmask% dev %iface% ]]
+    [[ ip addr add %address%[[/%netmask%]] dev %iface% ]]
     [[ ip route add %gateway% dev %iface% ]]
     [[ ip route add ::/0 via %gateway% dev %iface% ]]
 
@@ -5777,8 +5812,8 @@ architecture linux
 method none
   description
   conversion
-    iface (get_token . 0) =link
-    iface (get_token . 1) =vlan_id
+    iface (get_token . 0 "") =link
+    iface (get_token . 1 "") =vlan_id
   up
     if test -d /sys/class/net/%link% -a \
             ! -d /sys/class/net/%iface% ; \

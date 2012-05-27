@@ -8,6 +8,11 @@ ifupdown (0.7~rc4) unstable; urgency=low
   * Make ifquery return false if interface isn't defined.
   * Fix typos in the changelog.
   * Calculate broadcast address internally.
+  * Allow concurrent netmask specification in both address (using CIDR
+    notation) and netmask for IPv6 (Closes: #674775).
+  * Add preferred-lifetime setting for IPv6.
+  * Pass -w and -e options to sysctl so we still can configure an interface
+    even if IPv6 SLAAC options can't be set for some reason.
   * Update tests.
   * Update README.
 
