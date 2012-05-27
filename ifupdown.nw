@@ -1149,7 +1149,7 @@ if (@options) {
 			my $opt = $1;
 			my $optargs = $2;
 			my $dsc = $3;
-			$dsc .= ($5) ? " Default value: $5" : "";
+			$dsc .= (length($5)) ? ". Default value: \"$5\"" : "";
 			print ".TP\n";
 			print ".BI $opt";
 			print " \" $optargs\"" unless($optargs =~ m/^\s*$/);
