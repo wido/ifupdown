@@ -5161,7 +5161,7 @@ method static
 
   options
     address address        -- Address (colon delimited) *required*
-    netmask mask           -- Netmask (number of bits, eg 64) *required*
+    netmask mask           -- Netmask (number of bits, eg 64)
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
     hwaddress address      -- Hardware address
@@ -5232,7 +5232,7 @@ method v4tunnel
     the *ip* command from the *iproute* package.
 
   options
-    address address       -- Address (colon delimited)
+    address address       -- Address (colon delimited) *required*
     netmask mask          -- Netmask (number of bits, eg 64) 
     endpoint address      -- Address of other tunnel endpoint (IPv4 \
                              dotted quad) *required*
