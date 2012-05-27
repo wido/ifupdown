@@ -14,6 +14,6 @@ if [ ! "$2" ] ; then
 fi
 iface="$1"
 targetmac=`echo "$2" | sed -e 'y/ABCDEF/abcdef/'`
-mac=$(/sbin/ifconfig "$iface" | sed -n -e '/^.*HWaddr \([:[:xdigit:]]*\).*/{s//\1/;y/ABCDEF/abcdef/;p;q;}')
+mac=$(/sbin/ifconfig "$iface" | sed -n -e '/^.*HWaddr \([:[:xdigit:]\-]*\).*/{s//\1/;y/ABCDEF/abcdef/;p;q;}')
 
 if [ "$targetmac" = "$mac" ]; then exit 0; else exit 1; fi

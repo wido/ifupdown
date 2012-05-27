@@ -5,7 +5,7 @@ set -e
 export LANG=C
 
 iface="$1"
-mac=$(/sbin/ifconfig "$iface" | sed -n -e '/^.*HWaddr \([:[:xdigit:]]*\).*/{s//\1/;y/ABCDEF/abcdef/;p;q;}')
+mac=$(/sbin/ifconfig "$iface" | sed -n -e '/^.*HWaddr \([:[:xdigit:]\-]*\).*/{s//\1/;y/ABCDEF/abcdef/;p;q;}')
 which=""
 
 while read testmac scheme; do
