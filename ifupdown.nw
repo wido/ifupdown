@@ -5188,6 +5188,8 @@ method static
   conversion
     hwaddress cleanup_hwaddress
     preferred-lifetime set_preferred_lft
+    address (get_token / 1 "") =netmask?
+    address (get_token / 0 "")
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
