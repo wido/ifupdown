@@ -13,6 +13,7 @@ ifupdown (0.7~rc4) unstable; urgency=low
   * Add preferred-lifetime setting for IPv6.
   * Pass -w and -e options to sysctl so we still can configure an interface
     even if IPv6 SLAAC options can't be set for some reason.
+  * Port to GNU/Hurd (thanks to Svante Signell, closes: #296115).
   * Update tests.
   * Update README.
 
