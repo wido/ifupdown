@@ -5108,7 +5108,7 @@ method ppp
     unit number    -- Use /number/ as the ppp unit number.
     options string -- Pass /string/ as additional options to pon.
   up
-    pon [[%provider%]] updetach [[unit %unit%]] [[%options%]]
+    pon [[%provider%]] [[unit %unit%]] [[%options%]]
   down
     poff [[%provider%]]
 @ 
