@@ -5200,7 +5200,7 @@ method static
     this interface.
 
   options
-    address address        -- Address (colon delimited) *required*
+    address address        -- Address (colon delimited/netmask) *required*
     netmask mask           -- Netmask (number of bits, eg 64)
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
