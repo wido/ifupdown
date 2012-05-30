@@ -1,4 +1,4 @@
-VERSION ?= 0.7~beta
+VERSION ?= 0.7
 CFLAGS ?= -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 ARCH ?= linux
 
