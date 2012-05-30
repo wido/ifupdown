@@ -80,7 +80,7 @@ ifup_hotplug () {
     then
 	    ifaces=$(for iface in $(ifquery --list --allow=hotplug)
 			    do
-				    if [ -e "/sys/class/net/$iface" ]
+				    if [ -e "/sys/class/net/$iface" -a "$(cat /sys/class/net/$iface/operstate)" = up ]
 				    then
 					    echo "$iface"
 				    fi
