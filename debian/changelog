@@ -16,6 +16,8 @@ ifupdown (0.7~rc4) unstable; urgency=low
   * Port to GNU/Hurd (thanks to Svante Signell, closes: #296115).
   * Chdir to root when executing external programs (Closes: #361964).
   * Remove updetach from PPP method (Closes: #675016).
+  * Configure hotplug interfaces only if they're running (thanks to Evgeni
+    Golov, closes: #673658).
   * Update examples (Closes: #340992).
   * Update tests.
   * Update README.
