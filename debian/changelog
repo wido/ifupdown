@@ -1,4 +1,4 @@
-ifupdown (0.7~rc4) unstable; urgency=low
+ifupdown (0.7) unstable; urgency=low
 
   * Accept duplicate options in /etc/network/interfaces, join them using
     a newline as a delimiter.
@@ -23,7 +23,7 @@ ifupdown (0.7~rc4) unstable; urgency=low
   * Update tests.
   * Update README.
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Wed, 23 May 2012 17:50:00 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Wed, 30 May 2012 13:47:18 +0200
 
 ifupdown (0.7~rc3) unstable; urgency=low
 
