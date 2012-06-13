@@ -58,9 +58,11 @@ then
       mv -f /run/network/ifstate.dpkg-new /run/network/ifstate
     fi
   fi
-  mv -f /etc/network/run /etc/network/run.dpkg-old
+  [ -L /etc/network/run.dpkg-old ] && echo "Removing old symlink /etc/network/run.dpkg-old..." && rm -f /etc/network/run.dpkg-old
+  mv -f /etc/network/run /etc/network/run.dpkg-old || true
   ln -s /run/network /etc/network/run
-  rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "Not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
+  [ -L /etc/network/run.dpkg-old ] && rm -f /etc/network/run.dpkg-old || true
+  [ -d /etc/network/run.dpkg-old ] && rmdir /etc/network/run.dpkg-old 2>/dev/null || report_warn "Not removing the old contents of /etc/network/run: directory not empty; renamed into /etc/network/run.dpkg-old."
 fi
 
 
