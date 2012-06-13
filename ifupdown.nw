@@ -5254,13 +5254,16 @@ method dhcp
 
   options
     hwaddress address      -- Hardware address
+    accept_ra int          -- Accept router advertisements (0=off, 1=on) [0]
+    autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
 
   conversion
     hwaddress cleanup_hwaddress
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=0
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
+    [[sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[address %hwaddress%]] up
     dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
