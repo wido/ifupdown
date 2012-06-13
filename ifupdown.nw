@@ -5009,11 +5009,12 @@ method dhcp
 
   options
     hostname hostname       -- Hostname to be requested (pump, dhcpcd, udhcpc)
+    metric metric           -- Metric for added routes (dhclient)
     leasehours leasehours   -- Preferred lease time in hours (pump)
     leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
-    hwaddress address       -- Hardware Address.
+    hwaddress address       -- Hardware address.
 
   conversion
     hwaddress cleanup_hwaddress
@@ -5021,8 +5022,10 @@ method dhcp
   up
     [[ip link set dev %iface% address %hwaddress%]]
     dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
     dhclient3 -1 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+	[[-e IF_METRIC=%metric%]] \
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
@@ -5491,6 +5494,7 @@ method dhcp
 
   options
     hostname hostname       -- Hostname to be requested (dhcpcd, udhcpc)
+    metric metric           -- Metric for added routes (dhclient)
     leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
@@ -5502,8 +5506,10 @@ method dhcp
   up
     [[ifconfig %iface% link %hwaddress%]]
     dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
     dhclient3 -1 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+	[[-e IF_METRIC=%metric%]] \
         elsif (execable("/sbin/dhclient3"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
