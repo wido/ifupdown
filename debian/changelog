@@ -6,8 +6,9 @@ ifupdown (0.7.1) unstable; urgency=low
     - Remove old /etc/network/run.dpkg-old symlink.
     - Try to remove old /etc/network/run even if it's a symlink.
   * Depend on initscripts >= 2.88dsf-25 so mountnfs doesn't break.
+  * Pass -q to sysctl to make the output less verbose.
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 14 Jun 2012 10:35:37 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 14 Jun 2012 13:55:30 +0200
 
 ifupdown (0.7) unstable; urgency=low
 
