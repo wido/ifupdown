@@ -1,3 +1,14 @@
+ifupdown (0.7.1) unstable; urgency=low
+
+  * Supply metric setting to dhclient (Closes: #279741, #364581, #676323).
+  * Add autoconf/accept_ra options to inet6/dhcp (Closes: #676244).
+  * Clean up after /run migration (Closes: #673057):
+    - Remove old /etc/network/run.dpkg-old symlink.
+    - Try to remove old /etc/network/run even if it's a symlink.
+  * Depend on initscripts >= 2.88dsf-25 so mountnfs doesn't break.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 14 Jun 2012 10:35:37 +0200
+
 ifupdown (0.7) unstable; urgency=low
 
   * Accept duplicate options in /etc/network/interfaces, join them using
