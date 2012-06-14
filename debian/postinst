@@ -12,7 +12,6 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
   if [ -e /etc/network/run -o -L /etc/network/run ]; then
     echo "Removing non-directory /etc/network/run..."
     rm -f /etc/network/run
-    [ -L /etc/network/run.dpkg-old ] && echo "Removing old symlink /etc/network/run.dpkg-old..." && rm -f /etc/network/run.dpkg-old
   fi
 
   # The best choice is to use /run/network
@@ -21,6 +20,8 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
   [ -d /run/network ] || mkdir -p /run/network
   ln -s /run/network /etc/network/run
 fi 
+
+[ -L /etc/network/run.dpkg-old ] && echo "Removing old symlink /etc/network/run.dpkg-old..." && rm -f /etc/network/run.dpkg-old
 
 # Move /etc/network/ifstate to /etc/network/run/ifstate
 if [ "$1" = configure -a "$2" != "" -a -e /etc/network/ifstate ] &&
@@ -58,7 +59,6 @@ then
       mv -f /run/network/ifstate.dpkg-new /run/network/ifstate
     fi
   fi
-  [ -L /etc/network/run.dpkg-old ] && echo "Removing old symlink /etc/network/run.dpkg-old..." && rm -f /etc/network/run.dpkg-old
   mv -f /etc/network/run /etc/network/run.dpkg-old || true
   ln -s /run/network /etc/network/run
   [ -L /etc/network/run.dpkg-old ] && rm -f /etc/network/run.dpkg-old || true
