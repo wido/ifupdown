@@ -169,7 +169,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::1/64  dev eth0 
 
@@ -179,7 +179,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::2/64  dev eth0 
 
@@ -189,7 +189,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::3/64  dev eth0 
 
@@ -199,7 +199,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::4  dev eth0 
 
@@ -209,7 +209,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::5/128  dev eth0 
 
@@ -219,7 +219,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 64  dev eth0 
 
@@ -325,9 +325,9 @@ run-parts --verbose /etc/network/if-up.d
 Configuring interface eth0=eth0 (inet6)
 run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-sysctl -e -w net.ipv6.conf.eth0.use_tempaddr=2
-sysctl -e -w net.ipv6.conf.eth0.accept_ra=0
-sysctl -e -w net.ipv6.conf.eth0.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0.use_tempaddr=2
+sysctl -q -e -w net.ipv6.conf.eth0.accept_ra=0
+sysctl -q -e -w net.ipv6.conf.eth0.autoconf=0
 ip link set dev eth0   up
 ip -6 addr add 3ffe:ffff:100:f101::1/64 dev eth0
 
@@ -338,7 +338,7 @@ run-parts --verbose /etc/network/if-pre-up.d
 modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
 
 
-sysctl -e -w net.ipv6.conf.eth0/1.autoconf=0
+sysctl -q -e -w net.ipv6.conf.eth0/1.autoconf=0
 ip link set dev eth0.1   up
 ip -6 addr add 3ffe:ffff:120:f101::1/64 dev eth0.1
 

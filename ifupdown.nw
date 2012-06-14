@@ -5175,9 +5175,9 @@ method auto
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
-    sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=1
+    [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
+    sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
     dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
@@ -5224,9 +5224,9 @@ method static
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    [[sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
-    [[sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
+    [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
+    [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
+    [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
     [[ ip -6 route add default via %gateway% dev %iface% ]]
@@ -5262,8 +5262,8 @@ method dhcp
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
-    [[sysctl -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
-    [[sysctl -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
+    [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
+    [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[address %hwaddress%]] up
     dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
