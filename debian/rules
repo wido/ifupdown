@@ -41,6 +41,7 @@ ifeq "$(origin CC)" "default"
 export CC := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)-gcc
 endif
 export ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+export DESTDIR := debian/$(shell dh_listpackages)
 
 %:
 	dh $@
@@ -50,6 +51,7 @@ override_dh_auto_configure:
 
 override_dh_installinit:
 	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
+	install -p -m 0755 debian/networking.defaults $(DESTDIR)/etc/defaults/networking
 
 override_dh_auto_clean:
 	$(MAKE) clean
