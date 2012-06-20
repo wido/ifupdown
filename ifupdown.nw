@@ -3556,7 +3556,28 @@ match interfaces. A user could easily have unexpected behaviour
 if he uses a small string to do the match:
 
 <<we're [[--exclude]]ing this interface>>=
-(excludeint != NULL && strstr(iface,excludeint) != NULL)
+(excludeints != 0 && match_patterns(iface, excludeints, excludeint))
+@
+
+[[match_patterns]] function goes through exclusion patterns and returns [[true]] if it finds at least one match.
+
+<<main function declarations>>=
+bool match_patterns(char * string, int argc, char * argv[]);
+@
+
+It's implemented using [[fnmatch]] function, so we can use shell globs.
+
+<<main functions>>=
+bool match_patterns(char * string, int argc, char * argv[]) {
+	if (!argc || !argv || !string) return false;
+	int i;
+	for (i = 0; i < argc; i++) {
+		if (fnmatch(argv[i], string, 0) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
 @
 
 \subsection{Argument Handling}
@@ -3616,7 +3637,8 @@ int force = 0;
 int list = 0;
 char *allow_class = NULL;
 char *interfaces = "/etc/network/interfaces";
-char *excludeint = NULL ;
+char **excludeint = NULL;
+int excludeints = 0;
 variable *option = NULL;
 int n_options = 0;
 int max_options = 0;
@@ -3748,7 +3770,14 @@ case 2:
 @
 <<[[getopt]] possibilities>>=
 case 'X':
-	excludeint = strdup(optarg);
+	/* */
+	excludeints++;
+	excludeint = realloc(excludeint, excludeints * sizeof(char *));
+	if (excludeint == NULL) {
+		char * filename = argv[0];
+		<<report internal error and die>>
+	}
+	excludeint[excludeints - 1] = strdup(optarg);
 	break;
 @ 
 <<[[getopt]] possibilities>>=

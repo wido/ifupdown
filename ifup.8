@@ -88,9 +88,9 @@ instead of from
 .TP
 .BI \-X " PATTERN\fR, " "\-\-exclude=" PATTERN
 Exclude interfaces from the list of interfaces to operate on by the \fIPATTERN\fR.
-Notice that the \fIPATTERN\fR can be a full interface name or substrings that
-match interfaces. Users could easily have unexpected behaviour
-if they use a small string to do the match.
+\fIPATTERN\fR uses a usual shell glob syntax. If shell wildcards are not used, it
+must match the exact interface name. This option may be specified multiple times
+resulting in more than one pattern being excluded.
 .TP
 .BI \-o " OPTION" "\fB=" VALUE
 Set \fIOPTION\fR to \fIVALUE\fR as though it were in
