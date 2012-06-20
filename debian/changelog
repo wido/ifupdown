@@ -7,8 +7,18 @@ ifupdown (0.7.1) unstable; urgency=low
     - Try to remove old /etc/network/run even if it's a symlink.
   * Depend on initscripts >= 2.88dsf-25 so mountnfs doesn't break.
   * Pass -q to sysctl to make the output less verbose.
+  * Fix shell scripting mistake in /etc/init.d/networking (thanks to
+    Stanislav Maslovski, closes: #678101).
+  * Changes to interfaces exclusion:
+    - Accept -X shortcut (wasn't working because of a bug).
+    - Allow specifying more than one -X option.
+    - Use shell glob syntax.
+  * Add /etc/default/networking (Closes: #580035, #677973):
+    - CONFIGURE_INTERFACES can be used to disable interfaces configuration.
+    - Individual interfaces can be excluded with EXCLUDE_INTERFACES.
+    - Extra verbosity may be requested with VERBOSE.
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 14 Jun 2012 13:55:30 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Wed, 20 Jun 2012 17:18:27 +0200
 
 ifupdown (0.7) unstable; urgency=low
 
