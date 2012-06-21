@@ -51,7 +51,7 @@ override_dh_auto_configure:
 
 override_dh_installinit:
 	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
-	install -p -m 0755 debian/networking.defaults $(DESTDIR)/etc/defaults/networking
+	install -p -m 0755 debian/networking.defaults $(DESTDIR)/etc/default/networking
 
 override_dh_auto_clean:
 	$(MAKE) clean
