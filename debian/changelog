@@ -19,8 +19,9 @@ ifupdown (0.7.1) unstable; urgency=low
     - Extra verbosity may be requested with VERBOSE.
   * When ifup is being run with --force -n, always report errors regardless of
     ifstate.
+  * Declare Breaks on dhcp-client (<< 3.0) instead of Conflicts.
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 21 Jun 2012 18:59:10 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Fri, 22 Jun 2012 00:08:04 +0200
 
 ifupdown (0.7) unstable; urgency=low
 
