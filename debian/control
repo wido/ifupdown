@@ -14,8 +14,7 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base, initscripts (>= 2.88dsf-25)
 Suggests: isc-dhcp-client | dhcp-client, ppp, rdnssd, ${net:Suggests}
 Replaces: netbase (<< 5.0)
-Breaks: netbase (<< 5.0)
-Conflicts: dhcp-client (<< 3.0)
+Breaks: netbase (<< 5.0), dhcp-client (<< 3.0)
 Multi-Arch: foreign
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to
