@@ -4599,7 +4599,7 @@ interfaces up and down.
 <<update ifupdown state>>=
 {
 	if (<<we're bringing interfaces up>>) {
-		if (current_state == NULL) {
+		if ((current_state == NULL) || (no_act)) {
 			if (failed == 1) {
 				printf("Failed to bring up %s.\n", liface);
 				update_state (argv[0], iface, NULL);
