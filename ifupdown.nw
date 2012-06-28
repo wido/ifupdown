@@ -2353,7 +2353,9 @@ fairly direct result run some executable.
 
 \begin{itemize}
 	\item [[iface_up()]] and [[iface_down()]] which will actually
-	configure or deconfigure an interface.
+	configure or deconfigure an interface. These functions take
+	a second parameter to whether to run the scripts under 
+	/etc/network/if-*.d/
 
 	\item [[iface_list()]] which permits querying a list of known
 	interfaces by class.
@@ -2695,6 +2697,8 @@ int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 }
 
 int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
+	if (!run_scripts) return;
+
 	char buf[100];
 	snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d",
 		verbose ? "--verbose" : "", opt);
@@ -3603,6 +3607,7 @@ struct option long_opts[] = {
 	{"exclude",     required_argument, NULL, 'X'},
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
+	{"no-scripts",  no_argument,       NULL,  4 },
 	{"force",       no_argument,       NULL,  2 },
 	{"option",      required_argument, NULL, 'o'},
 	{"list",        no_argument,       NULL, 'l'},
@@ -3617,6 +3622,7 @@ the various things. The only special note here is that we need to export
 <<exported symbols>>=
 extern int no_act;
 extern int verbose;
+extern int run_scripts;
 @
 
 <<constant definitions>>=
@@ -3625,6 +3631,7 @@ extern int verbose;
 
 <<main global variables>>=
 int no_act = 0;
+int run_scripts = 1;
 int verbose = 0;
 char *statefile = RUN_DIR "ifstate";
 char *tmpstatefile = RUN_DIR ".ifstate.tmp";
@@ -3698,6 +3705,7 @@ static void help(char *execname, int (*cmds)(interface_defn *)) {
 	printf("\t-o OPTION=VALUE\t\tset OPTION to VALUE as though it were in\n");
 	printf("\t\t\t\t/etc/network/interfaces\n");
 	printf("\t--no-mappings\t\tdon't run any mappings\n");
+	printf("\t--no-scripts\t\tdon't run any hook scripts\n");
 	if (!<<we're listing known interfaces>>
 	    && !<<we're querying an interface's config>>)
 		printf("\t--force\t\t\tforce de/configuration\n");
@@ -3759,6 +3767,11 @@ case 'n':
 <<[[getopt]] possibilities>>=
 case 1:
 	run_mappings = 0;
+	break;
+@ 
+<<[[getopt]] possibilities>>=
+case 4:
+	run_scripts = 0;
 	break;
 @ 
 <<[[getopt]] possibilities>>=
