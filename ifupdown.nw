@@ -2353,9 +2353,7 @@ fairly direct result run some executable.
 
 \begin{itemize}
 	\item [[iface_up()]] and [[iface_down()]] which will actually
-	configure or deconfigure an interface. These functions take
-	a second parameter to whether to run the scripts under 
-	/etc/network/if-*.d/
+	configure or deconfigure an interface.
 
 	\item [[iface_list()]] which permits querying a list of known
 	interfaces by class.
