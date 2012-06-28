@@ -91,7 +91,7 @@ foreach my $if (keys %iface) {
     }
 
     if ($iface{$if}->{"type"} =~ m/ethernet/i) {
-        if ($iface{$if}->{"ipv4"} eq "yes") {
+        if ($iface{$if}->{"ipv4"}) {
             print "iface $if inet static\n";
             if (defined $iface{$if}->{"ipv4_addr"}) {
                 print "    address " . $iface{$if}->{"ipv4_addr"} . "\n";
