@@ -1,3 +1,11 @@
+ifupdown (0.7.2) unstable; urgency=low
+
+  * Don't install /etc/default/networking as executable (Closes: #679623).
+  * Declare Breaks on dhcp-client (<< 3.0) instead of Conflicts.
+  * Implement --no-scripts option (LP: #258782).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 01 Jul 2012 10:20:56 +0200
+
 ifupdown (0.7.1) unstable; urgency=low
 
   * Supply metric setting to dhclient (Closes: #279741, #364581, #676323).
@@ -19,7 +27,6 @@ ifupdown (0.7.1) unstable; urgency=low
     - Extra verbosity may be requested with VERBOSE.
   * When ifup is being run with --force -n, always report errors regardless of
     ifstate.
-  * Declare Breaks on dhcp-client (<< 3.0) instead of Conflicts.
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Fri, 22 Jun 2012 00:08:04 +0200
 
