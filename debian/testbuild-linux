@@ -356,7 +356,7 @@ EOF
 
 cat >tests/testcase.8 <<EOF
 # RUN: -a
-auto eth1 eth1:1 eth2.2 eth2.2:2
+auto eth1 eth1:1 eth2.2 eth2.2:3
 iface eth1 inet static
   address 1.2.3.4
   netmask 255.255.255.0
@@ -372,7 +372,7 @@ iface eth1:1 inet static
 iface eth2.2 inet static
   address 2.3.4.5/24
 
-iface eth2.2:2 inet static
+iface eth2.2:3 inet static
   address 3.4.5.6/23
 EOF
 cat >tests/up.8 <<EOF
@@ -403,10 +403,10 @@ ip link set dev eth2.2   up
 
 run-parts --verbose /etc/network/if-up.d
 if test -d /sys/class/net/eth2 -a             ! -d /sys/class/net/eth2.2 ;     then         ip link set up dev eth2;         ip link add link eth2 name eth2.2 type vlan id 2;     fi
-Configuring interface eth2.2:2=eth2.2:2 (inet)
+Configuring interface eth2.2:3=eth2.2:3 (inet)
 run-parts --verbose /etc/network/if-pre-up.d
-ip addr add 3.4.5.6/255.255.254.0 broadcast 3.4.5.255 	  dev eth2.2:2 label eth2.2:2
-ip link set dev eth2.2:2   up
+ip addr add 3.4.5.6/255.255.254.0 broadcast 3.4.5.255 	  dev eth2.2:3 label eth2.2:3
+ip link set dev eth2.2:3   up
 
 run-parts --verbose /etc/network/if-up.d
 run-parts --verbose /etc/network/if-up.d
