@@ -98,7 +98,9 @@ ifup_hotplug () {
     then
 	    ifaces=$(for iface in $(ifquery --list --allow=hotplug)
 			    do
-				    if [ -e "/sys/class/net/$iface" ] && [ "$(cat /sys/class/net/$iface/operstate)" = up ]
+				    link=${iface##:*}
+				    link=${link##.*}
+				    if [ -e "/sys/class/net/$link" ] && [ "$(cat /sys/class/net/$link/operstate)" = up ]
 				    then
 					    echo "$iface"
 				    fi
