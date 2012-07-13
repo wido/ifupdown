@@ -4780,13 +4780,13 @@ void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, c
 	struct in_addr addr;
 	struct in_addr mask;
 
-	char * s = get_var("address", sizeof("address"), ifd);
+	char * s = get_var("address", strlen("address"), ifd);
 	if (!s) return;
 	int r = inet_pton(AF_INET, s, &addr);
 	free(s);
 	if (r != 1) return;
 
-	s = get_var("netmask", sizeof("netmask"), ifd);
+	s = get_var("netmask", strlen("netmask"), ifd);
 	if (!s) return;
 	r = inet_pton(AF_INET, s, &mask);
 	free(s);
