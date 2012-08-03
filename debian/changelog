@@ -3,6 +3,7 @@ ifupdown (0.7.2) unstable; urgency=low
   * Don't install /etc/default/networking as executable (Closes: #679623).
   * Declare Breaks on dhcp-client (<< 3.0) instead of Conflicts.
   * Implement --no-scripts option (LP: #258782).
+  * LSB headers: provide $network (Closes: #682494).
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 01 Jul 2012 10:20:56 +0200
 
