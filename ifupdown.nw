@@ -4648,6 +4648,7 @@ void compute_v4_mask(interface_defn *ifd, char **pparam, int argc, char ** argv)
 void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void set_preferred_lft(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void get_token(interface_defn *ifd, char **pparam, int argc, char ** argv);
+void to_decimal(interface_defn *ifd, char **pparam, int argc, char ** argv);
 @ 
 
 <<common functions implementations>>=
@@ -4845,6 +4846,21 @@ void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char ** argv
 	    }
 	}
 	free(s);
+}
+
+void to_decimal(interface_defn *ifd UNUSED, char **pparam, int argc, char ** argv)
+{
+	int base = 10;
+
+	if (argc == 1) {
+		base = atoi(argv[0]);
+	}
+
+	char * result;
+	long value = strtol(*pparam, &result, base);
+	if (result == *pparam) return;
+
+	snprintf(*pparam, strlen(*pparam) + 1, "%ld", value);
 }
 
 @ 
@@ -5866,7 +5882,8 @@ method none
     iface (get_token . 0 "") =link
     iface (get_token . 1 "") =vlan_id0
     iface (get_token : 0 "") =iface0
-    vlan_id0 (get_token : 0 "") =vlan_id
+    vlan_id0 (get_token : 0 "") =vlan_id1
+    vlan_id1 (to_decimal 10) =vlan_id
   up
     if test -d /sys/class/net/%link% -a \
             ! -d /sys/class/net/%iface0% ; \
