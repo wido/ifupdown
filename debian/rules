@@ -52,6 +52,7 @@ override_dh_auto_configure:
 override_dh_installinit:
 	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
 	install -p -m 0644 debian/networking.defaults $(DESTDIR)/etc/default/networking
+	install -p -m 0644 debian/ifupdown.insserv $(DESTDIR)/etc/insserv.conf.d/ifupdown
 
 override_dh_auto_clean:
 	$(MAKE) clean
