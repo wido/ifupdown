@@ -10,7 +10,7 @@ ifupdown (0.7.2) unstable; urgency=low
   * LSB headers: provide $network (Closes: #682494).
   * Work-around ip(8) understanding of 0NNN as octal numbers (Closes: #684698).
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 01 Jul 2012 10:20:56 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 16 Aug 2012 18:10:23 +0200
 
 ifupdown (0.7.1) unstable; urgency=low
 
