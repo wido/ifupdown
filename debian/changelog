@@ -6,10 +6,11 @@ ifupdown (0.7.2) unstable; urgency=low
   * Calculate the length of a string properly (Closes: #681431).
   * When bringing hotplug interfaces up, strip VLAN and alias identifiers out
     (Closes: #680042).
+  * LSB headers: depend on urandom.
   * Recognize vlan+alias combination and filter aliases out (Closes: #679672).
   * Work-around ip(8) understanding of 0NNN as octal numbers (Closes: #684698).
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 16 Aug 2012 18:10:23 +0200
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 16 Aug 2012 23:22:32 +0200
 
 ifupdown (0.7.1) unstable; urgency=low
 
