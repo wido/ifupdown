@@ -9,7 +9,7 @@ emits static-network-up
 emits net-device-up
 
 start on (local-filesystems
-      and (stopped udevtrigger or container))
+      and (stopped udevtrigger or container)) or runlevel [2345]
 stop on unmounted-remote-filesystems
 
 pre-start script
