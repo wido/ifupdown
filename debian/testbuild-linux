@@ -4,7 +4,7 @@ rm -rf tests/
 mkdir tests
 cat >tests/testcase.1 <<EOF
 # RUN: -a
-auto eth0 eth1 eth2
+auto eth0 eth1 eth2 eth3
 iface eth0 inet static
   address 1.2.3.4
   netmask 255.255.255.0
@@ -24,6 +24,25 @@ iface eth2 inet static
   broadcast 1.2.3.127
   up echo hi
   post-up echo hello
+
+iface eth3 inet static
+  address 1.2.3.4/24
+  broadcast -
+  up true
+
+iface eth3 inet static
+  address 1.2.3.4/30
+  broadcast -
+  up true
+
+iface eth3 inet static
+  address 1.2.3.4/31
+  up true
+
+iface eth3 inet static
+  address 1.2.3.4/31
+  broadcast -
+  up true
 EOF
 cat >tests/up.1 <<EOF
 ====stdout====
@@ -52,6 +71,34 @@ ip link set dev eth2   up
 
 echo hi
 echo hello
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth3=eth3 (inet)
+run-parts --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.0 broadcast 1.2.3.0 	  dev eth3 label eth3
+ip link set dev eth3   up
+
+true
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth3=eth3 (inet)
+run-parts --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.252 broadcast 1.2.3.4 	  dev eth3 label eth3
+ip link set dev eth3   up
+
+true
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth3=eth3 (inet)
+run-parts --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.254 broadcast 255.255.255.255 	  dev eth3 label eth3
+ip link set dev eth3   up
+
+true
+run-parts --verbose /etc/network/if-up.d
+Configuring interface eth3=eth3 (inet)
+run-parts --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.254 broadcast 0.0.0.0 	  dev eth3 label eth3
+ip link set dev eth3   up
+
+true
 run-parts --verbose /etc/network/if-up.d
 run-parts --verbose /etc/network/if-up.d
 EOF

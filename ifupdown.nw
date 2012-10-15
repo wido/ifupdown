@@ -4793,12 +4793,22 @@ void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, c
 	free(s);
 	if (r != 1) return;
 
-	if (!strcmp(*pparam, "+")) {
-	    addr.s_addr |=  ~mask.s_addr;
-	}
+	if (mask.s_addr != htonl(0xfffffffe)) {
+	    if (!strcmp(*pparam, "+")) {
+		addr.s_addr |= ~mask.s_addr;
+	    }
 
-	if (!strcmp(*pparam, "-")) {
-	    addr.s_addr |=  mask.s_addr;
+	    if (!strcmp(*pparam, "-")) {
+		addr.s_addr &= mask.s_addr;
+	    }
+	} else {
+	    if (!strcmp(*pparam, "+")) {
+		addr.s_addr = 0xffffffff;
+	    }
+
+	    if (!strcmp(*pparam, "-")) {
+		addr.s_addr = 0;
+	    }
 	}
 
 	char buffer[INET_ADDRSTRLEN + 1];
