@@ -114,6 +114,9 @@ ifup_hotplug () {
 
 case "$1" in
 start)
+	if init_is_upstart; then
+		exit 1
+	fi
 	process_options
 	check_ifstate
 
@@ -134,6 +137,9 @@ start)
 	;;
 
 stop)
+	if init_is_upstart; then
+		exit 0
+	fi
 	check_network_file_systems
 	check_network_swap
 
@@ -159,6 +165,9 @@ reload)
 	;;
 
 force-reload|restart)
+	if init_is_upstart; then
+		exit 1
+	fi
 	process_options
 
 	log_warning_msg "Running $0 $1 is deprecated because it may not re-enable some interfaces"
