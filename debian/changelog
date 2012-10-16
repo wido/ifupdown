@@ -4,7 +4,7 @@ ifupdown (0.7.3) unstable; urgency=low
     previously, a network mask was mistakenly used instead of them.
   * Follow RFC 3021 regarding broadcast addresses in /31 subnets:
     they should use limited broadcast address (Closes: #690561).
-  * Add upstart support (patch provided by Steve Langasek).
+  * Add upstart support (patch provided by Steve Langasek, closes: #679549).
 
  -- Andrew O. Shadura <bugzilla@tut.by>  Tue, 16 Oct 2012 10:39:24 +0200
 
