@@ -1,3 +1,10 @@
+ifupdown (0.7.4) unstable; urgency=low
+
+  * Don't try to run upstart's initctl when no upstart is installed
+    (Closes: #692008).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 01 Nov 2012 12:01:17 +0100
+
 ifupdown (0.7.3) unstable; urgency=low
 
   * Fix the calculation of broadcast addresses of obsolete scheme;
