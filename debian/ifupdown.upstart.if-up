@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/sh -e
 MARK_DEV_PREFIX="/run/network/ifup."
 MARK_STATIC_NETWORK_EMITTED="/run/network/static-network-up-emitted"
 
-set -e
+[ -x /sbin/initctl ] || exit 0
 
 # Let's ignore meta entries (ifup -a)
 if [ "$ADDRFAM" = "meta" ]; then

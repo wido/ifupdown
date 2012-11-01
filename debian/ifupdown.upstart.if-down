@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/sh -e
 
-set -e
+[ -x /sbin/initctl ] || exit 0
 
 initctl emit -n net-device-down \
 	"IFACE=$IFACE" \
