@@ -1,6 +1,17 @@
 #!/bin/sh -e
 
-[ -x /sbin/initctl ] || exit 0
+if [ -e /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+fi
+
+if ! init_is_upstart; then
+    return 0
+fi
+
+# Let's ignore meta entries (ifdown -a)
+if [ "$ADDRFAM" = "meta" ]; then
+    return 0
+fi
 
 initctl emit -n net-device-down \
 	"IFACE=$IFACE" \
