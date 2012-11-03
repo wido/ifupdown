@@ -5,12 +5,12 @@ if [ -e /lib/lsb/init-functions ]; then
 fi
 
 if ! init_is_upstart; then
-    return 0
+    exit 0
 fi
 
 # Let's ignore meta entries (ifdown -a)
 if [ "$ADDRFAM" = "meta" ]; then
-    return 0
+    exit 0
 fi
 
 initctl emit -n net-device-down \

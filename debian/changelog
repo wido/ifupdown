@@ -1,3 +1,9 @@
+ifupdown (0.7.5) unstable; urgency=low
+
+  * Fix upstart hooks (Closes: #692110).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Fri, 02 Nov 2012 18:30:19 +0100
+
 ifupdown (0.7.4) unstable; urgency=low
 
   * Check if upstart is the current init and don't try to call initctl if it
