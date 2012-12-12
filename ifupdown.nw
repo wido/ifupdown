@@ -2144,6 +2144,7 @@ if (strcmp(firstword, "pre-down") == 0) {
 
 				currif->option[i].value[l] = '\n';
 				strcpy(&(currif->option[i].value[l + 1]), rest);
+				strcpy(rest, currif->option[i].value);
 			}
 		}
 	}
