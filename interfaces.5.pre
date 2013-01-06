@@ -296,7 +296,8 @@ This manpage was contributed by Joey Hess <joey@kitenet.net>.
 .BR ifup (8),
 .BR ip (8),
 .BR ifconfig (8),
-.BR run\-parts (8).
+.BR run\-parts (8),
+.BR resolvconf (8).
 .P
 For advice on configuring this package read the
 .B Network Configuration
