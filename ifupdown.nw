@@ -161,7 +161,7 @@ OBJ := main.o addrfam.o execute.o config.o \
 	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o link.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
-DEFNFILES += meta.defn
+DEFNFILES += meta.defn link.defn
 
 default : executables
 all : executables docs
