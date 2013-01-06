@@ -161,7 +161,7 @@ OBJ := main.o addrfam.o execute.o config.o \
 	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o link.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
-DEFNFILES += meta.defn
+DEFNFILES += meta.defn link.defn
 
 default : executables
 all : executables docs
@@ -3213,11 +3213,13 @@ Which means we can finish of the chunk, thus:
 varvalue = get_var(command, namelen, ifd);
 @ 
 
-We also define an exported [[var_true()]] function to allow methods to
-have lines of code that are conditional on the value of a variable.
+We also define an exported [[var_true()]] and [[var_set()]] functions
+to allow methods to have lines of code that are conditional on the value
+of a variable.
 
 <<exported symbols>>=
 int var_true(char *id, interface_defn *ifd);
+int var_set(char *id, interface_defn *ifd);
 @
 
 <<execute functions>>=
@@ -3239,6 +3241,18 @@ int var_true(char *id, interface_defn *ifd) {
 		}
 	} else
 		return 0;
+}
+
+int var_set(char *id, interface_defn *ifd) {
+	char *varvalue;
+
+	varvalue = get_var(id, strlen(id), ifd);
+	if (varvalue) {
+		free(varvalue);
+		return 1;
+	} else {
+		return 0;
+	}
 }
 @
 
@@ -5901,9 +5915,9 @@ method none
     then \
         ip link set up dev %link%; \
         ip link add link %link% name %iface0% type vlan id %vlan_id%; \
-    fi if (iface_has("."))
+    fi if (iface_has(".") && (!var_set("bridge_ports")))
   down
-    ip link del %iface% if (iface_has("."))
+    ip link del %iface% if (iface_has(".") && (!var_set("bridge_ports")))
 
 architecture kfreebsd
 
