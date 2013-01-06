@@ -1,0 +1,4 @@
+# We should always have a loopback interface, or bad things may happen.
+
+auto lo
+iface lo inet loopback
