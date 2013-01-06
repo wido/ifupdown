@@ -5915,9 +5915,9 @@ method none
     then \
         ip link set up dev %link%; \
         ip link add link %link% name %iface0% type vlan id %vlan_id%; \
-    fi if (iface_has(".") && (!var_set("bridge_ports")))
+    fi if (iface_has(".") && (!var_set("bridge_ports", ifd)))
   down
-    ip link del %iface% if (iface_has(".") && (!var_set("bridge_ports")))
+    ip link del %iface% if (iface_has(".") && (!var_set("bridge_ports", ifd)))
 
 architecture kfreebsd
 
