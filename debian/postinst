@@ -100,7 +100,7 @@ if [ "$1" = "configure" ] ; then
     # TODO: This should be handled with debconf and the script
     # could introduce the line there directly
     if ! ifquery --list | grep -q "^lo[0-9]*$" ; then
-        report_warn "No loopback interface definition is found, you may want to check you configuration, as it may break software badly."
+        report_warn "No loopback interface definition is found, you may want to check your configuration, as it may break software badly."
         if ! grep -q "^[[:space:]]*iface[[:space:]]\+lo0\?[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces ; then
             report_warn "No 'iface lo' definition found in /etc/network/interfaces."
         fi
