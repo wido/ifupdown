@@ -1,12 +1,17 @@
+ifupdown (0.7.50) experimental; urgency=low
+
+  * Add /etc/network/interfaces.d/lo with a loopback interface definition,
+    enable sourcing /etc/network/interfaces.d/* in the default configuration
+    (Closes: #695906).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 07 Jan 2013 01:51:58 +0100
+
 ifupdown (0.7.6) unstable; urgency=low
 
   [ Andrew O. Shadura ]
   * Don't configure bridge interfaces as tagged VLAN interfaces
     (Closes: #696642).
   * Add "tryonce" option to DHCP-enabled methods (Closes: #694541).
-  * Add /etc/network/interfaces.d/lo with a loopback interface definition,
-    enable sourcing /etc/network/interfaces.d/* in the default configuration
-    (Closes: #695906).
   * Update manual pages.
 
   [ Stéphane Graber ]
