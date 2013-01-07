@@ -99,26 +99,17 @@ if [ "$1" = "configure" ] ; then
   if [ -f /etc/network/interfaces ] ; then
     # TODO: This should be handled with debconf and the script
     # could introduce the line there directly
-    if ! ifquery --list | grep -q "^lo[0-9]*$" ; then
-        report_warn "No loopback interface definition is found, you may want to check you configuration, as it may break software badly."
-        if ! grep -q "^[[:space:]]*iface[[:space:]]\+lo0\?[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces ; then
-            report_warn "No 'iface lo' definition found in /etc/network/interfaces."
-        fi
-        if ! grep -q "^[[:space:]]*\(allow-\|\)auto[[:space:]]\+\(.*[[:space:]]\+\|\)lo0\?\([[:space:]]\+\|$\)" /etc/network/interfaces ; then
-            report_warn "No 'auto lo' statement found in /etc/network/interfaces."
-        fi
-        if [ -d /etc/network/interfaces.d ] ; then
-            if grep -q "^[[:space:]]*iface[[:space:]]\+lo0\?[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces.d/* ; then
-                files=$(grep "^[[:space:]]*iface[[:space:]]\+lo0\?[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces.d/* | cut -d : -f 1)
-                report_warn "Loopback interface definition is found in the following files: $files.\nYou may want to include one of them in your /etc/network/interfaces file using 'source' directive. Read more in interfaces(5)."
-            fi
-        fi
+    if ! grep -q "^[[:space:]]*iface[[:space:]]\+lo0\?[[:space:]]\+inet[[:space:]]\+loopback\>" /etc/network/interfaces ; then
+      report_warn "No 'iface lo' definition found in /etc/network/interfaces"
+    fi
+    if ! grep -q "^[[:space:]]*\(allow-\|\)auto[[:space:]]\+\(.*[[:space:]]\+\|\)lo0\?\([[:space:]]\+\|$\)" /etc/network/interfaces ; then
+      report_warn "No 'auto lo' statement found in /etc/network/interfaces"
     fi
   else  # ! -f /etc/network/interfaces
     echo "Creating /etc/network/interfaces."
     echo "# interfaces(5) file used by ifup(8) and ifdown(8)" > /etc/network/interfaces
-    echo "# Include files from /etc/network/interfaces.d:" >> /etc/network/interfaces
-    echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+    echo "auto lo" >> /etc/network/interfaces
+    echo "iface lo inet loopback" >> /etc/network/interfaces
   fi
 fi
 

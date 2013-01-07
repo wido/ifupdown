@@ -4,9 +4,6 @@ ifupdown (0.7.6) unstable; urgency=low
   * Don't configure bridge interfaces as tagged VLAN interfaces
     (Closes: #696642).
   * Add "tryonce" option to DHCP-enabled methods (Closes: #694541).
-  * Add /etc/network/interfaces.d/lo with a loopback interface definition,
-    enable sourcing /etc/network/interfaces.d/* in the default configuration
-    (Closes: #695906).
   * Update manual pages.
 
   [ Stéphane Graber ]
