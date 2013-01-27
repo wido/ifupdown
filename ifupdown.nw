@@ -1342,6 +1342,10 @@ variable * set_variable(char *filename, char *name, char *value,
 					return NULL;
 				}
 
+				if ((*var)[j].value == value) {
+				    return value;
+				}
+
 				free((*var)[j].value);
 				(*var)[j].value = strdup(value);
 				if (!(*var)[j].value) {
@@ -2144,7 +2148,7 @@ if (strcmp(firstword, "pre-down") == 0) {
 
 				currif->option[i].value[l] = '\n';
 				strcpy(&(currif->option[i].value[l + 1]), rest);
-				strcpy(rest, currif->option[i].value);
+				rest = currif->option[i].value;
 			}
 		}
 	}
