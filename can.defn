@@ -1,0 +1,28 @@
+address_family can
+architecture linux
+
+method static
+  description
+    This method may be used to setup an Controller Area Network (CAN)
+    interface. It requires the the *ip* command from the *iproute* package.
+
+  options
+    bitrate bitrate		-- bitrate (1..1000000) *required*
+    samplepoint samplepoint	-- sample point (0.000..0.999)
+    loopback loopback		-- loop back CAN Messages (on|off)
+    listenonly listenonly	-- listen only mode (on|off)
+    triple triple		-- activate triple sampling (on|off)
+    oneshot oneshot		-- one shot mode (on|off)
+    berr berr			-- activate berr reporting (on|off) 
+
+  up
+    ip link set %iface% type can bitrate %bitrate%
+    [[ ip link set %iface% type can loopback %loopback% ]]
+    [[ ip link set %iface% type can listen-only %listenonly% ]]
+    [[ ip link set %iface% type can triple-sampling %triple% ]]
+    [[ ip link set %iface% type can one-shot %oneshot% ]]
+    [[ ip link set %iface% type can berr-reporting %berr% ]]
+    ip link set %iface% up
+
+  down
+    ip link set %iface% down

@@ -22,7 +22,7 @@ executables : ifup ifdown ifquery ifup.8 ifdown.8 ifquery.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
 .PHONY : executables 
-.PHONY : clean clobber
+.PHONY : clean distclean
 
 install :
 	install -m 0755 -d     ${BASEDIR}/sbin
@@ -37,11 +37,8 @@ clean :
 	rm -f ifup ifdown ifquery interfaces.5 ifdown.8 ifquery.8
 	rm -f ifupdown.dvi *.ps{,.gz}
 
-clobber : clean
-	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES) arch*
+distclean : clean
 
-distclean : clobber
-	rm -f makecdep.sh makenwdep.sh Makefile
 ifup: $(OBJ)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) $(OUTPUT_OPTION)
 
@@ -106,5 +103,5 @@ ifeq "clobber" "$(MAKECMDGOALS)"
 include-deps := NO
 endif
 ifeq "$(strip $(include-deps))" "YES"
-include ifupdown.d
+-include ifupdown.d
 endif

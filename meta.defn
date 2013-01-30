@@ -1,0 +1,7 @@
+address_family meta
+architecture any
+
+method none
+	description
+	up
+	down
