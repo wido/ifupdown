@@ -4241,7 +4241,7 @@ if (do_all) {
 	okay = iface_postdown(&meta_iface);
     }
     if (!okay) {
-	fprintf(stderr, "%s: pre-%s script failed.\n", argv[0], &argv[0][2]);
+	fprintf(stderr, "%s: post-%s script failed.\n", argv[0], &argv[0][2]);
 	exit(1);
     }
 }
