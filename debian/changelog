@@ -20,7 +20,11 @@ ifupdown (0.7.6) unstable; urgency=low
   * Actually set the new calculated value for duplicate entries
     (LP: #1086517).
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 06 Jan 2013 19:36:49 +0100
+  [ Josselin Mouette ]
+  * postinst: do not create /e/n/i if it was removed manually
+    (Closes: #695906)
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 14 Feb 2013 20:49:29 +0100
 
 ifupdown (0.7.5) unstable; urgency=low
 
