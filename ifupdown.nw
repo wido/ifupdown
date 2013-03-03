@@ -5319,6 +5319,8 @@ method auto
     dhclient -6 [[%tryonce%]] -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
+    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
     ip -6 addr flush dev %iface% scope global
     ip link set dev %iface% down \
 		if (iface_is_link())
@@ -5723,6 +5725,37 @@ method manual
   up
 
   down
+
+method auto
+  description
+    This method may be used to define interfaces with automatically assigned
+    IPv6 addresses. Using this method on its own doesn't mean that RDNSS options
+    will be applied, too. To make this happen, *rdnssd* daemon must be installed,
+    properly configured and running.
+    If stateless DHCPv6 support is turned on, then additional network
+    configuration parameters such as DNS and NTP servers will be retrieved
+    from a DHCP server.
+
+  options
+    dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
+    tryonce bool           -- Try to acquire lease just once. [yes]
+
+  conversion
+    hwaddress cleanup_hwaddress
+    tryonce (map_value "" -1)
+
+  up
+    sysctl -q -e -w net.inet6.ip6.accept_rtadv=1
+    ifconfig %iface% up
+    dhclient -6 [[%tryonce%]] -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
+
+  down
+    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
+    ifconfig %iface% down
+
+
 
 method dhcp
   description
