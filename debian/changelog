@@ -1,4 +1,4 @@
-ifupdown (0.7.6) unstable; urgency=low
+ifupdown (0.7.40) experimental; urgency=low
 
   [ Andrew Shadura ]
   * Don't configure bridge interfaces as tagged VLAN interfaces
@@ -26,7 +26,7 @@ ifupdown (0.7.6) unstable; urgency=low
   * postinst: Do not create /etc/network/interfaces if it was removed manually
     (Closes: #695906)
 
- -- Andrew Shadura <bugzilla@tut.by>  Sun, 03 Mar 2013 12:08:16 +0100
+ -- Andrew Shadura <bugzilla@tut.by>  Mon, 04 Mar 2013 13:21:35 +0100
 
 ifupdown (0.7.5) unstable; urgency=low
 
