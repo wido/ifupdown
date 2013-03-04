@@ -7,6 +7,9 @@ ifupdown (0.7.40) experimental; urgency=low
   * Implement inet6/auto for kFreeBSD, call DHCP release of ifdown
     on Linux (Closes: #701884).
   * Update manual pages.
+  * Add tests for DHCP method.
+  * Add ISC DHCP client to Build-Depends (the tests don't actually run
+    the DHCP client, however).
 
   [ Stéphane Graber ]
   * Patches for upstart support from Ubuntu:
@@ -26,7 +29,7 @@ ifupdown (0.7.40) experimental; urgency=low
   * postinst: Do not create /etc/network/interfaces if it was removed manually
     (Closes: #695906)
 
- -- Andrew Shadura <bugzilla@tut.by>  Mon, 04 Mar 2013 13:21:35 +0100
+ -- Andrew Shadura <bugzilla@tut.by>  Mon, 04 Mar 2013 21:56:39 +0100
 
 ifupdown (0.7.5) unstable; urgency=low
 
