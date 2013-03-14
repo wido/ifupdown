@@ -3,7 +3,6 @@ ifupdown (0.7.6) unstable; urgency=low
   [ Andrew Shadura ]
   * Don't configure bridge interfaces as tagged VLAN interfaces
     (Closes: #696642).
-  * Add "tryonce" option to DHCP-enabled methods (Closes: #694541).
   * Implement inet6/auto for kFreeBSD, call DHCP release of ifdown
     on Linux (Closes: #701884).
   * Update manual pages.
