@@ -2700,7 +2700,7 @@ int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 }
 
 int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
-	if (!run_scripts) return;
+	if (!run_scripts) return 1;
 
 	char buf[100];
 	snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d",
