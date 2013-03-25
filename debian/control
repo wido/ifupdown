@@ -1,7 +1,7 @@
 Source: ifupdown
 Section: admin
 Priority: important
-Maintainer: Andrew O. Shadura <bugzilla@tut.by>
+Maintainer: Andrew Shadura <andrewsh@debian.org>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
 Standards-Version: 3.9.3
 Build-Depends: debhelper (>= 9.20120410~), noweb

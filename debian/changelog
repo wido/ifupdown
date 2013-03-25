@@ -1,3 +1,10 @@
+ifupdown (0.7.7) unstable; urgency=low
+
+  * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
+  * Don't call dhclient with -1 for now.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 25 Mar 2013 22:12:09 +0100
+
 ifupdown (0.7.6) unstable; urgency=low
 
   [ Andrew Shadura ]
