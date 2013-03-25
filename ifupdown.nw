@@ -5275,7 +5275,8 @@ method auto
     properly configured and running.
     If stateless DHCPv6 support is turned on, then additional network
     configuration parameters such as DNS and NTP servers will be retrieved
-    from a DHCP server.
+    from a DHCP server. Please note that on ifdown, the lease is not currently
+    released (a known bug).
 
   options
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
@@ -5289,8 +5290,6 @@ method auto
     dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
-    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
-        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
     ip -6 addr flush dev %iface% scope global
     ip link set dev %iface% down \
 		if (iface_is_link())
@@ -5700,7 +5699,8 @@ method auto
     properly configured and running.
     If stateless DHCPv6 support is turned on, then additional network
     configuration parameters such as DNS and NTP servers will be retrieved
-    from a DHCP server.
+    from a DHCP server. Please note that on ifdown, the lease is not currently
+    released (a known bug).
 
   options
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
@@ -5715,8 +5715,6 @@ method auto
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
 
   down
-    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
-        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
     ifconfig %iface% down
 
 
