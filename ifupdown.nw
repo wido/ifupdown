@@ -5128,10 +5128,10 @@ method dhcp
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
-    dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
-    dhclient3 -1 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
@@ -5287,7 +5287,7 @@ method auto
     sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
     sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
-    dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
     ip -6 addr flush dev %iface% scope global
@@ -5373,7 +5373,7 @@ method dhcp
     [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
     [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[address %hwaddress%]] up
-    dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
@@ -5616,10 +5616,10 @@ method dhcp
 
   up
     [[ifconfig %iface% link %hwaddress%]]
-    dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
-    dhclient3 -1 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         elsif (execable("/sbin/dhclient3"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
@@ -5711,7 +5711,7 @@ method auto
   up
     sysctl -q -e -w net.inet6.ip6.accept_rtadv=1
     ifconfig %iface% up
-    dhclient -6 -1 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
 
   down
@@ -5733,7 +5733,7 @@ method dhcp
 
   up
     ifconfig %iface% [[link %hwaddress%]] up
-    dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
@@ -5834,7 +5834,7 @@ method dhcp
 
   up
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
-    dhclient -1 -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
@@ -5916,7 +5916,7 @@ method dhcp
   up
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
     inetutils-ifconfig --interface %iface% --up
-    dhclient -6 -1 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
