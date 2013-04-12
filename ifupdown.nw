@@ -4122,6 +4122,7 @@ Bringing an interface up or taking it down can be done thusly:
 	if (okay && <<we're taking interfaces down>>) {
 		interface_defn link = {
 		    .real_iface = iface,
+		    .logical_iface = liface,
 		    .max_options = 0,
 		    .address_family = &addr_link,
 		    .method = &(addr_link.method[0]),

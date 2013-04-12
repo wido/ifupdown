@@ -1,3 +1,10 @@
+ifupdown (0.7.8) unstable; urgency=medium
+
+  * Assign logical interface name for link pseudointerface on down
+    (Closes: #705268).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 12 Apr 2013 11:44:21 +0200
+
 ifupdown (0.7.7) unstable; urgency=low
 
   * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
