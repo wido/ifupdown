@@ -38,6 +38,13 @@ ifupdown (0.7.40) experimental; urgency=low
 
  -- Andrew Shadura <bugzilla@tut.by>  Mon, 04 Mar 2013 21:56:39 +0100
 
+ifupdown (0.7.8) unstable; urgency=medium
+
+  * Assign logical interface name for link pseudointerface on down
+    (Closes: #705268).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 12 Apr 2013 11:44:21 +0200
+
 ifupdown (0.7.5) unstable; urgency=low
 
   * Fix upstart hooks (Closes: #692110).
