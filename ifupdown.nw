@@ -132,6 +132,8 @@ structure definitions, exported interfaces and so on.
 #ifndef HEADER_H
 #define HEADER_H
 
+#include <stdbool.h>
+
 <<type definitions>>
 <<function type definitions>>
 <<structure definitions>>
@@ -1190,7 +1192,6 @@ headers. Please move along, there's nothing to see here.
 @ 
 
 <<config headers>>=
-#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -1485,6 +1486,27 @@ if (defn == NULL) {
 defn->allowups = NULL;
 defn->mappings = NULL;
 defn->ifaces = NULL;
+
+if (!no_loopback) {
+	interface_defn * lo_if = malloc(sizeof(interface_defn));
+	if (!lo_if) {
+		<<report internal error and die>>
+	}
+
+	*lo_if = (interface_defn){
+	    .logical_iface = strdup(LO_IFACE),
+	    .max_options = 0,
+	    .address_family = &addr_inet,
+	    .method = get_method(&addr_inet, "loopback"),
+	    .n_options = 0,
+	    .option = NULL,
+	    .next = NULL
+	};
+
+	defn->ifaces = lo_if;
+
+	add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), lo_if->logical_iface);
+}
 @ 
 
 \subsection{File Handling}
@@ -2641,6 +2663,11 @@ int doit(char *str);
 <<execute functions>>=
 int doit(char *str) {
 	assert(str);
+	bool ignore_status = false;
+	if (*str == '-') {
+	    ignore_status = true;
+	    str++;
+	}
 
 	if (verbose || no_act) {
 		fprintf(stderr, "%s\n", str);
@@ -2661,6 +2688,9 @@ int doit(char *str) {
 		    	break;
 		}
 		waitpid(child, &status, 0);
+		if (ignore_status)
+			return 1;
+
 		if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
 			return 0;
 	}
@@ -3428,7 +3458,6 @@ function. It's put together in a fairly straightforward way.
 Equally, there's nothing particularly special about our headers.
 
 <<main headers>>=
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -3642,6 +3671,7 @@ struct option long_opts[] = {
 	{"no-act",      no_argument,       NULL, 'n'},
 	{"no-mappings", no_argument,       NULL,  1 },
 	{"no-scripts",  no_argument,       NULL,  4 },
+	{"no-loopback", no_argument,       NULL,  5 },
 	{"force",       no_argument,       NULL,  2 },
 	{"option",      required_argument, NULL, 'o'},
 	{"list",        no_argument,       NULL, 'l'},
@@ -3657,16 +3687,24 @@ the various things. The only special note here is that we need to export
 extern int no_act;
 extern int verbose;
 extern int run_scripts;
+extern bool no_loopback;
 @
 
 <<constant definitions>>=
+#ifndef RUN_DIR
 #define RUN_DIR "/run/network/"
+#endif
+
+#ifndef LO_IFACE
+#define LO_IFACE "lo"
+#endif
 @ 
 
 <<main global variables>>=
 int no_act = 0;
 int run_scripts = 1;
 int verbose = 0;
+bool no_loopback = false;
 char *statefile = RUN_DIR "ifstate";
 char *tmpstatefile = RUN_DIR ".ifstate.tmp";
 @
@@ -3740,6 +3778,7 @@ static void help(char *execname, int (*cmds)(interface_defn *)) {
 	printf("\t\t\t\t/etc/network/interfaces\n");
 	printf("\t--no-mappings\t\tdon't run any mappings\n");
 	printf("\t--no-scripts\t\tdon't run any hook scripts\n");
+	printf("\t--no-loopback\t\tdon't act specially on the loopback device\n");
 	if (!<<we're listing known interfaces>>
 	    && !<<we're querying an interface's config>>)
 		printf("\t--force\t\t\tforce de/configuration\n");
@@ -3806,6 +3845,11 @@ case 1:
 <<[[getopt]] possibilities>>=
 case 4:
 	run_scripts = 0;
+	break;
+@ 
+<<[[getopt]] possibilities>>=
+case 5:
+	no_loopback = true;
 	break;
 @ 
 <<[[getopt]] possibilities>>=
@@ -4682,6 +4726,7 @@ interfaces up and down.
 int execable(char *);
 #define iface_is_link() (!_iface_has(ifd->real_iface, ":."))
 #define iface_has(s) _iface_has(ifd->real_iface, (s))
+#define iface_is_lo() ((!strcmp(ifd->logical_iface, LO_IFACE)) && (!no_loopback))
 int _iface_has(char *, char *);
 void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char ** argv);
 void make_hex_address(interface_defn *ifd, char **pparam, int argc, char ** argv);
@@ -5071,10 +5116,10 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    ip link set dev %iface% up
+    ip link set dev %iface% up if (!iface_is_lo())
 
   down
-    ip link set dev %iface% down
+    ip link set dev %iface% down if (!iface_is_lo())
 @ 
 
 <<Linux inet methods: static>>=
@@ -5322,11 +5367,11 @@ method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
-    ip link set dev %iface% up
-    ip addr add dev %iface% ::1
+    -ip link set dev %iface% up 2>/dev/null if (!iface_is_lo())
+    -ip addr add dev %iface% ::1 2>/dev/null if (!iface_is_lo())
   down
-    ip addr del dev %iface% ::1
-    ip link set dev %iface% down
+    -ip addr del dev %iface% ::1 2>/dev/null if (!iface_is_lo())
+    -ip link set dev %iface% down 2>/dev/null if (!iface_is_lo())
 
 method static
   description
@@ -5579,10 +5624,12 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    ifconfig %iface% 127.0.0.1 up
+    ifconfig %iface% 127.0.0.1 up \
+	if (!iface_is_lo())
 
   down
-    ifconfig %iface% down
+    ifconfig %iface% down \
+	if (!iface_is_lo())
 @ 
 
 <<kFreeBSD inet methods: static>>=
@@ -5675,9 +5722,11 @@ method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
-    ifconfig %iface% inet6 ::1
+    ifconfig %iface% inet6 ::1 \
+	if (!iface_is_lo())
   down
-    ifconfig %iface% down
+    ifconfig %iface% down \
+	if (!iface_is_lo())
 
 method static
   description
@@ -5800,10 +5849,12 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    inetutils-ifconfig --interface %iface% 127.0.0.1 --up
+    inetutils-ifconfig --interface %iface% 127.0.0.1 --up \
+	if (!iface_is_lo())
 
   down
-    inetutils-ifconfig --interface %iface% --down
+    inetutils-ifconfig --interface %iface% --down \
+	if (!iface_is_lo())
 @ 
 
 <<Hurd inet methods: static>>=
@@ -5995,22 +6046,36 @@ method none
         ip link set up dev %link%; \
         ip link add link %link% name %iface0% type vlan id %vlan_id%; \
     fi if (iface_has(".") && (!var_set_anywhere("bridge_ports", ifd)))
+    -ip link set up dev %iface% 2>/dev/null \
+	if (iface_is_lo())
   down
     ip link del %iface% if (iface_has(".") && (!var_set_anywhere("bridge_ports", ifd)))
+    -ip link set down dev %iface% 2>/dev/null \
+	if (iface_is_lo())
 
 architecture kfreebsd
 
 method none
   description
   up
+    -ifconfig %iface% 127.0.0.1 up \
+	if (iface_is_lo())
+    -ifconfig %iface% inet6 ::1 \
+	if (iface_is_lo())
   down
+    -ifconfig %iface% down \
+	if (iface_is_lo())
 
 architecture hurd
 
 method none
   description
   up
+    -inetutils-ifconfig --interface %iface% 127.0.0.1 --up \
+	if (iface_is_lo())
   down
+    -inetutils-ifconfig --interface %iface% --down \
+	if (iface_is_lo())
 
 @ 
 
