@@ -115,10 +115,14 @@ if [ "$1" = "configure" ] ; then
         fi
     fi
   else  # ! -f /etc/network/interfaces
-    echo "Creating /etc/network/interfaces."
-    echo "# interfaces(5) file used by ifup(8) and ifdown(8)" > /etc/network/interfaces
-    echo "# Include files from /etc/network/interfaces.d:" >> /etc/network/interfaces
-    echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+    if [ -z "$2" ]; then
+      echo "Creating /etc/network/interfaces."
+      echo "# interfaces(5) file used by ifup(8) and ifdown(8)" > /etc/network/interfaces
+      echo "# Include files from /etc/network/interfaces.d:" >> /etc/network/interfaces
+      echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+    else
+      report_warn "/etc/network/interfaces does not exist"
+    fi
   fi
 fi
 

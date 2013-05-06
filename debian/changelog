@@ -1,18 +1,26 @@
-ifupdown (0.7.50) experimental; urgency=low
+ifupdown (0.7.41) UNRELEASED; urgency=low
 
+  * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
+  * Don't call dhclient with -1 for now.
+  * Assign logical interface name for link pseudointerface on down
+    (Closes: #705268).
   * Add /etc/network/interfaces.d/lo with a loopback interface definition,
-    enable sourcing /etc/network/interfaces.d/* in the default configuration
-    (Closes: #695906).
+    enable sourcing /etc/network/interfaces.d/* in the default configuration.
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 07 Jan 2013 01:51:58 +0100
+ -- Andrew Shadura <andrewsh@debian.org>  Thu, 11 Apr 2013 21:44:23 +0200
 
-ifupdown (0.7.6) unstable; urgency=low
+ifupdown (0.7.40) experimental; urgency=low
 
-  [ Andrew O. Shadura ]
+  [ Andrew Shadura ]
   * Don't configure bridge interfaces as tagged VLAN interfaces
     (Closes: #696642).
   * Add "tryonce" option to DHCP-enabled methods (Closes: #694541).
+  * Implement inet6/auto for kFreeBSD, call DHCP release of ifdown
+    on Linux (Closes: #701884).
   * Update manual pages.
+  * Add tests for DHCP method.
+  * Add ISC DHCP client to Build-Depends (the tests don't actually run
+    the DHCP client, however).
 
   [ Stéphane Graber ]
   * Patches for upstart support from Ubuntu:
@@ -28,7 +36,45 @@ ifupdown (0.7.6) unstable; urgency=low
   * Actually set the new calculated value for duplicate entries
     (LP: #1086517).
 
- -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 06 Jan 2013 19:36:49 +0100
+  [ Josselin Mouette ]
+  * postinst: Do not create /etc/network/interfaces if it was removed manually
+    (Closes: #695906)
+
+ -- Andrew Shadura <bugzilla@tut.by>  Mon, 04 Mar 2013 21:56:39 +0100
+
+ifupdown (0.7.8) unstable; urgency=medium
+
+  * Assign logical interface name for link pseudointerface on down
+    (Closes: #705268).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 12 Apr 2013 11:44:21 +0200
+
+ifupdown (0.7.7) unstable; urgency=low
+
+  * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
+  * Don't call dhclient with -1 for now.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 25 Mar 2013 22:12:09 +0100
+
+ifupdown (0.7.6) unstable; urgency=low
+
+  [ Andrew Shadura ]
+  * Don't configure bridge interfaces as tagged VLAN interfaces
+    (Closes: #696642).
+  * Implement inet6/auto for kFreeBSD, call DHCP release of ifdown
+    on Linux (Closes: #701884).
+  * Update manual pages.
+
+  [ Stéphane Graber ]
+  * Set MTU of tunnel devices (LP: #1074048).
+  * Actually set the new calculated value for duplicate entries
+    (LP: #1086517).
+
+  [ Josselin Mouette ]
+  * postinst: Do not create /etc/network/interfaces if it was removed manually
+    (Closes: #695906)
+
+ -- Andrew Shadura <bugzilla@tut.by>  Sun, 03 Mar 2013 12:08:16 +0100
 
 ifupdown (0.7.5) unstable; urgency=low
 
