@@ -43,6 +43,10 @@ endif
 export ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 export DESTDIR := debian/$(shell dh_listpackages)
 
+ifeq "$(ARCH)" "kfreebsd"
+CFLAGS += -D'LO_IFACE="lo0"'
+endif
+
 %:
 	dh $@
 
