@@ -1,3 +1,10 @@
+ifupdown (0.7.42) unstable; urgency=low
+
+  * Fix syntax issue with postinst (Closes: #707041).
+  * Fix cross-build.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 07 May 2013 08:09:32 +0200
+
 ifupdown (0.7.41) unstable; urgency=low
 
   * Upload to unstable.
