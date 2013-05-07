@@ -96,10 +96,9 @@ fi
 
 # Generic stuff done on all configurations
 if [ "$1" = "configure" ] ; then
-  if [ -f /etc/network/interfaces ] ; then
-    # We don't need loopback interface definition anymore as
-    # ifupdown handles loopback interface on its own from now
-  else  # ! -f /etc/network/interfaces
+  # We don't need loopback interface definition anymore as
+  # ifupdown handles loopback interface on its own from now
+  if [ ! -f /etc/network/interfaces ] ; then
     if [ -z "$2" ]; then
       echo "Creating /etc/network/interfaces."
       echo "# interfaces(5) file used by ifup(8) and ifdown(8)" > /etc/network/interfaces
