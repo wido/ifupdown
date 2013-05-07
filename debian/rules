@@ -88,10 +88,10 @@ endif
 endif
 
 override_dh_gencontrol:
-ifeq ($(DEB_HOST_ARCH_OS),linux)
+ifeq ($(ARCH),linux)
 	dh_gencontrol -- -V'net:Depends=iproute (>= 20071016-1)' -V'net:Suggests=net-tools'
-else ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
+else ifeq ($(ARCH),kfreebsd)
 	dh_gencontrol -- -V'net:Depends=net-tools' -V'net:Suggests='
-else ifeq ($(DEB_HOST_ARCH_OS),hurd)
+else ifeq ($(ARCH),hurd)
 	dh_gencontrol -- -V'net:Depends=inetutils-tools' -V'net:Suggests='
 endif
