@@ -1,11 +1,14 @@
-ifupdown (0.7.41) UNRELEASED; urgency=low
+ifupdown (0.7.41) unstable; urgency=low
 
+  * Upload to unstable.
   * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
+  * Remove "tryonce" option introduced in 0.7.40.
   * Don't call dhclient with -1 for now.
+  * Remove ISC DHCP client from Build-Depends.
   * Assign logical interface name for link pseudointerface on down
     (Closes: #705268).
-  * Add /etc/network/interfaces.d/lo with a loopback interface definition,
-    enable sourcing /etc/network/interfaces.d/* in the default configuration.
+  * Add implicit loopback device definition.
+  * Enable sourcing /etc/network/interfaces.d/* in the default configuration.
 
  -- Andrew Shadura <andrewsh@debian.org>  Thu, 11 Apr 2013 21:44:23 +0200
 
