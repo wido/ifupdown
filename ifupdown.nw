@@ -2260,19 +2260,19 @@ allowup_defn *add_allow_up(char *filename, int line,
 allowup_defn *add_allow_up(char *filename, int line,
 	allowup_defn *allow_up, char *iface_name)
 {
-	<<check [[iface_name]] isn't already an [[allow_up]] interface or die>>
+	<<check [[iface_name]] isn't already an [[allow_up]] interface>>
 	<<add [[iface_name]] as an [[allow_up]] interface or die>>
 	return allow_up;
 }
 @
 
-<<check [[iface_name]] isn't already an [[allow_up]] interface or die>>=
+<<check [[iface_name]] isn't already an [[allow_up]] interface>>=
 {
 	int i;
 
 	for (i = 0; i < allow_up->n_interfaces; i++) {
 		if (strcmp(iface_name, allow_up->interfaces[i]) == 0) {
-			<<report [[iface_name]] as [[allow_up]] duplicate, die>>
+			return allow_up;
 		}
 	}
 }
