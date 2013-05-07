@@ -107,6 +107,14 @@ for more information about the mapping feature.
 .B \-\-no\-scripts
 Don't run any scripts under /etc/network/if-*.d/
 .TP
+.B \-\-no\-loopback
+Disable special handling of the loopback interface. By default, the loopback interface
+(\fIlo\fR on Linux) is predefined internally as an auto interface, so it's brought up
+on \fBifup -a\fR automatically. In the case the loopback device is redefined by user,
+the interface is configured just once anyway. If, however, another interface is also
+defined as loopback, it's configured as usual. Specifying this option disables this
+behaviour, so the loopback interface won't be configured automatically.
+.TP
 .BR \-V ", " \-\-version
 Show copyright and version information.
 .TP
