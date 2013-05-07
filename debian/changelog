@@ -1,3 +1,9 @@
+ifupdown (0.7.43) unstable; urgency=low
+
+  * Don't consider multiple auto declarations an error (Closes: #707052).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 07 May 2013 09:41:18 +0200
+
 ifupdown (0.7.42) unstable; urgency=low
 
   * Fix syntax issue with postinst (Closes: #707041).
