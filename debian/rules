@@ -43,6 +43,10 @@ endif
 export ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 export DESTDIR := debian/$(shell dh_listpackages)
 
+ifeq "$(ARCH)" "kfreebsd"
+CFLAGS += -D'LO_IFACE="lo0"'
+endif
+
 %:
 	dh $@
 
@@ -52,7 +56,6 @@ override_dh_auto_configure:
 override_dh_installinit:
 	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
 	install -p -m 0644 debian/networking.defaults $(DESTDIR)/etc/default/networking
-	install -p -m 0644 debian/ifupdown.interfaces.d.lo $(DESTDIR)/etc/network/interfaces.d/lo
 	dh_installinit --name=network-interface-container --noscripts
 	dh_installinit --name=network-interface-security --noscripts
 	dh_installinit --name=network-interface --noscripts
@@ -85,10 +88,10 @@ endif
 endif
 
 override_dh_gencontrol:
-ifeq ($(DEB_HOST_ARCH_OS),linux)
+ifeq ($(ARCH),linux)
 	dh_gencontrol -- -V'net:Depends=iproute (>= 20071016-1)' -V'net:Suggests=net-tools'
-else ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
+else ifeq ($(ARCH),kfreebsd)
 	dh_gencontrol -- -V'net:Depends=net-tools' -V'net:Suggests='
-else ifeq ($(DEB_HOST_ARCH_OS),hurd)
+else ifeq ($(ARCH),hurd)
 	dh_gencontrol -- -V'net:Depends=inetutils-tools' -V'net:Suggests='
 endif

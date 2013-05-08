@@ -16,20 +16,34 @@ method none
         ip link set up dev %link%; \
         ip link add link %link% name %iface0% type vlan id %vlan_id%; \
     fi if (iface_has(".") && (!var_set_anywhere("bridge_ports", ifd)))
+    -ip link set up dev %iface% 2>/dev/null \
+	if (iface_is_lo())
   down
     ip link del %iface% if (iface_has(".") && (!var_set_anywhere("bridge_ports", ifd)))
+    -ip link set down dev %iface% 2>/dev/null \
+	if (iface_is_lo())
 
 architecture kfreebsd
 
 method none
   description
   up
+    -ifconfig %iface% 127.0.0.1 up \
+	if (iface_is_lo())
+    -ifconfig %iface% inet6 ::1 \
+	if (iface_is_lo())
   down
+    -ifconfig %iface% down \
+	if (iface_is_lo())
 
 architecture hurd
 
 method none
   description
   up
+    -inetutils-ifconfig --interface %iface% 127.0.0.1 --up \
+	if (iface_is_lo())
   down
+    -inetutils-ifconfig --interface %iface% --down \
+	if (iface_is_lo())
 

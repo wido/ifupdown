@@ -6,10 +6,10 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    ip link set dev %iface% up
+    ip link set dev %iface% up if (!iface_is_lo())
 
   down
-    ip link set dev %iface% down
+    ip link set dev %iface% down if (!iface_is_lo())
 
 method static
   description
@@ -75,18 +75,16 @@ method dhcp
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
     hwaddress address       -- Hardware address.
-    tryonce bool            -- Try to acquire lease just once (dhclient). [yes]
 
   conversion
     hwaddress cleanup_hwaddress
-    tryonce (map_value "" -1)
 
   up
     [[ip link set dev %iface% address %hwaddress%]]
-    dhclient [[%tryonce%]] -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
-    dhclient3 [[%tryonce%]] -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
@@ -203,10 +201,12 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    ifconfig %iface% 127.0.0.1 up
+    ifconfig %iface% 127.0.0.1 up \
+	if (!iface_is_lo())
 
   down
-    ifconfig %iface% down
+    ifconfig %iface% down \
+	if (!iface_is_lo())
 
 method static
   description
@@ -264,18 +264,16 @@ method dhcp
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
     hwaddress address       -- Hardware Address.
-    tryonce bool            -- Try to acquire lease just once (dhclient). [yes]
 
   conversion
     hwaddress cleanup_hwaddress
-    tryonce (map_value "" -1)
 
   up
     [[ifconfig %iface% link %hwaddress%]]
-    dhclient [[%tryonce%]] -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
-    dhclient3 [[%tryonce%]] -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
+    dhclient3 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         elsif (execable("/sbin/dhclient3"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
@@ -362,10 +360,12 @@ method loopback
     This method may be used to define the IPv4 loopback interface.
 
   up
-    inetutils-ifconfig --interface %iface% 127.0.0.1 --up
+    inetutils-ifconfig --interface %iface% 127.0.0.1 --up \
+	if (!iface_is_lo())
 
   down
-    inetutils-ifconfig --interface %iface% --down
+    inetutils-ifconfig --interface %iface% --down \
+	if (!iface_is_lo())
 
 method static
   description
@@ -420,15 +420,13 @@ method dhcp
     vendor vendor           -- Vendor class identifier (dhcpcd)
     client client           -- Client identifier (dhcpcd, udhcpc)
     hwaddress address       -- Hardware Address (Not yet supported)
-    tryonce bool            -- Try to acquire lease just once (dhclient). [yes]
 
   conversion
     hwaddress cleanup_hwaddress
-    tryonce (map_value "" -1)
 
   up
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
-    dhclient [[%tryonce%]] -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \

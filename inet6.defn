@@ -9,23 +9,19 @@ method auto
     properly configured and running.
     If stateless DHCPv6 support is turned on, then additional network
     configuration parameters such as DNS and NTP servers will be retrieved
-    from a DHCP server.
+    from a DHCP server. Please note that on ifdown, the lease is not currently
+    released (a known bug).
 
   options
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
-    tryonce bool           -- For DHCPv6, try to acquire lease just once. [yes]
-
-  conversion
-    tryonce (map_value "" -1)
-
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
     sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
     sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
-    dhclient -6 [[%tryonce%]] -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
   down
     ip -6 addr flush dev %iface% scope global
@@ -36,11 +32,11 @@ method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
-    ip link set dev %iface% up
-    ip addr add dev %iface% ::1
+    -ip link set dev %iface% up 2>/dev/null if (!iface_is_lo())
+    -ip addr add dev %iface% ::1 2>/dev/null if (!iface_is_lo())
   down
-    ip addr del dev %iface% ::1
-    ip link set dev %iface% down
+    -ip addr del dev %iface% ::1 2>/dev/null if (!iface_is_lo())
+    -ip link set dev %iface% down 2>/dev/null if (!iface_is_lo())
 
 method static
   description
@@ -102,18 +98,16 @@ method dhcp
     hwaddress address      -- Hardware address
     accept_ra int          -- Accept router advertisements (0=off, 1=on) [0]
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
-    tryonce bool           -- Try to acquire lease just once. [yes]
 
   conversion
     hwaddress cleanup_hwaddress
-    tryonce (map_value "" -1)
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%]]
     [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=%autoconf%]]
     ip link set dev %iface% [[address %hwaddress%]] up
-    dhclient -6 [[%tryonce%]] -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
@@ -182,9 +176,11 @@ method loopback
   description
     This method may be used to define the IPv6 loopback interface.
   up
-    ifconfig %iface% inet6 ::1
+    ifconfig %iface% inet6 ::1 \
+	if (!iface_is_lo())
   down
-    ifconfig %iface% down
+    ifconfig %iface% down \
+	if (!iface_is_lo())
 
 method static
   description
@@ -222,6 +218,34 @@ method manual
 
   down
 
+method auto
+  description
+    This method may be used to define interfaces with automatically assigned
+    IPv6 addresses. Using this method on its own doesn't mean that RDNSS options
+    will be applied, too. To make this happen, *rdnssd* daemon must be installed,
+    properly configured and running.
+    If stateless DHCPv6 support is turned on, then additional network
+    configuration parameters such as DNS and NTP servers will be retrieved
+    from a DHCP server. Please note that on ifdown, the lease is not currently
+    released (a known bug).
+
+  options
+    dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
+
+  conversion
+    hwaddress cleanup_hwaddress
+
+  up
+    sysctl -q -e -w net.inet6.ip6.accept_rtadv=1
+    ifconfig %iface% up
+    dhclient -6 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+        if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
+
+  down
+    ifconfig %iface% down
+
+
+
 method dhcp
   description
     This method may be used to obtain network interface configuration via
@@ -230,15 +254,13 @@ method dhcp
 
   options
     hwaddress address      -- Hardware address
-    tryonce bool           -- Try to acquire lease just once. [yes]
 
   conversion
     hwaddress cleanup_hwaddress
-    tryonce (map_value "" -1)
 
   up
     ifconfig %iface% [[link %hwaddress%]] up
-    dhclient -6 [[%tryonce%]] -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
@@ -298,16 +320,14 @@ method dhcp
 
   options
     hwaddress address      -- Hardware address (Not yet supported)
-    tryonce bool           -- Try to acquire lease just once. [yes]
 
   conversion
     hwaddress cleanup_hwaddress
-    tryonce (map_value "" -1)
 
   up
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
     inetutils-ifconfig --interface %iface% --up
-    dhclient -6 [[%tryonce%]] -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down

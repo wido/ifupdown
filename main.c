@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +13,7 @@
 int no_act = 0;
 int run_scripts = 1;
 int verbose = 0;
+bool no_loopback = false;
 char *statefile = RUN_DIR "ifstate";
 char *tmpstatefile = RUN_DIR ".ifstate.tmp";
 interfaces_file *defn;
@@ -80,6 +80,7 @@ static void help(char *execname, int (*cmds) (interface_defn *))
     printf("\t\t\t\t/etc/network/interfaces\n");
     printf("\t--no-mappings\t\tdon't run any mappings\n");
     printf("\t--no-scripts\t\tdon't run any hook scripts\n");
+    printf("\t--no-loopback\t\tdon't act specially on the loopback device\n");
     if (!(cmds == iface_list)
         && !(cmds == iface_query))
         printf("\t--force\t\t\tforce de/configuration\n");
@@ -327,6 +328,7 @@ int main(int argc, char **argv)
         {"no-act", no_argument, NULL, 'n'},
         {"no-mappings", no_argument, NULL, 1},
         {"no-scripts", no_argument, NULL, 4},
+        {"no-loopback", no_argument, NULL, 5},
         {"force", no_argument, NULL, 2},
         {"option", required_argument, NULL, 'o'},
         {"list", no_argument, NULL, 'l'},
@@ -413,6 +415,9 @@ int main(int argc, char **argv)
                 break;
             case 4:
                 run_scripts = 0;
+                break;
+            case 5:
+                no_loopback = true;
                 break;
             case 2:
                 if ((cmds == iface_list) || (cmds == iface_query))
@@ -581,8 +586,7 @@ int main(int argc, char **argv)
                 }
             }
 
-            if ((allow_class != NULL)
-                ) {
+            if (allow_class != NULL) {
                 {
                     int i;
                     allowup_defn *allowup = find_allowup(defn, allow_class);
@@ -815,6 +819,7 @@ int main(int argc, char **argv)
                 if (okay && (cmds == iface_down)) {
                     interface_defn link = {
                         .real_iface = iface,
+                        .logical_iface = liface,
                         .max_options = 0,
                         .address_family = &addr_link,
                         .method = &(addr_link.method[0]),
@@ -877,7 +882,7 @@ int main(int argc, char **argv)
             okay = iface_postdown(&meta_iface);
         }
         if (!okay) {
-            fprintf(stderr, "%s: pre-%s script failed.\n", argv[0], &argv[0][2]);
+            fprintf(stderr, "%s: post-%s script failed.\n", argv[0], &argv[0][2]);
             exit(1);
         }
     }

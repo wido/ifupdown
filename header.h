@@ -1,6 +1,8 @@
 #ifndef HEADER_H
 #define HEADER_H
 
+#include <stdbool.h>
+
 typedef struct address_family address_family;
 typedef struct method method;
 typedef struct conversion conversion;
@@ -94,7 +96,13 @@ struct mapping_defn
 #define EUNDEFVAR   10002
 #define MAX_VARNAME    32
 #define EUNBALPER   10000
+#ifndef RUN_DIR
 #define RUN_DIR "/run/network/"
+#endif
+
+#ifndef LO_IFACE
+#define LO_IFACE "lo"
+#endif
 extern address_family *addr_fams[];
 variable * set_variable(char *filename, char *name, char *value, 
                 variable **var, int *n_vars, int *max_vars);
@@ -124,6 +132,7 @@ int run_mapping(char *physical, char *logical, int len, mapping_defn * map);
 extern int no_act;
 extern int verbose;
 extern int run_scripts;
+extern bool no_loopback;
 extern interfaces_file *defn;
 extern address_family addr_link;
 extern address_family addr_inet;

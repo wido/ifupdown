@@ -54,17 +54,22 @@ static void set_environ(interface_defn * iface, char *mode, char *phase)
 
     *(environend++) = setlocalenv("%s=%s", "IFACE", iface->real_iface);
     *environend = NULL;
+
     *(environend++) = setlocalenv("%s=%s", "LOGICAL", iface->logical_iface);
     *environend = NULL;
+
     *(environend++) = setlocalenv("%s=%s", "ADDRFAM", iface->address_family->name);
     *environend = NULL;
+
     *(environend++) = setlocalenv("%s=%s", "METHOD", iface->method->name);
     *environend = NULL;
 
     *(environend++) = setlocalenv("%s=%s", "MODE", mode);
     *environend = NULL;
+
     *(environend++) = setlocalenv("%s=%s", "PHASE", phase);
     *environend = NULL;
+
     *(environend++) = setlocalenv("%s=%s", "VERBOSITY", verbose ? "1" : "0");
     *environend = NULL;
 
@@ -110,6 +115,11 @@ static char *setlocalenv(char *format, char *name, char *value)
 int doit(char *str)
 {
     assert(str);
+    bool ignore_status = false;
+    if (*str == '-') {
+        ignore_status = true;
+        str++;
+    }
 
     if (verbose || no_act) {
         fprintf(stderr, "%s\n", str);
@@ -130,6 +140,9 @@ int doit(char *str)
                 break;
         }
         waitpid(child, &status, 0);
+        if (ignore_status)
+            return 1;
+
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
             return 0;
     }
@@ -152,7 +165,7 @@ int execute_options(interface_defn * ifd, execfn * exec, char *opt)
 int execute_scripts(interface_defn * ifd, execfn * exec, char *opt)
 {
     if (!run_scripts)
-        return;
+        return 1;
 
     char buf[100];
     snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d", verbose ? "--verbose" : "", opt);
@@ -286,8 +299,8 @@ static char *parse(char *command, interface_defn * ifd)
 {
     char *result = NULL;
     size_t pos = 0, len = 0;
-    size_t old_pos[MAX_OPT_DEPTH] = {0};
-    int okay[MAX_OPT_DEPTH] = {1};
+    size_t old_pos[MAX_OPT_DEPTH] = { 0 };
+    int okay[MAX_OPT_DEPTH] = { 1 };
     int opt_depth = 1;
 
     while (*command) {
