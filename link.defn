@@ -19,7 +19,7 @@ method none
     -ip link set up dev %iface% 2>/dev/null \
 	if (iface_is_lo())
   down
-    ip link del %iface% if (iface_has(".") && (!var_set_anywhere("bridge_ports", ifd)))
+    ip link del %iface% if (iface_has(".") && (!iface_has(":")) && (!var_set_anywhere("bridge_ports", ifd)))
     -ip link set down dev %iface% 2>/dev/null \
 	if (iface_is_lo())
 
