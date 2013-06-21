@@ -24,6 +24,7 @@ VERBOSE=no
 
 [ -f /etc/default/networking ] && . /etc/default/networking
 
+verbose=""
 [ "$VERBOSE" = yes ] && verbose=-v
 
 process_exclusions() {
