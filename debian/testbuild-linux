@@ -496,8 +496,23 @@ ip route add 2000::/3 via ::192.88.99.1 dev tunnel
 run-parts --verbose /etc/network/if-up.d
 EOF
 
+cat >tests/testcase.10 <<EOF
+# RUN: -a
+source /dev/null
+source null
+EOF
+cat >tests/up.10 <<EOF
+====stdout====
+====stderr====
+Parsing file /dev/null
+Parsing file tests/null
+run-parts --verbose /etc/network/if-pre-up.d
+run-parts --verbose /etc/network/if-up.d
+EOF
+
+
 result=true
-for test in 1 2 3 4 5 6 7 8 9; do
+for test in 1 2 3 4 5 6 7 8 9 10; do
         args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
         ./ifup --no-loopback -nv --force -i tests/testcase.$test $args \
                 >tests/up-res-out.$test 2>tests/up-res-err.$test || 

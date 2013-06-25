@@ -206,17 +206,55 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
             }
             currently_processing = MAPPING;
         } else if (strcmp(firstword, "source") == 0) {
+            char *filename_dup = strdup(filename);
+            if (filename_dup == NULL) {
+                perror(filename);
+                return NULL;
+            }
+            char *dir = strdup(dirname(filename_dup));
+            if (dir == NULL) {
+                perror(filename);
+                return NULL;
+            }
+            free(filename_dup);
+
             wordexp_t p;
             char **w;
             size_t i;
+            size_t l = strlen(dir);
             int fail = wordexp(rest, &p, WRDE_NOCMD);
             if (!fail) {
                 w = p.we_wordv;
                 for (i = 0; i < p.we_wordc; i++) {
-                    read_interfaces_defn(defn, w[i]);
+                    char * file;
+                    if (w[i][0] == '/') {
+                        size_t s = strlen(w[i]) + 1; /* + NUL */
+                        file = malloc(s);
+                        if (file == NULL) {
+                            perror(filename);
+                            return NULL;
+                        }
+                    } else {
+                        size_t s = l + strlen(w[i]) + 2; /* + slash + NUL */
+                        file = malloc(s);
+                        if (file == NULL) {
+                            perror(filename);
+                            return NULL;
+                        }
+                        file[0] = '\0';
+                        strcat(file, dir);
+                        strcat(file, "/");
+                    }
+                    strcat(file, w[i]);
+                    if (verbose) {
+                        fprintf(stderr, "Parsing file %s\n", file);
+                    }
+                    read_interfaces_defn(defn, file);
+                    free(file);
                 }
                 wordfree(&p);
             }
+            free(dir);
             currently_processing = NONE;
         } else if (strcmp(firstword, "iface") == 0) {
             {
