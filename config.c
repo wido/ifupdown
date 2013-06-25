@@ -257,7 +257,6 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
                 currif->method = get_method(currif->address_family, method_name);
                 if (!currif->method) {
                     fprintf(stderr, "%s:%d: unknown method\n", filename, line);
-                    return NULL;
                     return NULL;        /* FIXME */
                 }
                 currif->automatic = 1;
