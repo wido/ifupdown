@@ -219,43 +219,44 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
             }
             free(filename_dup);
 
+            size_t l = strlen(dir);
+            char * pattern;
+            if (rest[0] == '/') {
+                size_t s = strlen(rest) + 1; /* + NUL */
+                pattern = malloc(s);
+                if (pattern == NULL) {
+                    perror(filename);
+                    return NULL;
+                }
+                pattern[0] = '\0';
+            } else {
+                size_t s = l + strlen(rest) + 2; /* + slash + NUL */
+                pattern = malloc(s);
+                if (pattern == NULL) {
+                    perror(filename);
+                    return NULL;
+                }
+                pattern[0] = '\0';
+                strcat(pattern, dir);
+                strcat(pattern, "/");
+            }
+            strcat(pattern, rest);
+
             wordexp_t p;
             char **w;
             size_t i;
-            size_t l = strlen(dir);
-            int fail = wordexp(rest, &p, WRDE_NOCMD);
+            int fail = wordexp(pattern, &p, WRDE_NOCMD);
             if (!fail) {
                 w = p.we_wordv;
                 for (i = 0; i < p.we_wordc; i++) {
-                    char * file;
-                    if (w[i][0] == '/') {
-                        size_t s = strlen(w[i]) + 1; /* + NUL */
-                        file = malloc(s);
-                        if (file == NULL) {
-                            perror(filename);
-                            return NULL;
-                        }
-                        file[0] = '\0';
-                    } else {
-                        size_t s = l + strlen(w[i]) + 2; /* + slash + NUL */
-                        file = malloc(s);
-                        if (file == NULL) {
-                            perror(filename);
-                            return NULL;
-                        }
-                        file[0] = '\0';
-                        strcat(file, dir);
-                        strcat(file, "/");
-                    }
-                    strcat(file, w[i]);
                     if (verbose) {
-                        fprintf(stderr, "Parsing file %s\n", file);
+                        fprintf(stderr, "Parsing file %s\n", w[i]);
                     }
-                    read_interfaces_defn(defn, file);
-                    free(file);
+                    read_interfaces_defn(defn, w[i]);
                 }
                 wordfree(&p);
             }
+            free(pattern);
             free(dir);
             currently_processing = NONE;
         } else if (strcmp(firstword, "iface") == 0) {
