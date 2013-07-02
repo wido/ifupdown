@@ -7,6 +7,7 @@
 #include "header.h"
 #include <errno.h>
 #include <ctype.h>
+#include <libgen.h>
 #include <wordexp.h>
 static int get_line(char **result, size_t * result_len, FILE * f, int *line);
 static char *next_word(char *buf, char *word, int maxlen);
@@ -234,6 +235,7 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
                             perror(filename);
                             return NULL;
                         }
+                        file[0] = '\0';
                     } else {
                         size_t s = l + strlen(w[i]) + 2; /* + slash + NUL */
                         file = malloc(s);
