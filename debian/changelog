@@ -1,3 +1,20 @@
+ifupdown (0.7.44) UNRELEASED; urgency=low
+
+  * Convert from noweb to plain C.
+  * Don't bring down VLANned aliases (Closes: #711449).
+  * Initialise 'verbose' variable (Closes: #710301).
+  * Handle relative paths properly (Closes: #712909).
+    Now non-absolute paths are understood relatively to the file
+    they're sourced from.
+  * Update RFC number (Closes: #717520).
+  * Add source-directory directive.
+  * Use source-directory in the default interfaces file.
+  * Remove loopback interface from the manpage example.
+  * Update the manpages (Closes: #711012).
+  * Depend on iproute2 instead of iproute (Closes: #713825).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Thu, 25 Jul 2013 22:52:36 +0200
+
 ifupdown (0.7.43) unstable; urgency=low
 
   * Don't consider multiple auto declarations an error (Closes: #707052).
