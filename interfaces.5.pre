@@ -180,7 +180,7 @@ The following "command" options are available for every family and method.
 Each of these options can be given multiple times in a single stanza,
 in which case the commands are executed in the order in which they appear
 in the stanza.
-(You can ensure a command never fails by suffixing "|| true".)
+(You can ensure a command never fails by suffixing them with "|| true".)
 .TP
 .BI pre\-up " command"
 Run
