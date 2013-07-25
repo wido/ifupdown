@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <libgen.h>
 #include <wordexp.h>
+#include <dirent.h>
 static int get_line(char **result, size_t * result_len, FILE * f, int *line);
 static char *next_word(char *buf, char *word, int maxlen);
 static address_family *get_address_family(address_family * af[], char *name);
@@ -146,6 +147,22 @@ interfaces_file *read_interfaces(char *filename)
     return read_interfaces_defn(defn, filename);
 }
 
+static int directory_filter(const struct dirent * d)
+{
+    const char *p;
+    if ((d == NULL) || (d->d_name == NULL)) {
+        return 0;
+    }
+    for (p = d->d_name; *p; p++) {
+        if (!(((*p >= 'a') && (*p <= 'z')) ||
+              ((*p >= 'A') && (*p <= 'Z')) ||
+              ((*p >= '0') && (*p <= '9')) ||
+              (*p == '_') || (*p == '-')))
+            return 0;
+    }
+    return 1;
+}
+
 interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
 {
     FILE *f;
@@ -254,6 +271,71 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
                         fprintf(stderr, "Parsing file %s\n", w[i]);
                     }
                     read_interfaces_defn(defn, w[i]);
+                }
+                wordfree(&p);
+            }
+            free(pattern);
+            free(dir);
+            currently_processing = NONE;
+        } else if (strlmatch(firstword, "source-dir") == 0) {
+            char *filename_dup = strdup(filename);
+            if (filename_dup == NULL) {
+                perror(filename);
+                return NULL;
+            }
+            char *dir = strdup(dirname(filename_dup));
+            if (dir == NULL) {
+                perror(filename);
+                return NULL;
+            }
+            free(filename_dup);
+
+            size_t l = strlen(dir);
+            char * pattern;
+            if (rest[0] == '/') {
+                size_t s = strlen(rest) + 1; /* + NUL */
+                pattern = malloc(s);
+                if (pattern == NULL) {
+                    perror(filename);
+                    return NULL;
+                }
+                pattern[0] = '\0';
+            } else {
+                size_t s = l + strlen(rest) + 2; /* + slash + NUL */
+                pattern = malloc(s);
+                if (pattern == NULL) {
+                    perror(filename);
+                    return NULL;
+                }
+                pattern[0] = '\0';
+                strcat(pattern, dir);
+                strcat(pattern, "/");
+            }
+            strcat(pattern, rest);
+
+            wordexp_t p;
+            char **w;
+            size_t i;
+            int fail = wordexp(pattern, &p, WRDE_NOCMD);
+            if (!fail) {
+                w = p.we_wordv;
+                for (i = 0; i < p.we_wordc; i++) {
+                    struct dirent **namelist;
+                    int n = scandir(w[i], &namelist, directory_filter, alphasort);
+                    if (n >= 0) {
+                        if (verbose) {
+                            fprintf(stderr, "Reading directory %s\n", w[i]);
+                        }
+
+                        int j;
+                        for (j = 0; j < n; j++) {
+                            if (verbose) {
+                                fprintf(stderr, "Parsing file %s\n", namelist[j]->d_name);
+                            }
+                            read_interfaces_defn(defn, namelist[j]->d_name);
+                        }
+                        free(namelist);
+                    }
                 }
                 wordfree(&p);
             }

@@ -124,6 +124,7 @@ int iface_list(interface_defn * iface);
 int iface_query(interface_defn * iface);
 int execute(char *command, interface_defn * ifd, execfn * exec);
 int strncmpz(char *l, char *r, size_t llen);
+#define strlmatch(l,r) strncmp(l,r,strlen(r))
 char *get_var(char *id, size_t idlen, interface_defn * ifd);
 int var_true(char *id, interface_defn * ifd);
 int var_set(char *id, interface_defn * ifd);
