@@ -78,6 +78,26 @@ used.
 .BR wordexp (3)
 for details.)
 .P
+Similarly, "source-directory" keyword is used to source multiple files at once,
+without specifying them individually or using shell globs. Additionally,
+when "source-directory" is used, names of the files are checked to match
+the following regular expression: \fI^[a\-zA\-Z0\-9_\-]+$\fR. In other words,
+the names must consist entirely of ASCII upper- and lower-case letters,
+ASCII digits, ASCII underscores, and ASCII minus-hyphens. In the directory path,
+shell wildcards may be used as well.
+.P
+When sourcing files or directories, if a path doesn't have a leading slash,
+it's considered relative to the directory containing the file in which the
+keyword is placed. In the example above, if the file is located at
+.IR /etc/network/interfaces\fR,
+paths to the included files are understood to be under
+.IR /etc/network\fR.
+.P
+By default, on a freshly installed Debian system, the interfaces file includes a
+line to source
+.IR /etc/network/interfaces.d
+directory.
+.P
 Stanzas beginning with the word "mapping" are used to determine how a
 logical interface name is chosen for a physical interface that is to be
 brought up.  The first line of a mapping stanza consists of the word
