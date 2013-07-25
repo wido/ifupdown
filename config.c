@@ -17,6 +17,7 @@ allowup_defn *get_allowup(allowup_defn ** allowups, char *name);
 
 allowup_defn *add_allow_up(char *filename, int line,
     allowup_defn * allow_up, char *iface_name);
+
 variable *set_variable(char *filename, char *name, char *value,
     variable ** var, int *n_vars, int *max_vars)
 {
@@ -41,7 +42,7 @@ variable *set_variable(char *filename, char *name, char *value,
                 }
 
                 if ((*var)[j].value == value) {
-                    return value;
+                    return &(*var)[j];
                 }
 
                 free((*var)[j].value);
