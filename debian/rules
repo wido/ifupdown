@@ -89,7 +89,7 @@ endif
 
 override_dh_gencontrol:
 ifeq ($(ARCH),linux)
-	dh_gencontrol -- -V'net:Depends=iproute (>= 20071016-1)' -V'net:Suggests=net-tools'
+	dh_gencontrol -- -V'net:Depends=iproute2' -V'net:Suggests=net-tools'
 else ifeq ($(ARCH),kfreebsd)
 	dh_gencontrol -- -V'net:Depends=net-tools' -V'net:Suggests='
 else ifeq ($(ARCH),hurd)
