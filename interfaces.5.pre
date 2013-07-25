@@ -37,6 +37,8 @@ allow-hotplug eth1
 
 source interfaces.d/machine\-dependent
 
+source-directory interfaces.d
+
 mapping eth0 
  	script /usr/local/sbin/map\-scheme
  	map HOME eth0\-home

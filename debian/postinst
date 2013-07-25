@@ -103,7 +103,7 @@ if [ "$1" = "configure" ] ; then
       echo "Creating /etc/network/interfaces."
       echo "# interfaces(5) file used by ifup(8) and ifdown(8)" > /etc/network/interfaces
       echo "# Include files from /etc/network/interfaces.d:" >> /etc/network/interfaces
-      echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+      echo "source-directory /etc/network/interfaces.d" >> /etc/network/interfaces
     else
       report_warn "/etc/network/interfaces does not exist"
     fi
