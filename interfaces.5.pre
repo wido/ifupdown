@@ -32,10 +32,8 @@ a backslash.
 The file consists of zero or more "iface", "mapping", "auto", "allow-" and
 "source" stanzas. Here is an example.
 .EX
-auto lo eth0
+auto eth0
 allow-hotplug eth1
-
-iface lo inet loopback
 
 source interfaces.d/machine\-dependent
 
