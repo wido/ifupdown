@@ -13,7 +13,7 @@ method auto
     released (a known bug).
 
   options
-    privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
+    privext int            -- Privacy extensions (RFC4941) (0=off, 1=assign, 2=prefer)
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
