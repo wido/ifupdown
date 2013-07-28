@@ -14,7 +14,8 @@
 # available.
 ######################################################################
 
-# We always want the loopback interface.
+# The loopback interface isn't really required any longer,
+# but can be used if needed.
 #
 # auto lo
 # iface lo inet loopback
@@ -23,8 +24,7 @@
 #
 # auto eth0
 # iface eth0 inet static
-#     address 192.168.0.42
-#     netmask 255.255.255.0
+#     address 192.168.0.42/24
 #     gateway 192.168.0.1
 
 # A more complicated ethernet setup, with a less common netmask, and a downright
@@ -33,8 +33,7 @@
 #
 # auto eth0
 # iface eth0 inet static
-#     address 192.168.1.42
-#     netmask 255.255.255.128
+#     address 192.168.1.42/25
 #     up route add -net 192.168.1.128 netmask 255.255.255.128 gw 192.168.1.2
 #     up route add default gw 192.168.1.200
 #     down route del default gw 192.168.1.200
@@ -54,8 +53,7 @@
 #
 # auto eth0 eth0:1
 # iface eth0 inet static
-#     address 192.168.0.100
-#     netmask 255.255.255.0
+#     address 192.168.0.100/24
 #     gateway 192.168.0.1
 # iface eth0:1 inet static
 #     address 192.168.0.200
