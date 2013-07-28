@@ -59,6 +59,19 @@
 #     address 192.168.0.200
 #     netmask 255.255.255.0
 
+# Another way to accomplish this:
+#
+# auto eth0
+# iface eth0 inet static
+#     address 192.168.0.100/24
+#     gateway 192.168.0.1
+# iface eth0 inet static
+#     address 192.168.0.200
+#     netmask 255.255.255.0
+#
+# However, when specifying multiple addresses this way, there will be no
+# way to add or remove them individually using ifup/ifdown only.
+
 # "pre-up" and "post-down" commands are also available. In addition, the
 # exit status of these commands are checked, and if any fail, configuration
 # (or deconfiguration) is aborted. So:
