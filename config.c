@@ -138,7 +138,14 @@ interfaces_file *read_interfaces(char *filename)
         }
 
         *lo_if = (interface_defn) {
-        .logical_iface = strdup(LO_IFACE),.max_options = 0,.address_family = &addr_inet,.method = get_method(&addr_inet, "loopback"),.n_options = 0,.option = NULL,.next = NULL};
+            .logical_iface = strdup(LO_IFACE),
+            .max_options = 0,
+            .address_family = &addr_inet,
+            .method = get_method(&addr_inet, "loopback"),
+            .n_options = 0,
+            .option = NULL,
+            .next = NULL
+        };
 
         defn->ifaces = lo_if;
 
