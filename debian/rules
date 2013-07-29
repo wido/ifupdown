@@ -66,7 +66,6 @@ override_dh_installifupdown:
 
 override_dh_auto_clean:
 	$(MAKE) clean
-	$(MAKE) clobber
 	rm -rf tests/
 
 ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
