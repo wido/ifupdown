@@ -12,9 +12,10 @@ Package: ifupdown
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base (>= 4.1+Debian3), initscripts (>= 2.88dsf-25)
-Suggests: isc-dhcp-client | dhcp-client, ppp, rdnssd, ${net:Suggests}
+Recommends: isc-dhcp-client | dhcp-client
+Suggests: ppp, rdnssd, ${net:Suggests}
 Replaces: netbase (<< 5.0)
-Breaks: netbase (<< 5.0), dhcp-client (<< 3.0)
+Breaks: netbase (<< 5.0), dhcp3-client (<< 4.0)
 Multi-Arch: foreign
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to
