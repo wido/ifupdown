@@ -4,7 +4,7 @@ Priority: important
 Maintainer: Andrew Shadura <andrewsh@debian.org>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
 Standards-Version: 3.9.3
-Build-Depends: debhelper (>= 9.20120410~), noweb
+Build-Depends: debhelper (>= 9.20120410~)
 Vcs-Hg: http://anonscm.debian.org/hg/collab-maint/ifupdown/
 Vcs-Browser: http://anonscm.debian.org/hg/collab-maint/ifupdown/
 
