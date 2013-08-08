@@ -1,6 +1,6 @@
-ifupdown (0.7.44) UNRELEASED; urgency=low
+ifupdown (0.7.44) unstable; urgency=low
 
-  * Convert from noweb to plain C.
+  * Convert from noweb to plain C (Closes: #707209).
   * Don't bring down VLANned aliases (Closes: #711449).
   * Initialise 'verbose' variable (Closes: #710301).
   * Handle relative paths properly (Closes: #712909).
@@ -12,8 +12,10 @@ ifupdown (0.7.44) UNRELEASED; urgency=low
   * Remove loopback interface from the manpage example.
   * Update the manpages (Closes: #711012).
   * Depend on iproute2 instead of iproute (Closes: #713825).
+  * Recommend ISC DHCP client, at the same time declare Breaks against
+    dhcp3-client earlier than 4.0, as it has incompatible syntax.
 
- -- Andrew Shadura <andrewsh@debian.org>  Thu, 25 Jul 2013 22:52:36 +0200
+ -- Andrew Shadura <andrewsh@debian.org>  Thu, 08 Aug 2013 21:55:27 +0200
 
 ifupdown (0.7.43) unstable; urgency=low
 
