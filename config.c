@@ -335,11 +335,24 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
                         }
 
                         int j;
+                        size_t ll = strlen(w[i]);
                         for (j = 0; j < n; j++) {
-                            if (verbose) {
-                                fprintf(stderr, "Parsing file %s\n", namelist[j]->d_name);
+                            size_t s = ll + strlen(namelist[j]->d_name) + 2; /* + slash + NUL */
+                            char *name = malloc(s);
+                            if (name == NULL) {
+                                perror(filename);
+                                return NULL;
                             }
-                            read_interfaces_defn(defn, namelist[j]->d_name);
+                            name[0] = '\0';
+                            strcat(name, w[i]);
+                            strcat(name, "/");
+                            strcat(name, namelist[j]->d_name);
+
+                            if (verbose) {
+                                fprintf(stderr, "Parsing file %s\n", name);
+                            }
+                            read_interfaces_defn(defn, name);
+                            free(name);
                         }
                         free(namelist);
                     }
