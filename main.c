@@ -14,8 +14,9 @@ int no_act = 0;
 int run_scripts = 1;
 int verbose = 0;
 bool no_loopback = false;
-char *statefile = RUN_DIR "ifstate";
-char *tmpstatefile = RUN_DIR ".ifstate.tmp";
+char lockfile[] = RUN_DIR ".ifstate.lock";
+char statefile[] = RUN_DIR "ifstate";
+char tmpstatefile[] = RUN_DIR ".ifstate.tmp";
 interfaces_file *defn;
 bool match_patterns(char *string, int argc, char *argv[]);
 static void usage(char *execname);
@@ -90,13 +91,43 @@ static void help(char *execname, int (*cmds) (interface_defn *))
     exit(0);
 }
 
+FILE * lock_state(const char * argv0) {
+    FILE *lock_fp;
+    lock_fp = fopen(lockfile, no_act ? "r" : "a+");
+    if (lock_fp == NULL) {
+        if (!no_act) {
+            fprintf(stderr, "%s: failed to open lockfile %s: %s\n", argv0, lockfile, strerror(errno));
+            exit(1);
+        } else {
+            return NULL;
+        }
+    }
+
+    int flags;
+
+    if ((flags = fcntl(fileno(lock_fp), F_GETFD)) < 0 || fcntl(fileno(lock_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
+        fprintf(stderr, "%s: failed to set FD_CLOEXEC on lockfile %s: %s\n", argv0, lockfile, strerror(errno));
+        exit(1);
+    }
+
+    if (lock_fd(fileno(lock_fp)) < 0) {
+        fprintf(stderr, "%s: failed to lock lockfile %s: %s\n", argv0, lockfile, strerror(errno));
+        exit(1);
+    }
+
+    return lock_fp;
+}
+
 static const char *read_state(const char *argv0, const char *iface)
 {
     char *ret = NULL;
 
+    FILE *lock_fp;
     FILE *state_fp;
     char buf[80];
     char *p;
+
+    lock_fp = lock_state(argv0);
 
     state_fp = fopen(statefile, no_act ? "r" : "a+");
     if (state_fp == NULL) {
@@ -113,11 +144,6 @@ static const char *read_state(const char *argv0, const char *iface)
 
         if ((flags = fcntl(fileno(state_fp), F_GETFD)) < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
             fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
-            exit(1);
-        }
-
-        if (lock_fd(fileno(state_fp)) < 0) {
-            fprintf(stderr, "%s: failed to lock statefile %s: %s\n", argv0, statefile, strerror(errno));
             exit(1);
         }
     }
@@ -148,15 +174,23 @@ static const char *read_state(const char *argv0, const char *iface)
         state_fp = NULL;
     }
 
+    if (lock_fp != NULL) {
+        fclose(lock_fp);
+        lock_fp = NULL;
+    }
+
     return ret;
 }
 
 static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces)
 {
     int i;
+    FILE *lock_fp;
     FILE *state_fp;
     char buf[80];
     char *p;
+
+    lock_fp = lock_state(argv0);
 
     state_fp = fopen(statefile, no_act ? "r" : "a+");
     if (state_fp == NULL) {
@@ -173,11 +207,6 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces)
 
         if ((flags = fcntl(fileno(state_fp), F_GETFD)) < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
             fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
-            exit(1);
-        }
-
-        if (lock_fd(fileno(state_fp)) < 0) {
-            fprintf(stderr, "%s: failed to lock statefile %s: %s\n", argv0, statefile, strerror(errno));
             exit(1);
         }
     }
@@ -213,15 +242,23 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces)
         fclose(state_fp);
         state_fp = NULL;
     }
+
+    if (lock_fp != NULL) {
+        fclose(lock_fp);
+        lock_fp = NULL;
+    }
 }
 
 static void update_state(const char *argv0, const char *iface, const char *state)
 {
     FILE *tmp_fp;
 
+    FILE *lock_fp;
     FILE *state_fp;
     char buf[80];
     char *p;
+
+    lock_fp = lock_state(argv0);
 
     state_fp = fopen(statefile, no_act ? "r" : "a+");
     if (state_fp == NULL) {
@@ -295,6 +332,11 @@ static void update_state(const char *argv0, const char *iface, const char *state
     if (state_fp != NULL) {
         fclose(state_fp);
         state_fp = NULL;
+    }
+
+    if (lock_fp != NULL) {
+        fclose(lock_fp);
+        lock_fp = NULL;
     }
 }
 
