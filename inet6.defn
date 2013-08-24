@@ -327,11 +327,11 @@ method dhcp
   up
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
     inetutils-ifconfig --interface %iface% --up
-    dhclient -6 -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -pf /run/dhclient6.%iface///.%.pid -lf /var/lib/dhcp/dhclient6.%iface///.%.leases %iface% \
         if (execable("/sbin/dhclient"))
 
   down
-    dhclient -6 -r -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
+    dhclient -6 -r -pf /run/dhclient6.%iface///.%.pid -lf /var/lib/dhcp/dhclient6.%iface///.%.leases %iface% \
         if (execable("/sbin/dhclient"))
     inetutils-ifconfig --interface %iface% --down
 

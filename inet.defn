@@ -426,9 +426,9 @@ method dhcp
 
   up
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
-    dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -pf /run/dhclient.%iface///.%.pid -lf /var/lib/dhcp/dhclient.%iface///.%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
+    udhcpc -n -p /run/udhcpc.%iface///.%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
@@ -436,9 +436,9 @@ method dhcp
         elsif (execable("/sbin/dhcpcd"))
 
   down
-    dhclient -v -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases %iface% \
+    dhclient -v -r -pf /run/dhclient.%iface///.%.pid -lf /var/lib/dhcp/dhclient.%iface///.%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid) \
+    kill -USR2 $(cat /run/udhcpc.%iface///.%.pid); kill -TERM $(cat /run/udhcpc.%iface///.%.pid) \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
@@ -487,10 +487,10 @@ method wvdial
     provider name  -- Use /name/ as the provider (from /etc/wvdial.conf).
   up
     /sbin/start-stop-daemon --start -x /usr/bin/wvdial \
-                      -p /run/wvdial.%iface%.pid -b -m -- [[ %provider% ]]
+                      -p /run/wvdial.%iface///.%.pid -b -m -- [[ %provider% ]]
   down
     /sbin/start-stop-daemon --stop -x /usr/bin/wvdial \
-                      -p /run/wvdial.%iface%.pid -s 2
+                      -p /run/wvdial.%iface///.%.pid -s 2
 
 
 method ipv4ll

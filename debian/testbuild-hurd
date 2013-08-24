@@ -4,24 +4,31 @@ rm -rf tests/
 mkdir tests
 cat >tests/testcase.1 <<EOF
 # RUN: -a
-auto eth0
-iface eth0 inet static
+auto /dev/eth0
+iface /dev/eth0 inet static
   address 1.2.3.4
   netmask 255.255.255.0
   up echo hi
   post-up echo hello
+
+iface /dev/eth0 inet dhcp
 EOF
 cat >tests/up.1 <<EOF
 ====stdout====
 ====stderr====
 run-parts --verbose /etc/network/if-pre-up.d
-Configuring interface eth0=eth0 (inet)
+Configuring interface /dev/eth0=/dev/eth0 (inet)
 run-parts --verbose /etc/network/if-pre-up.d
 
-inetutils-ifconfig --interface eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
+inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
 echo hi
 echo hello
+run-parts --verbose /etc/network/if-up.d
+Configuring interface /dev/eth0=/dev/eth0 (inet)
+run-parts --verbose /etc/network/if-pre-up.d
+
+dhclient -v -pf /run/dhclient..dev.eth0.pid -lf /var/lib/dhcp/dhclient..dev.eth0.leases /dev/eth0
 run-parts --verbose /etc/network/if-up.d
 run-parts --verbose /etc/network/if-up.d
 EOF
