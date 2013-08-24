@@ -215,7 +215,7 @@ int iface_predown(interface_defn * iface)
 {
     if (!no_act) {
         char pidfilename[100];
-        snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "ifup-%s.pid", iface->real_iface);
+        make_pidfile_name(pidfilename, sizeof(pidfilename), "ifup", iface);
         FILE *pidfile = fopen(pidfilename, "r");
         if (pidfile) {
             int pid;

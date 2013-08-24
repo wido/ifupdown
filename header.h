@@ -130,6 +130,8 @@ int var_true(char *id, interface_defn * ifd);
 int var_set(char *id, interface_defn * ifd);
 int var_set_anywhere(char *id, interface_defn * ifd);
 int run_mapping(char *physical, char *logical, int len, mapping_defn * map);
+void sanitize_file_name(char *name);
+bool make_pidfile_name(char *name, size_t size, const char *command, interface_defn *ifd);
 extern int no_act;
 extern int verbose;
 extern int run_scripts;

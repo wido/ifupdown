@@ -358,6 +358,33 @@ static int lock_fd(int fd)
     return 0;
 }
 
+void sanitize_file_name(char *name)
+{
+    for (; *name; name++) {
+        if (*name == '/') {
+            *name = '.';
+        }
+    }
+}
+
+bool make_pidfile_name(char *name, size_t size,
+                      const char *command, interface_defn *ifd)
+{
+    char *iface = strdup(ifd->real_iface);
+    if (!iface) {
+        return false;
+    }
+    sanitize_file_name(iface);
+
+    int n = snprintf(name, size, RUN_DIR "%s-%s.pid", command, iface);
+    if (n < 0 || (size_t) n >= size) {
+        free(iface);
+        return false;
+    }
+
+    return true;
+}
+
 int main(int argc, char **argv)
 {
     int (*cmds) (interface_defn *) = NULL;
@@ -815,7 +842,9 @@ int main(int argc, char **argv)
                                 } else {
                                     command = argv[0];  /* no /'s in argv[0] */
                                 }
-                                snprintf(pidfilename, sizeof(pidfilename), RUN_DIR "%s-%s.pid", command, currif->real_iface);
+                                make_pidfile_name(pidfilename,
+                                                  sizeof(pidfilename),
+                                                  command, currif);
                                 if (!no_act) {
                                     FILE *pidfile = fopen(pidfilename, "w");
                                     if (pidfile) {
