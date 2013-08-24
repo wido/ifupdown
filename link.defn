@@ -41,7 +41,7 @@ architecture hurd
 method none
   description
   up
-    -inetutils-ifconfig --interface %iface% 127.0.0.1 --up \
+    -inetutils-ifconfig --interface %iface% --address 127.0.0.1 --up \
 	if (iface_is_lo())
   down
     -inetutils-ifconfig --interface %iface% --down \
