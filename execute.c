@@ -367,9 +367,11 @@ static char *parse(char *command, interface_defn * ifd)
                 varvalue = get_var(command, namelen, ifd);
 
                 if (varvalue) {
-                    char *position = strchr(varvalue, pat);
-                    if (position) {
-                        *position = rep;
+                    char *position = varvalue;
+                    for (; *position; position++) {
+                        if (*position == pat) {
+                            *position = rep;
+                        }
                     }
                     addstr(&result, &len, &pos, varvalue, strlen(varvalue));
                     free(varvalue);
