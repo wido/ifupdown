@@ -111,8 +111,10 @@ FILE * lock_state(const char * argv0) {
     }
 
     if (lock_fd(fileno(lock_fp)) < 0) {
-        fprintf(stderr, "%s: failed to lock lockfile %s: %s\n", argv0, lockfile, strerror(errno));
-        exit(1);
+        if (!no_act) {
+            fprintf(stderr, "%s: failed to lock lockfile %s: %s\n", argv0, lockfile, strerror(errno));
+            exit(1);
+        }
     }
 
     return lock_fp;
