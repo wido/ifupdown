@@ -232,10 +232,10 @@ method static
     ifconfig %iface% %address% [[netmask %netmask%]] [[broadcast %broadcast%]] \
 	[[pointopoint %pointopoint%]] [[media %media%]] [[mtu %mtu%]] \
 	up
-    [[ /lib/freebsd/route add default %gateway% ]]
+    [[ route add default %gateway% ]]
 
   down
-    [[ /lib/freebsd/route del default %gateway% 2>&1 1>/dev/null || true ]]
+    [[ route del default %gateway% 2>&1 1>/dev/null || true ]]
     ifconfig %iface% down
 
 method manual

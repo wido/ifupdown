@@ -15,7 +15,7 @@ Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base (>= 4.1+De
 Recommends: isc-dhcp-client | dhcp-client
 Suggests: ppp, rdnssd, ${net:Suggests}
 Replaces: netbase (<< 5.0)
-Breaks: netbase (<< 5.0), dhcp3-client (<< 4.0)
+Breaks: netbase (<< 5.0), dhcp3-client (<< 4.0), freebsd-net-tools (<< 9.0+ds1-2) [kfreebsd-any]
 Multi-Arch: foreign
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to

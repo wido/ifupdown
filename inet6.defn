@@ -201,10 +201,10 @@ method static
   up
     ifconfig %iface% [[media %media%]] [[link %hwaddress%]] [[mtu %mtu%]] up
     ifconfig %iface% inet6 %address%/%netmask% alias
-    [[ /lib/freebsd/route add -inet6 ::/0 %gateway% ]]
+    [[ route add -inet6 ::/0 %gateway% ]]
 
   down
-    [[ /lib/freebsd/route -n del -inet6 ::/0 2>&1 1>/dev/null || true ]]
+    [[ route -n del -inet6 ::/0 2>&1 1>/dev/null || true ]]
     [[ ifconfig %iface% inet6 %address% -alias ]]
     ifconfig %iface% down
 
