@@ -2,11 +2,10 @@ ifupdown (0.7.45) unstable; urgency=low
 
   * Fix files enumeration in source-directory.
   * Lock a lockfile, not the statefile (Closes: #704003).
-  * Bug fixes for Hurd (thanks to Justus Winter)
-    - Accept interface names in form /dev/* on Hurd (Affects #720531).
-      Thanks to Justus Winter.
+  * Bug fixes for Hurd (thanks to Justus Winter, closes: #720531)
+    - Accept interface names in form /dev/* on Hurd.
     - Use inetutils-ifconfig, fix invocation of inetutils-ifconfig.
-    - Sanitize pidfile name (Closes: #720531).
+    - Sanitize pidfile name.
   * /lib/freebsd/route -> /sbin/route transition for kFreeBSD
     (Closes: #721629).
   * Set environment variables before running up and down commands.
