@@ -1,3 +1,21 @@
+ifupdown (0.7.45) unstable; urgency=low
+
+  * Fix files enumeration in source-directory.
+  * Lock a lockfile, not the statefile (Closes: #704003).
+  * Bug fixes for Hurd (thanks to Justus Winter)
+    - Accept interface names in form /dev/* on Hurd (Affects #720531).
+      Thanks to Justus Winter.
+    - Use inetutils-ifconfig, fix invocation of inetutils-ifconfig.
+    - Sanitize pidfile name (Closes: #720531).
+  * /lib/freebsd/route -> /sbin/route transition for kFreeBSD
+    (Closes: #721629).
+  * Set environment variables before running up and down commands.
+  * Add DAD script (most probably closes: #705996).
+  * Compat level 9.
+  * Bump Standards Version to 3.9.4 (no changes).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sat, 19 Oct 2013 20:25:51 +0200
+
 ifupdown (0.7.44) unstable; urgency=low
 
   * Convert from noweb to plain C (Closes: #707209).
