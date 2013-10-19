@@ -177,10 +177,10 @@ int execute_scripts(interface_defn * ifd, execfn * exec, char *opt)
 
 int iface_preup(interface_defn * iface)
 {
+    set_environ(iface, "start", "pre-up");
     if (!iface->method->up(iface, check))
         return -1;
 
-    set_environ(iface, "start", "pre-up");
     if (!execute_options(iface, doit, "pre-up"))
         return 0;
     if (!execute_scripts(iface, doit, "pre-up"))
@@ -191,10 +191,10 @@ int iface_preup(interface_defn * iface)
 
 int iface_postup(interface_defn * iface)
 {
+    set_environ(iface, "start", "post-up");
     if (!iface->method->up(iface, doit))
         return 0;
 
-    set_environ(iface, "start", "post-up");
     if (!execute_options(iface, doit, "up"))
         return 0;
     if (!execute_scripts(iface, doit, "up"))
@@ -230,10 +230,10 @@ int iface_predown(interface_defn * iface)
         }
     }
 
+    set_environ(iface, "stop", "pre-down");
     if (!iface->method->down(iface, check))
         return -1;
 
-    set_environ(iface, "stop", "pre-down");
     if (!execute_scripts(iface, doit, "down"))
         return 0;
     if (!execute_options(iface, doit, "down"))
