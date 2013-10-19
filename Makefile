@@ -29,6 +29,7 @@ install :
 	install -m 0755 ifup   ${BASEDIR}/sbin
 	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifdown	
 	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifquery
+	install -D -m 0755 settle-dad.sh $(BASEDIR)/lib/ifupdown/settle-dad.sh
 
 clean :
 	rm -f *.aux *.toc *.log *.bbl *.blg *.ps *.eps *.pdf

@@ -57,6 +57,8 @@ method static
     scope                  -- Address validity scope. Possible values: \
                               global, site, link, host
     preferred-lifetime int -- Time that address remains preferred []
+    dad-attempts           -- Number of attempts to settle DAD (0 to disable) [60]
+    dad-interval           -- DAD state polling interval in seconds [0.1]
 
   conversion
     hwaddress cleanup_hwaddress
@@ -72,6 +74,7 @@ method static
     ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
     ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
     [[ ip -6 route add default via %gateway% dev %iface% ]]
+    /lib/ifupdown/settle-dad.sh if (execable("/lib/ifupdown/settle-dad.sh"))
 
   down
     ip -6 addr flush dev %iface% scope global
