@@ -48,7 +48,8 @@ static void usage(char *execname)
 static void version(char *execname)
 {
     printf("%s version " IFUPDOWN_VERSION "\n", execname);
-    printf("Copyright (c) 1999-2007 Anthony Towns\n\n");
+    printf("Copyright (c) 1999-2009 Anthony Towns\n");
+    printf("Copyright (c) 2010-2013 Andrew Shadura\n\n");
     printf(
 "This program is free software; you can redistribute it and/or modify\n"
 "it under the terms of the GNU General Public License as published by\n"
