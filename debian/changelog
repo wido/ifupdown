@@ -1,3 +1,13 @@
+ifupdown (0.7.46) unstable; urgency=low
+
+  * Update copyrights.
+  * Change /run/network ownership to root:netdev.
+  * Drop now-empty Pre-Depends.
+  * Add --state command to ifquery.
+  * Update the init script to use --state.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Wed, 13 Nov 2013 13:46:58 +0100
+
 ifupdown (0.7.45) unstable; urgency=low
 
   * Fix files enumeration in source-directory.
