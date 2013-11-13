@@ -12,6 +12,7 @@
 PATH="/sbin:/bin"
 RUN_DIR="/run/network"
 IFSTATE="$RUN_DIR/ifstate"
+STATEDIR="$RUN_DIR/state"
 
 [ -x /sbin/ifup ] || exit 0
 [ -x /sbin/ifdown ] || exit 0
@@ -47,6 +48,9 @@ check_ifstate() {
 	if ! mkdir -p "$RUN_DIR" ; then
 	    log_failure_msg "can't create $RUN_DIR"
 	    exit 1
+	fi
+	if ! chown root:netdev "$RUN_DIR" ; then
+	    log_warning_msg "can't chown $RUN_DIR"
 	fi
     fi
     if [ ! -r "$IFSTATE" ] ; then
