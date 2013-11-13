@@ -63,7 +63,10 @@ static void help(char *execname, int (*cmds) (interface_defn *))
     printf("Usage: %s <options> <ifaces...>\n", execname);
     if ((cmds == iface_list)
         || (cmds == iface_query))
+    {
         printf("       %s <options> --list\n", execname);
+        printf("       %s --state <ifaces...>\n", execname);
+    }
     printf("\n");
     printf("Options:\n");
     printf("\t-h, --help\t\tthis help\n");
@@ -87,7 +90,10 @@ static void help(char *execname, int (*cmds) (interface_defn *))
         printf("\t--force\t\t\tforce de/configuration\n");
     if ((cmds == iface_list)
         || (cmds == iface_query))
+    {
         printf("\t--list\t\t\tlist all matching known interfaces\n");
+        printf("\t--state\t\t\tshow the state of specified interfaces\n");
+    }
     exit(0);
 }
 
@@ -403,12 +409,14 @@ int main(int argc, char **argv)
         {"force", no_argument, NULL, 2},
         {"option", required_argument, NULL, 'o'},
         {"list", no_argument, NULL, 'l'},
+        {"state", no_argument, NULL, 6},
         {0, 0, 0, 0}
     };
     int do_all = 0;
     int run_mappings = 1;
     int force = 0;
     int list = 0;
+    bool state_query = false;
     char *allow_class = NULL;
     char *interfaces = "/etc/network/interfaces";
     char **excludeint = NULL;
@@ -540,10 +548,49 @@ int main(int argc, char **argv)
             case 'V':
                 version(argv[0]);
                 break;
+            case 6:
+                /* --state */
+                if (cmds != iface_query)
+                    usage(argv[0]);
+                state_query = true;
+                break;
             default:
                 usage(argv[0]);
                 break;
         }
+    }
+
+    if (state_query) {
+        char **up_ifaces;
+        int n_up_ifaces;
+        read_all_state(argv[0], &up_ifaces, &n_up_ifaces);
+        target_iface = argv + optind;
+        n_target_ifaces = argc - optind;
+        bool ret = true;
+
+        int i;
+        if (n_target_ifaces == 0) {
+            for (i = 0; i < n_up_ifaces; i++) {
+                puts(up_ifaces[i]);
+            }
+        } else {
+            int j;
+            for (j = 0; j < n_target_ifaces; j++) {
+                size_t l = strlen(target_iface[j]);
+                bool found = false;
+                for (i = 0; i < n_up_ifaces; i++) {
+                    if (strncmp(target_iface[j], up_ifaces[i], l) == 0) {
+                        if (up_ifaces[i][l] == '=') {
+                            puts(up_ifaces[i]);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                ret &= found;
+            }
+        }
+        exit(!ret);
     }
 
     if (argc - optind > 0 && (do_all || list)) {
