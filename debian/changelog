@@ -1,3 +1,9 @@
+ifupdown (0.7.46.1) unstable; urgency=low
+
+  * Disable DHCP test on Hurd to make the package buildable again.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Wed, 13 Nov 2013 14:15:47 +0100
+
 ifupdown (0.7.46) unstable; urgency=low
 
   * Update copyrights.
