@@ -27,8 +27,8 @@ docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 install :
 	install -m 0755 -d     ${BASEDIR}/sbin
 	install -m 0755 ifup   ${BASEDIR}/sbin
-	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifdown
-	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifquery
+	ln -s /sbin/ifup ${BASEDIR}/sbin/ifdown
+	ln -s /sbin/ifup ${BASEDIR}/sbin/ifquery
 	install -D -m 0755 settle-dad.sh $(BASEDIR)/lib/ifupdown/settle-dad.sh
 
 clean :
