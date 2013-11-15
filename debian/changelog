@@ -1,3 +1,10 @@
+ifupdown (0.7.47) UNRELEASED; urgency=low
+
+  * Don't use hardlinks for ifdown and ifquery.
+  * Remove Petter from the Uploaders.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 15 Nov 2013 13:58:40 +0100
+
 ifupdown (0.7.46.1) unstable; urgency=low
 
   * Disable DHCP test on Hurd to make the package buildable again.
