@@ -1,9 +1,10 @@
-ifupdown (0.7.47) UNRELEASED; urgency=low
+ifupdown (0.7.47) unstable; urgency=low
 
   * Don't use hardlinks for ifdown and ifquery.
   * Remove Petter from the Uploaders.
+  * Ensure netdev group exists.
 
- -- Andrew Shadura <andrewsh@debian.org>  Fri, 15 Nov 2013 13:58:40 +0100
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 26 Nov 2013 08:27:29 +0100
 
 ifupdown (0.7.46.1) unstable; urgency=low
 
