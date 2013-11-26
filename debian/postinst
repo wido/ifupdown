@@ -7,6 +7,10 @@ report() { echo "${MYNAME}: $*" ; }
 report_warn() { report "Warning: $*" >&2 ; }
 report_err() { report "Error: $*" >&2 ; }
 
+if [ "$1" = configure ]; then
+  addgroup --quiet --system netdev || true
+fi
+
 # Create /etc/network/run 
 if [ "$1" = configure -a ! -d /etc/network/run ]; then
   if [ -e /etc/network/run -o -L /etc/network/run ]; then
@@ -17,9 +21,12 @@ if [ "$1" = configure -a ! -d /etc/network/run ]; then
   # The best choice is to use /run/network
   # That must be supported everywhere
 
-  [ -d /run/network ] || mkdir -p /run/network
+  if [ ! -d /run/network ]; then
+    mkdir -p /run/network
+    chown root:netdev /run/network
+  fi
   ln -s /run/network /etc/network/run
-fi 
+fi
 
 [ -L /etc/network/run.dpkg-old ] && echo "Removing old symlink /etc/network/run.dpkg-old..." && rm -f /etc/network/run.dpkg-old
 
