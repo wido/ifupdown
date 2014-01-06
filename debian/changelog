@@ -1,3 +1,16 @@
+ifupdown (0.7.47.2) unstable; urgency=low
+
+  * Rebuild to avoid useless dependencies on sysv-rc and file-rc.
+  * No source changes.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 06 Jan 2014 21:17:54 +0100
+
+ifupdown (0.7.47.1) unstable; urgency=low
+
+  * Depend on adduser (Closes: #730598).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Wed, 27 Nov 2013 08:24:41 +0100
+
 ifupdown (0.7.47) unstable; urgency=low
 
   * Don't use hardlinks for ifdown and ifquery.
