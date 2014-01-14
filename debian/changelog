@@ -1,9 +1,9 @@
 ifupdown (0.7.47.2) unstable; urgency=low
 
   * Rebuild to avoid useless dependencies on sysv-rc and file-rc.
-  * No source changes.
+  * Don't pass deprecated arguments to update-rc.d.
 
- -- Andrew Shadura <andrewsh@debian.org>  Mon, 06 Jan 2014 21:17:54 +0100
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 06 Jan 2014 21:23:03 +0100
 
 ifupdown (0.7.47.1) unstable; urgency=low
 

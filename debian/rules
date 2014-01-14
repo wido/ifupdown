@@ -54,7 +54,7 @@ override_dh_auto_configure:
 	chmod a+rx makecdep.sh makenwdep.sh
 
 override_dh_installinit:
-	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
+	dh_installinit --name=networking --no-start
 	install -p -m 0644 debian/networking.defaults $(DESTDIR)/etc/default/networking
 	dh_installinit --name=network-interface-container --noscripts
 	dh_installinit --name=network-interface-security --noscripts
