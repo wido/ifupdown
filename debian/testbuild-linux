@@ -185,20 +185,27 @@ iface eth0 inet static
 iface eth0 inet6 static
   address 3ffe:ffff:100:f101::1
   netmask 64
+  dad-attempts 0
 iface eth0 inet6 static
   address 3ffe:ffff:100:f101::2/64
+  dad-attempts 0
 iface eth0 inet6 static
   address 3ffe:ffff:100:f101::3/64
   netmask 64
+  dad-attempts 0
 iface eth0 inet6 static
   address 3ffe:ffff:100:f101::4/
+  dad-attempts 0
 iface eth0 inet6 static
   address 3ffe:ffff:100:f101::5/64
   netmask 128
+  dad-attempts 0
 iface eth0 inet6 static
   address /64
+  dad-attempts 0
 iface eth0 inet6 static
   address /
+  dad-attempts 0
 EOF
 cat >tests/up.3 <<EOF
 ====stdout====
@@ -353,9 +360,11 @@ iface eth0 inet6 static
   netmask 64
   privext 2
   accept_ra 0
+  dad-attempts 0
 iface eth0.1 inet6 static
   address 3ffe:ffff:120:f101::1
   netmask 64
+  dad-attempts 0
 iface eth0.0201 inet static
   address 192.168.0.1/25
 iface br0.0201 inet manual
