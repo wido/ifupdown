@@ -14,11 +14,12 @@ method auto
 
   options
     privext int            -- Privacy extensions (RFC4941) (0=off, 1=assign, 2=prefer)
+    accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding) [2]
     dhcp int               -- Use stateless DHCPv6 (0=off, 1=on)
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
     [[sysctl -q -e -w net.ipv6.conf.%iface/.//%.use_tempaddr=%privext%]]
-    sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=1
+    sysctl -q -e -w net.ipv6.conf.%iface/.//%.accept_ra=%accept_ra%
     sysctl -q -e -w net.ipv6.conf.%iface/.//%.autoconf=1
     ip link set dev %iface% up
     dhclient -6 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
@@ -51,7 +52,7 @@ method static
     media type             -- Medium type, driver dependent
     hwaddress address      -- Hardware address
     mtu size               -- MTU size
-    accept_ra int          -- Accept router advertisements (0=off, 1=on)
+    accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding)
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on) [0]
     privext int            -- Privacy extensions (RFC3041) (0=off, 1=assign, 2=prefer)
     scope                  -- Address validity scope. Possible values: \
@@ -99,7 +100,7 @@ method dhcp
 
   options
     hwaddress address      -- Hardware address
-    accept_ra int          -- Accept router advertisements (0=off, 1=on) [0]
+    accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding) [0]
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
 
   conversion
