@@ -1,3 +1,10 @@
+ifupdown (0.7.48.1) unstable; urgency=low
+
+  * Add --ignore-errors option.
+  * Handle errors correctly during interface deconfiguration.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 23 Mar 2014 18:50:08 +0100
+
 ifupdown (0.7.48) unstable; urgency=low
 
   * Ignore statuses on down, don't ignore them on up.
