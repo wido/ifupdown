@@ -140,7 +140,7 @@ int doit(char *str)
                 break;
         }
         waitpid(child, &status, 0);
-        if (ignore_status)
+        if (ignore_status || ignore_failures)
             return 1;
 
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
@@ -155,7 +155,7 @@ int execute_options(interface_defn * ifd, execfn * exec, char *opt)
     for (i = 0; i < ifd->n_options; i++) {
         if (strcmp(ifd->option[i].name, opt) == 0) {
             if (!(*exec)(ifd->option[i].value)) {
-                return 0;
+                if (!ignore_failures) return 0;
             }
         }
     }
@@ -168,11 +168,12 @@ int execute_scripts(interface_defn * ifd, execfn * exec, char *opt)
         return 1;
 
     char buf[100];
-    snprintf(buf, sizeof(buf), "run-parts %s /etc/network/if-%s.d", verbose ? "--verbose" : "", opt);
+    snprintf(buf, sizeof(buf), "run-parts %s%s/etc/network/if-%s.d",
+        ignore_failures ? "" : "--exit-on-error ",
+        verbose ? "--verbose " : "", opt);
 
-    (*exec)(buf);
-
-    return 1;
+    int result = (*exec)(buf);
+    return ignore_failures ? 1 : result;
 }
 
 int iface_preup(interface_defn * iface)

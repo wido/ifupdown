@@ -14,6 +14,7 @@ int no_act = 0;
 int run_scripts = 1;
 int verbose = 0;
 bool no_loopback = false;
+bool ignore_failures = false;
 char lockfile[] = RUN_DIR ".ifstate.lock";
 char statefile[] = RUN_DIR "ifstate";
 char tmpstatefile[] = RUN_DIR ".ifstate.tmp";
@@ -455,8 +456,10 @@ int main(int argc, char **argv)
             command = argv[0];  /* no /'s in argv[0] */
         }
         if (strcmp(command, "ifup") == 0) {
+            ignore_failures = force;
             cmds = iface_up;
         } else if (strcmp(command, "ifdown") == 0) {
+            ignore_failures = true;
             cmds = iface_down;
         } else if (strcmp(command, "ifquery") == 0) {
             cmds = iface_query;

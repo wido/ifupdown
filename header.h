@@ -136,6 +136,7 @@ extern int no_act;
 extern int verbose;
 extern int run_scripts;
 extern bool no_loopback;
+extern bool ignore_failures;
 extern interfaces_file *defn;
 extern address_family addr_link;
 extern address_family addr_inet;
