@@ -1,3 +1,20 @@
+ifupdown (0.7.48) unstable; urgency=low
+
+  * Ignore statuses on down, don't ignore them on up.
+      When configuring an interface, it's important for all commands
+      to succeed, so if anything fails, interface isn't marked as
+      configured. When deconfiguring it, however, we should do our
+      best we can to deconfigure it, so if something fails, that's
+      not the reason to stop trying.
+      Closes: #360806, #547587, #562962, #700811.
+  * Disable tests for DAD.
+  * Fix hurd static script with IPv6 support (Closes: #737084).
+  * Support preferred lifetime setting for tunnels (Closes: #735534).
+  * Provide an alternative iproute dependency to make backporting easier.
+  * Default to accept_ra=2 for inet6/auto (Closes: #739993, LP: #1260241)
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 23 Mar 2014 15:03:09 +0100
+
 ifupdown (0.7.47.2) unstable; urgency=low
 
   * Rebuild to avoid useless dependencies on sysv-rc and file-rc.
