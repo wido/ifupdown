@@ -75,6 +75,9 @@ will be brought down.
 .B \-\-force
 Force configuration or deconfiguration of the interface.
 .TP
+.B \-\-ignore-errors
+If any of the commands of scripts fails, continue.
+.TP
 .BR \-h ", " \-\-help
 Show summary of options.
 .TP
@@ -185,6 +188,12 @@ checks if
 is still running. In that case,
 .B SIGTERM
 is sent to ifup.
+.P
+During interface deconfiguration,
+.BR ifdown
+ignores errors the same way as if
+.B \-\-ignore\-errors
+was specified.
 .SH FILES
 .TP
 .I /etc/network/interfaces
