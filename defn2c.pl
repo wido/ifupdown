@@ -22,10 +22,10 @@ sub nextline {
         }
         if (!$line) { return 0; }
         chomp $line;
-        while ($line =~ m/^(.*)\\$/) {
+        while ($line =~ m/^(.*)\\$/s) {
                 my $addon = <>;
                 chomp $addon;
-                $line = $1 . $addon;
+                $line = $1 . "\n". $addon;
         }
         return 1;
 }
@@ -37,7 +37,7 @@ sub match {
         my $cmd = "$_[1]" ? "$_[1]\\b\\s*" : "";;
         my $indentexp = (@_ == 3) ? "$_[2]\\s+" : "";
 
-        if ($line =~ /^${indentexp}${cmd}(([^\s](.*[^\s])?)?)\s*$/) {
+        if ($line =~ /^${indentexp}${cmd}(([^\s](.*[^\s])?)?)\s*$/s) {
                 $match = $1;
                 return 1;
         } else {
@@ -139,6 +139,14 @@ sub skip_section {
 
         1 while (nextline && match($line, "", $indent));
 }
+
+sub quote_chars {
+    my $string = $_[0];
+    $string =~ s/\\/\\\\/g;
+    $string =~ s/"/\\"/g;
+    $string =~ s/\n/\\\n/g;
+    return $string;
+}
 sub get_commands {
         my $method = $_[0];
         my $mode = $_[1];
@@ -148,17 +156,17 @@ sub get_commands {
         print "static int ${function}(interface_defn *ifd, execfn *exec) {\n";
 
         while (nextline && match($line, "", $indent)) {
-                if ( $match =~ /^(.*[^\s])\s+if\s*\((.*)\)\s*$/ ) {
+                if ( $match =~ /^(.*[^\s])\s+if\s*\((.*)\)\s*$/s ) {
                         print "if ( $2 ) {\n";
-                        print "  if (!execute(\"$1\", ifd, exec)) return 0;\n";
+                        print "  if (!execute(\"".quote_chars($1)."\", ifd, exec) && !ignore_failures) return 0;\n";
                         print "}\n";
-                } elsif ( $match =~ /^(.*[^\s])\s+elsif\s*\((.*)\)\s*$/ ) {
+                } elsif ( $match =~ /^(.*[^\s])\s+elsif\s*\((.*)\)\s*$/s ) {
                         print "else if ( $2 ) {\n";
-                        print "  if (!execute(\"$1\", ifd, exec)) return 0;\n";
+                        print "  if (!execute(\"".quote_chars($1)."\", ifd, exec) && !ignore_failures) return 0;\n";
                         print "}\n";
-                } elsif ( $match =~ /^(.*[^\s])\s*$/ ) {
+                } elsif ( $match =~ /^(.*[^\s])\s*$/s ) {
                         print "{\n";
-                        print "  if (!execute(\"$1\", ifd, exec)) return 0;\n";
+                        print "  if (!execute(\"".quote_chars($1)."\", ifd, exec) && !ignore_failures) return 0;\n";
                         print "}\n";
                 }
         }

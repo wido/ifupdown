@@ -88,8 +88,10 @@ static void help(char *execname, int (*cmds) (interface_defn *))
     printf("\t--no-scripts\t\tdon't run any hook scripts\n");
     printf("\t--no-loopback\t\tdon't act specially on the loopback device\n");
     if (!(cmds == iface_list)
-        && !(cmds == iface_query))
+        && !(cmds == iface_query)) {
         printf("\t--force\t\t\tforce de/configuration\n");
+        printf("\t--ignore-errors\t\t\tignore errors\n");
+    }
     if ((cmds == iface_list)
         || (cmds == iface_query))
     {
@@ -409,6 +411,7 @@ int main(int argc, char **argv)
         {"no-scripts", no_argument, NULL, 4},
         {"no-loopback", no_argument, NULL, 5},
         {"force", no_argument, NULL, 2},
+        {"ignore-errors", no_argument, NULL, 7},
         {"option", required_argument, NULL, 'o'},
         {"list", no_argument, NULL, 'l'},
         {"state", no_argument, NULL, 6},
@@ -456,7 +459,6 @@ int main(int argc, char **argv)
             command = argv[0];  /* no /'s in argv[0] */
         }
         if (strcmp(command, "ifup") == 0) {
-            ignore_failures = force;
             cmds = iface_up;
         } else if (strcmp(command, "ifdown") == 0) {
             ignore_failures = true;
@@ -506,6 +508,9 @@ int main(int argc, char **argv)
                 if ((cmds == iface_list) || (cmds == iface_query))
                     usage(argv[0]);
                 force = 1;
+                break;
+            case 7:
+                ignore_failures = 1;
                 break;
             case 'X':
                 /* */
