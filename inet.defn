@@ -390,7 +390,7 @@ method static
     [[Warning: Option hwaddress: %hwaddress% not yet supported]]
     inetutils-ifconfig --interface %iface% --address %address% [[--netmask %netmask%]] \
     [[--broadcast %broadcast%]] [[--mtu %mtu%]] --up
-    [[fsysopts /servers/socket/2 $(showtrans /servers/socket/2) --gateway %gateway% ]]
+    [[fsysopts /servers/socket/2 $(fsysopts /servers/socket/2) --gateway %gateway% ]]
 
   down
     inetutils-ifconfig --interface %iface% --down
