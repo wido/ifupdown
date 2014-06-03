@@ -157,6 +157,9 @@ stop)
 	;;
 
 reload)
+	if init_is_upstart; then
+		exit 1
+	fi
 	process_options
 
 	log_action_begin_msg "Reloading network interfaces configuration"
