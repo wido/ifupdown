@@ -180,6 +180,8 @@ method 6to4
     ip -6 route flush dev %iface%
     ip link set dev %iface% down
     ip tunnel del %iface%
+
+
 architecture kfreebsd
 
 method loopback
@@ -246,8 +248,7 @@ method auto
     hwaddress cleanup_hwaddress
 
   up
-    sysctl -q -e -w net.inet6.ip6.accept_rtadv=1
-    ifconfig %iface% up
+    ifconfig %iface% inet6 accept_rtadv up
     dhclient -6 -S -pf /run/dhclient6.%iface%.pid -lf /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (var_true("dhcp", ifd) && execable("/sbin/dhclient"))
 
