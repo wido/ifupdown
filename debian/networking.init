@@ -133,7 +133,7 @@ start)
 	set -f
 	exclusions=$(process_exclusions)
 	log_action_begin_msg "Configuring network interfaces"
-	if ifup -a $exclusions $verbose && ifup_hotplug $exclusions $verbose
+	if ifup -a $exclusions $verbose
 	then
 	    log_action_end_msg $?
 	else
