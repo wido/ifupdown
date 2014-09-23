@@ -1,3 +1,16 @@
+ifupdown (0.7.49) unstable; urgency=medium
+
+  [ Andrew Shadura ]
+  * Proper implementation of auto on kFreeBSD (Closes: #738942).
+  * Don't fail on sysctl failing (Closes: #757937).
+  * Accept router advertisements when using DHCPv6 (Closes: #753580).
+  * Don't configure hotplug interfaces on networking start to avoid races.
+
+  [ Stéphane Graber ]
+  * Upstart job tweaks.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 23 Sep 2014 17:39:51 +0200
+
 ifupdown (0.7.48.1) unstable; urgency=low
 
   * Add --ignore-errors option.
