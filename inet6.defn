@@ -100,7 +100,7 @@ method dhcp
 
   options
     hwaddress address      -- Hardware address
-    accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding) [0]
+    accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding) [1]
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
 
   conversion
