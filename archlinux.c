@@ -7,7 +7,7 @@
 
 #include "archlinux.h"
 
-unsigned int mylinuxver()
+unsigned int mylinuxver(void)
 {
     static int maj = -1, rev = 0, min = 0;
 

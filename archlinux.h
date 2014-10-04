@@ -1,4 +1,4 @@
-unsigned int mylinuxver();
+unsigned int mylinuxver(void);
 unsigned int mylinux(int, int, int);
 #include "header.h"
 

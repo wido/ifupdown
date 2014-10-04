@@ -2,6 +2,7 @@
 #define HEADER_H
 
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct address_family address_family;
 typedef struct method method;

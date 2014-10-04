@@ -101,7 +101,7 @@ static void help(char *execname, int (*cmds) (interface_defn *))
     exit(0);
 }
 
-FILE * lock_state(const char * argv0) {
+static FILE * lock_state(const char * argv0) {
     FILE *lock_fp;
     lock_fp = fopen(lockfile, no_act ? "r" : "a+");
     if (lock_fp == NULL) {
@@ -519,7 +519,7 @@ int main(int argc, char **argv)
                 if (excludeint == NULL) {
                     char *filename = argv[0];
                     perror(filename);
-                    return NULL;
+                    exit(1);
                 }
                 excludeint[excludeints - 1] = strdup(optarg);
                 break;
