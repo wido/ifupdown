@@ -105,7 +105,7 @@ ifup_hotplug () {
 			    do
 				    link=${iface##:*}
 				    link=${link##.*}
-				    if [ -e "/sys/class/net/$link" ] && [ "$(cat /sys/class/net/$link/operstate)" = up ]
+				    if [ -e "/sys/class/net/$link" ]
 				    then
 					    echo "$iface"
 				    fi
@@ -133,7 +133,12 @@ start)
 	set -f
 	exclusions=$(process_exclusions)
 	log_action_begin_msg "Configuring network interfaces"
-	if ifup -a $exclusions $verbose
+	if [ -x /sbin/udevadm ]; then
+		if [ -n "$(ifquery --list --exclude=lo)" ] || [ -n "$(ifquery --list --allow=hotplug)" ]; then
+			udevadm settle || true
+		fi
+	fi
+	if ifup -a $exclusions $verbose && ifup_hotplug $exclusions $verbose
 	then
 	    log_action_end_msg $?
 	else
