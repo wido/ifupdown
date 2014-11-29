@@ -73,7 +73,7 @@ method dhcp
     leasehours leasehours   -- Preferred lease time in hours (pump)
     leasetime leasetime     -- Preferred lease time in seconds (dhcpcd)
     vendor vendor           -- Vendor class identifier (dhcpcd)
-    client client           -- Client identifier (dhcpcd, udhcpc)
+    client client           -- Client identifier (dhcpcd)
     hwaddress address       -- Hardware address.
 
   conversion
@@ -89,8 +89,7 @@ method dhcp
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
-    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
-           [[-c %client%]] \
+    udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
         elsif (execable("/sbin/udhcpc") && mylinuxver() >= mylinux(2,2,0))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
            [[-l %leasetime%]] %iface% \
