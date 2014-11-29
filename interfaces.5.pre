@@ -29,8 +29,8 @@ NOT supported, comments must be on a line of their own.
 A line may be extended across multiple lines by making the last character
 a backslash.
 .P
-The file consists of zero or more "iface", "mapping", "auto", "allow-" and
-"source" stanzas. Here is an example.
+The file consists of zero or more "iface", "mapping", "auto", "allow-",
+"source" and "source-directory" stanzas. Here is an example.
 .EX
 auto eth0
 allow-hotplug eth1
@@ -93,8 +93,12 @@ keyword is placed. In the example above, if the file is located at
 paths to the included files are understood to be under
 .IR /etc/network\fR.
 .P
+Currently, "source-directory" isn't supported by
+.BR network-manager " and"
+.BR guessnet .
+.P
 By default, on a freshly installed Debian system, the interfaces file includes a
-line to source
+line to source files in the
 .IR /etc/network/interfaces.d
 directory.
 .P
