@@ -1,3 +1,18 @@
+ifupdown (0.7.50) unstable; urgency=medium
+
+  [ Andrew Shadura ]
+  * Configure the loopback interface by default only if user hasn't
+    defined their own loopback interface (Closes: #709378).
+  * Update udhcp command-line options (Closes: #741579).
+  * Fix compiler warnings.
+  * Update the documentation regarding "source" keyword.
+
+  [ Michael Biebl ]
+  * Call "udev settle" explicitly before configuring any devices (Closes:
+    #766943).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sat, 29 Nov 2014 14:32:32 +0100
+
 ifupdown (0.7.49) unstable; urgency=medium
 
   [ Andrew Shadura ]
