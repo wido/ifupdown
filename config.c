@@ -130,6 +130,12 @@ interfaces_file *read_interfaces(char *filename)
     defn->ifaces = NULL;
 
     if (!no_loopback) {
+        add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), LO_IFACE);
+    }
+
+    defn = read_interfaces_defn(defn, filename);
+
+    if (!no_loopback) {
         interface_defn *lo_if = malloc(sizeof(interface_defn));
         if (!lo_if) {
 
@@ -144,14 +150,12 @@ interfaces_file *read_interfaces(char *filename)
             .method = get_method(&addr_inet, "loopback"),
             .n_options = 0,
             .option = NULL,
-            .next = NULL
+            .next = defn->ifaces
         };
 
         defn->ifaces = lo_if;
-
-        add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), lo_if->logical_iface);
     }
-    return read_interfaces_defn(defn, filename);
+    return defn;
 }
 
 static int directory_filter(const struct dirent * d)
@@ -402,6 +406,11 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
                 if (!currif->method) {
                     fprintf(stderr, "%s:%d: unknown method\n", filename, line);
                     return NULL;        /* FIXME */
+                }
+                if (((!strcmp(address_family_name, "inet")) ||
+                     (!strcmp(address_family_name, "inet6"))) &&
+                     (!strcmp(method_name, "loopback"))) {
+                     no_loopback = 1;
                 }
                 currif->automatic = 1;
                 currif->max_options = 0;

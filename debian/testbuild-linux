@@ -519,6 +519,34 @@ run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
+cat >tests/testcase.11 <<EOF
+# RUN: -a
+auto lo eth0
+
+iface eth0 inet static
+  address 1.2.3.4/24
+
+iface lo inet loopback
+  pre-up configure lo
+  post-down deconfigure lo
+EOF
+cat >tests/up.11 <<EOF
+====stdout====
+====stderr====
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+Configuring interface lo=lo (inet)
+configure lo
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip link set dev lo up
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.0 broadcast 1.2.3.255 	  dev eth0 label eth0
+ip link set dev eth0   up
+
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+EOF
 
 result=true
 for test in 1 2 3 4 5 6 7 8 9 10; do
@@ -531,6 +559,25 @@ for test in 1 2 3 4 5 6 7 8 9 10; do
 
         echo "Testcase $test: $args"
         
+        if diff -ub tests/up.$test tests/up-res.$test; then
+                echo "(okay)"
+        else
+                echo "(failed)"
+                result=false
+        fi
+        echo "=========="
+done
+
+for test in 11; do
+        args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
+        ./ifup -nv --force -i tests/testcase.$test $args \
+                >tests/up-res-out.$test 2>tests/up-res-err.$test || 
+                true
+        (echo "====stdout===="; cat tests/up-res-out.$test
+         echo "====stderr===="; cat tests/up-res-err.$test) > tests/up-res.$test
+
+        echo "Testcase $test: $args"
+
         if diff -ub tests/up.$test tests/up-res.$test; then
                 echo "(okay)"
         else
