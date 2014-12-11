@@ -107,7 +107,12 @@ ifup_hotplug () {
 				    link=${link##.*}
 				    if [ -e "/sys/class/net/$link" ]
 				    then
+					# link detection does not work unless we up the link
+					ip link set "$iface" up || true
+					if [ "$(cat /sys/class/net/$link/operstate)" = up ]
+					then
 					    echo "$iface"
+					fi
 				    fi
 			    done)
 	    if [ -n "$ifaces" ]
