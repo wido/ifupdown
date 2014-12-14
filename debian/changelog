@@ -1,3 +1,11 @@
+ifupdown (0.7.51) unstable; urgency=medium
+
+  [ Michael Biebl ]
+  * Check the hotplug interface operstate to avoid blocking the
+    boot process (Closes: #771943).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 14 Dec 2014 12:34:19 +0100
+
 ifupdown (0.7.50) unstable; urgency=medium
 
   [ Andrew Shadura ]
