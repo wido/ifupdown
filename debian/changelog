@@ -1,3 +1,10 @@
+ifupdown (0.7.52) unstable; urgency=medium
+
+  * Fix segfault when /e/n/i can't be read. Fail only when the file
+    has errors, issue a warning when it can't be opened (Closes: #774212).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 04 Jan 2015 15:21:25 +0100
+
 ifupdown (0.7.51) unstable; urgency=medium
 
   [ Michael Biebl ]

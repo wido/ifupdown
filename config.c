@@ -135,6 +135,10 @@ interfaces_file *read_interfaces(char *filename)
 
     defn = read_interfaces_defn(defn, filename);
 
+    if (!defn) {
+        return NULL;
+    }
+
     if (!no_loopback) {
         interface_defn *lo_if = malloc(sizeof(interface_defn));
         if (!lo_if) {
@@ -187,8 +191,10 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
     char *rest;
 
     f = fopen(filename, "r");
-    if (f == NULL)
-        return NULL;
+    if (f == NULL) {
+        fprintf(stderr, "warning: couldn't open interfaces file \"%s\"\n", filename);
+        return defn;
+    }
     line = 0;
 
     while (get_line(&buf, &buf_len, f, &line)) {

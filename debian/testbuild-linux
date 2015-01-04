@@ -515,6 +515,7 @@ cat >tests/up.10 <<EOF
 ====stderr====
 Parsing file /dev/null
 Parsing file tests/null
+warning: couldn't open interfaces file "tests/null"
 run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
@@ -548,6 +549,32 @@ run-parts --exit-on-error --verbose /etc/network/if-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
+cat >tests/testcase.12 <<EOF
+auto lo eth0
+
+iface
+EOF
+cat >tests/up.12 <<EOF
+====stdout====
+====stderr====
+tests/testcase.12:3: too few parameters for iface line
+./ifup: couldn't read interfaces file "tests/testcase.12"
+EOF
+
+# don't create the input file for this testcase
+# cat >tests/testcase.13
+cat >tests/up.13 <<EOF
+====stdout====
+====stderr====
+warning: couldn't open interfaces file "tests/testcase.13"
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip link set up dev lo 2>/dev/null
+Configuring interface lo=lo (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+EOF
+
 result=true
 for test in 1 2 3 4 5 6 7 8 9 10; do
         args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
@@ -568,8 +595,8 @@ for test in 1 2 3 4 5 6 7 8 9 10; do
         echo "=========="
 done
 
-for test in 11; do
-        args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
+for test in 11 12 13; do
+        args="-a"
         ./ifup -nv --force -i tests/testcase.$test $args \
                 >tests/up-res-out.$test 2>tests/up-res-err.$test || 
                 true
