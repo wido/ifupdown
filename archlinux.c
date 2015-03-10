@@ -295,3 +295,13 @@ void map_value(interface_defn * ifd UNUSED, char **pparam, int argc, char **argv
         *pparam[0] = 0;
     }
 }
+
+void if_set(interface_defn * ifd UNUSED, char **pparam, int argc, char **argv)
+{
+    if (argc == 1) {
+        *pparam = realloc(*pparam, strlen(argv[0]) + 1);
+        if (*pparam == NULL)
+            return;
+        strcpy(*pparam, argv[0]);
+    }
+}

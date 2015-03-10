@@ -178,7 +178,7 @@ EOF
 
 cat >tests/testcase.3 <<EOF
 # RUN: -a
-auto eth0
+auto eth0 eth1
 iface eth0 inet static
   address 1.2.3.4
   netmask 255.255.255.0
@@ -205,6 +205,16 @@ iface eth0 inet6 static
   dad-attempts 0
 iface eth0 inet6 static
   address /
+  dad-attempts 0
+
+iface eth1 inet6 static
+  address 3ffe:ffff:100:f102::1/64
+  gateway 3ffe:ffff:100:f102::fff
+  dad-attempts 0
+iface eth1 inet6 static
+  address 3ffe:ffff:100:f102::6/64
+  gateway 3ffe:ffff:100:f102::fff
+  accept_ra 1
   dad-attempts 0
 EOF
 cat >tests/up.3 <<EOF
@@ -281,6 +291,26 @@ run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface eth0=eth0 (inet6)
 Missing required variable: address
 Missing required configuration variables for interface eth0/inet6.
+Configuring interface eth1=eth1 (inet6)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+sysctl -q -e -w net.ipv6.conf.eth1.accept_ra=0
+sysctl -q -e -w net.ipv6.conf.eth1.autoconf=0
+ip link set dev eth1   up
+ip -6 addr add 3ffe:ffff:100:f102::1/64  dev eth1 
+ ip -6 route add default via 3ffe:ffff:100:f102::fff dev eth1 
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth1=eth1 (inet6)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+sysctl -q -e -w net.ipv6.conf.eth1.accept_ra=1
+sysctl -q -e -w net.ipv6.conf.eth1.autoconf=0
+ip link set dev eth1   up
+ip -6 addr add 3ffe:ffff:100:f102::6/64  dev eth1 
+ ip -6 route add default via 3ffe:ffff:100:f102::fff dev eth1 
+run-parts --exit-on-error --verbose /etc/network/if-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 

@@ -66,6 +66,7 @@ method static
     preferred-lifetime set_preferred_lft
     address (get_token / 1 "") =netmask?
     address (get_token / 0 "")
+    gateway (if_set 0) =accept_ra?
 
   up
     modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.

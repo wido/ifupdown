@@ -16,3 +16,4 @@ void set_preferred_lft(interface_defn * ifd, char **pparam, int argc, char **arg
 void get_token(interface_defn * ifd, char **pparam, int argc, char **argv);
 void to_decimal(interface_defn * ifd, char **pparam, int argc, char **argv);
 void map_value(interface_defn * ifd, char **pparam, int argc, char **argv);
+void if_set(interface_defn * ifd, char **pparam, int argc, char **argv);
