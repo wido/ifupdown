@@ -10,6 +10,9 @@
 #include <libgen.h>
 #include <wordexp.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 static int get_line(char **result, size_t * result_len, FILE * f, int *line);
 static char *next_word(char *buf, char *word, int maxlen);
 static address_family *get_address_family(address_family * af[], char *name);
@@ -280,10 +283,18 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
             wordexp_t p;
             char **w;
             size_t i;
+            struct stat sb;
+
             int fail = wordexp(pattern, &p, WRDE_NOCMD);
             if (!fail) {
                 w = p.we_wordv;
                 for (i = 0; i < p.we_wordc; i++) {
+                    if (stat(w[i], &sb) == -1) {
+                        /* wordexp can't expand * in an empty dir */
+                        if (errno == ENOENT) {
+                            continue;
+                        }
+                    }
                     if (verbose) {
                         fprintf(stderr, "Parsing file %s\n", w[i]);
                     }
