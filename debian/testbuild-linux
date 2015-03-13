@@ -544,8 +544,6 @@ cat >tests/up.10 <<EOF
 ====stdout====
 ====stderr====
 Parsing file /dev/null
-Parsing file tests/null
-warning: couldn't open interfaces file "tests/null"
 run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF

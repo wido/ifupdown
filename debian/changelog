@@ -1,3 +1,9 @@
+ifupdown (0.7.53.1) unstable; urgency=medium
+
+  * Update tests.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 13 Mar 2015 13:18:59 +0100
+
 ifupdown (0.7.53) unstable; urgency=medium
 
   * Default accept_ra to 0 when gateway is set (Closes: #775660).
