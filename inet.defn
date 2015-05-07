@@ -92,7 +92,7 @@ method dhcp
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
         elsif (execable("/sbin/udhcpc") && mylinuxver() >= mylinux(2,2,0))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
-           [[-l %leasetime%]] %iface% \
+           [[-l %leasetime%]] [[-m %metric%]] %iface% \
         elsif (execable("/sbin/dhcpcd"))
 
   down
