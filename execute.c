@@ -395,7 +395,7 @@ static char *parse(char *command, interface_defn *ifd) {
 					free(varvalue);
 				} else {
 					if (opt_depth == 1)
-						fprintf(stderr, "Missing required variable: %.*s\n", namelen, command);
+						fprintf(stderr, "Missing required variable: %.*s\n", (int)namelen, command);
 
 					okay[opt_depth - 1] = 0;
 				}
