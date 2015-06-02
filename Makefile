@@ -4,13 +4,13 @@ ARCH ?= linux
 
 BASEDIR ?= $(DESTDIR)
 
-CFILES := addrfam.c execute.c config.c main.c arch$(ARCH).c
-HFILES := header.h arch$(ARCH).h
+CFILES := addrfam.c execute.c config.c main.c archcommon.c arch$(ARCH).c
+HFILES := header.h archcommon.h arch$(ARCH).h
 PERLFILES := defn2c.pl defn2man.pl
 DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o link.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) archcommon.o arch$(ARCH).o meta.o link.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
 DEFNFILES += meta.defn link.defn

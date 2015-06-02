@@ -54,6 +54,7 @@ sub get_architecture {
         if (!our_arch) {
                 %methods = ();
         } else {
+                print "#include \"archcommon.h\"\n";
                 print "#include \"arch${DEB_HOST_ARCH_OS}.h\"\n\n\n";
         }
         nextline;
