@@ -199,14 +199,12 @@ void set_preferred_lft(interface_defn *ifd, char **pparam, int argc UNUSED, char
 }
 
 void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
-	if (argc == 0)
+	if (argc < 1)
 		return;
 
-	int token_no;
+	int token_no = 0;
 
-	if (argc == 1)
-		token_no = 0;
-	else
+	if (argc > 1)
 		token_no = atoi(argv[1]);
 
 	char *s = strdup(*pparam);
@@ -234,7 +232,7 @@ void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv)
 void to_decimal(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
 	int base = 10;
 
-	if (argc == 1)
+	if (argc > 0)
 		base = atoi(argv[0]);
 
 	char *result;
@@ -250,10 +248,7 @@ void map_value(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv)
 	if (argc < 2)
 		return;
 
-	int value;
-
-	if (argc == 2)
-		value = (atoi(*pparam) || strcasecmp(*pparam, "on") == 0 || strcasecmp(*pparam, "true") == 0 || strcasecmp(*pparam, "yes") == 0);
+	int value = (atoi(*pparam) || strcasecmp(*pparam, "on") == 0 || strcasecmp(*pparam, "true") == 0 || strcasecmp(*pparam, "yes") == 0);
 
 	if ((value < argc) && (argv[value] != NULL)) {
 		*pparam = realloc(*pparam, strlen(argv[value]) + 1);
@@ -269,10 +264,11 @@ void map_value(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv)
 }
 
 void if_set(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
-	if (argc == 1) {
-		*pparam = realloc(*pparam, strlen(argv[0]) + 1);
-		if (*pparam == NULL)
-			return;
-		strcpy(*pparam, argv[0]);
-	}
+	if (argc < 1)
+		return;
+
+	*pparam = realloc(*pparam, strlen(argv[0]) + 1);
+	if (*pparam == NULL)
+		return;
+	strcpy(*pparam, argv[0]);
 }
