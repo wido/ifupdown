@@ -113,8 +113,6 @@ interfaces_file *read_interfaces(char *filename);
 interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename);
 allowup_defn *find_allowup(interfaces_file *defn, char *name);
 int doit(char *str);
-int execute_options(interface_defn *ifd, execfn *exec, char *opt);
-int execute_scripts(interface_defn *ifd, execfn *exec, char *opt);
 int iface_preup(interface_defn *iface);
 int iface_postup(interface_defn *iface);
 int iface_up(interface_defn *iface);

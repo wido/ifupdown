@@ -12,15 +12,39 @@
 
 static char **environ = NULL;
 
-static int check(char *str);
-static void set_environ(interface_defn *iface, char *mode, char *phase);
-static char *setlocalenv(char *format, char *name, char *value);
-static char *parse(char *command, interface_defn *ifd);
-void addstr(char **buf, size_t *len, size_t *pos, char *str, size_t strlen);
-static int popen2(FILE **in, FILE **out, char *command, ...);
-
 static int check(char *str) {
 	return str != NULL;
+}
+
+static char *setlocalenv(char *format, char *name, char *value) {
+	char *result;
+
+	result = malloc(strlen(format) + strlen(name) + strlen(value) + 1);	/* -4 for the two %s's */
+	if (!result) {
+		perror("malloc");
+		exit(1);
+	}
+
+	sprintf(result, format, name, value);
+
+	char *here, *there;
+
+	for (here = there = result; *there != '=' && *there; there++) {
+		if (*there == '-')
+			*there = '_';
+
+		if (isalpha(*there))
+			*there = toupper(*there);
+
+		if (isalnum(*there) || *there == '_') {
+			*here = *there;
+			here++;
+		}
+	}
+
+	memmove(here, there, strlen(there) + 1);
+
+	return result;
 }
 
 static void set_environ(interface_defn *iface, char *mode, char *phase) {
@@ -76,37 +100,6 @@ static void set_environ(interface_defn *iface, char *mode, char *phase) {
 	*environend = NULL;
 }
 
-static char *setlocalenv(char *format, char *name, char *value) {
-	char *result;
-
-	result = malloc(strlen(format) + strlen(name) + strlen(value) + 1);	/* -4 for the two %s's */
-	if (!result) {
-		perror("malloc");
-		exit(1);
-	}
-
-	sprintf(result, format, name, value);
-
-	char *here, *there;
-
-	for (here = there = result; *there != '=' && *there; there++) {
-		if (*there == '-')
-			*there = '_';
-
-		if (isalpha(*there))
-			*there = toupper(*there);
-
-		if (isalnum(*there) || *there == '_') {
-			*here = *there;
-			here++;
-		}
-	}
-
-	memmove(here, there, strlen(there) + 1);
-
-	return result;
-}
-
 int doit(char *str) {
 	assert(str);
 	bool ignore_status = false;
@@ -150,7 +143,7 @@ int doit(char *str) {
 	return 1;
 }
 
-int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
+static int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 	int i;
 
 	for (i = 0; i < ifd->n_options; i++)
@@ -162,7 +155,7 @@ int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
 	return 1;
 }
 
-int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
+static int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
 	if (!run_scripts)
 		return 1;
 
@@ -289,19 +282,31 @@ int iface_query(interface_defn *iface) {
 	return 0;
 }
 
-int execute(char *command, interface_defn *ifd, execfn *exec) {
-	char *out;
-	int ret;
+static void addstr(char **buf, size_t *len, size_t *pos, char *str, size_t strlen) {
+	assert(*len >= *pos);
+	assert(*len == 0 || (*buf)[*pos] == '\0');
 
-	out = parse(command, ifd);
-	if (!out)
-		return 0;
+	if (*pos + strlen >= *len) {
+		char *newbuf;
 
-	ret = (*exec) (out);
-	free(out);
+		newbuf = realloc(*buf, *len * 2 + strlen + 1);
+		if (!newbuf) {
+			perror("realloc");
+			exit(1);	/* a little ugly */
+		}
 
-	return ret;
+		*buf = newbuf;
+		*len = *len * 2 + strlen + 1;
+	}
+
+	while (strlen-- >= 1) {
+		(*buf)[(*pos)++] = *str;
+		str++;
+	}
+
+	(*buf)[*pos] = '\0';
 }
+
 
 static char *parse(char *command, interface_defn *ifd) {
 	char *result = NULL;
@@ -416,29 +421,18 @@ static char *parse(char *command, interface_defn *ifd) {
 	return result;
 }
 
-void addstr(char **buf, size_t *len, size_t *pos, char *str, size_t strlen) {
-	assert(*len >= *pos);
-	assert(*len == 0 || (*buf)[*pos] == '\0');
+int execute(char *command, interface_defn *ifd, execfn *exec) {
+	char *out;
+	int ret;
 
-	if (*pos + strlen >= *len) {
-		char *newbuf;
+	out = parse(command, ifd);
+	if (!out)
+		return 0;
 
-		newbuf = realloc(*buf, *len * 2 + strlen + 1);
-		if (!newbuf) {
-			perror("realloc");
-			exit(1);	/* a little ugly */
-		}
+	ret = (*exec) (out);
+	free(out);
 
-		*buf = newbuf;
-		*len = *len * 2 + strlen + 1;
-	}
-
-	while (strlen-- >= 1) {
-		(*buf)[(*pos)++] = *str;
-		str++;
-	}
-
-	(*buf)[*pos] = '\0';
+	return ret;
 }
 
 int strncmpz(char *l, char *r, size_t llen) {
@@ -518,35 +512,6 @@ int var_set_anywhere(char *id, interface_defn *ifd) {
 	return 0;
 }
 
-int run_mapping(char *physical, char *logical, int len, mapping_defn *map) {
-	FILE *in, *out;
-	int i, status;
-	pid_t pid;
-
-	pid = popen2(&in, &out, map->script, physical, NULL);
-	if (pid == 0)
-		return 0;
-
-	for (i = 0; i < map->n_mappings; i++)
-		fprintf(in, "%s\n", map->mapping[i]);
-
-	fclose(in);
-	waitpid(pid, &status, 0);
-
-	if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-		if (fgets(logical, len, out)) {
-			char *pch = logical + strlen(logical) - 1;
-
-			while (pch >= logical && isspace(*pch))
-				*(pch--) = '\0';
-		}
-	}
-
-	fclose(out);
-
-	return 1;
-}
-
 static int popen2(FILE **in, FILE **out, char *command, ...) {
 	va_list ap;
 	char *argv[11] = { command };
@@ -603,4 +568,33 @@ static int popen2(FILE **in, FILE **out, char *command, ...) {
 	}
 
 	/* unreached */
+}
+
+int run_mapping(char *physical, char *logical, int len, mapping_defn *map) {
+	FILE *in, *out;
+	int i, status;
+	pid_t pid;
+
+	pid = popen2(&in, &out, map->script, physical, NULL);
+	if (pid == 0)
+		return 0;
+
+	for (i = 0; i < map->n_mappings; i++)
+		fprintf(in, "%s\n", map->mapping[i]);
+
+	fclose(in);
+	waitpid(pid, &status, 0);
+
+	if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+		if (fgets(logical, len, out)) {
+			char *pch = logical + strlen(logical) - 1;
+
+			while (pch >= logical && isspace(*pch))
+				*(pch--) = '\0';
+		}
+	}
+
+	fclose(out);
+
+	return 1;
 }

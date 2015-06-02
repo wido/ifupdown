@@ -14,13 +14,180 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-static int get_line(char **result, size_t *result_len, FILE *f, int *line);
-static char *next_word(char *buf, char *word, int maxlen);
-static address_family *get_address_family(address_family *af[], char *name);
-static method *get_method(address_family *af, char *name);
-allowup_defn *get_allowup(allowup_defn **allowups, char *name);
+static int get_line(char **result, size_t *result_len, FILE *f, int *line) {
+	size_t pos;
 
-allowup_defn *add_allow_up(char *filename, int line, allowup_defn *allow_up, char *iface_name);
+	do {
+		pos = 0;
+
+		do {
+			if (*result_len - pos < 10) {
+				char *newstr = realloc(*result, *result_len * 2 + 80);
+				if (newstr == NULL) {
+					return 0;
+				}
+
+				*result = newstr;
+				*result_len = *result_len * 2 + 80;
+			}
+
+			if (!fgets(*result + pos, *result_len - pos, f)) {
+				if (ferror(f) == 0 && pos == 0)
+					return 0;
+
+				if (ferror(f) != 0)
+					return 0;
+			}
+
+			pos += strlen(*result + pos);
+		} while (pos == *result_len - 1 && (*result)[pos - 1] != '\n');
+
+		if (pos != 0 && (*result)[pos - 1] == '\n')
+			(*result)[--pos] = '\0';
+
+		(*line)++;
+
+		assert((*result)[pos] == '\0');
+
+		int first = 0;
+
+		while (isspace((*result)[first]) && (*result)[first])
+			first++;
+
+		memmove(*result, *result + first, pos - first + 1);
+		pos -= first;
+	} while ((*result)[0] == '#');
+
+	while ((*result)[pos - 1] == '\\') {
+		(*result)[--pos] = '\0';
+
+		do {
+			if (*result_len - pos < 10) {
+				char *newstr = realloc(*result, *result_len * 2 + 80);
+				if (newstr == NULL) {
+					return 0;
+				}
+
+				*result = newstr;
+				*result_len = *result_len * 2 + 80;
+			}
+			if (!fgets(*result + pos, *result_len - pos, f)) {
+				if (ferror(f) == 0 && pos == 0)
+					return 0;
+
+				if (ferror(f) != 0)
+					return 0;
+			}
+
+			pos += strlen(*result + pos);
+		} while (pos == *result_len - 1 && (*result)[pos - 1] != '\n');
+
+		if (pos != 0 && (*result)[pos - 1] == '\n')
+			(*result)[--pos] = '\0';
+
+		(*line)++;
+
+		assert((*result)[pos] == '\0');
+	}
+
+	while (isspace((*result)[pos - 1]))	/* remove trailing whitespace */
+		pos--;
+
+	(*result)[pos] = '\0';
+
+	return 1;
+}
+
+static char *next_word(char *buf, char *word, int maxlen) {
+	if (!buf)
+		return NULL;
+
+	if (!*buf)
+		return NULL;
+
+	while (!isspace(*buf) && *buf) {
+		if (maxlen-- > 1)
+			*word++ = *buf;
+
+		buf++;
+	}
+
+	if (maxlen > 0)
+		*word = '\0';
+
+	while (isspace(*buf) && *buf)
+		buf++;
+
+	return buf;
+}
+
+static address_family *get_address_family(address_family *af[], char *name) {
+	int i;
+
+	for (i = 0; af[i]; i++)
+		if (strcmp(af[i]->name, name) == 0)
+			return af[i];
+
+	return NULL;
+}
+
+static method *get_method(address_family *af, char *name) {
+	int i;
+
+	for (i = 0; i < af->n_methods; i++)
+		if (strcmp(af->method[i].name, name) == 0)
+			return &af->method[i];
+
+	return NULL;
+}
+
+static allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
+	for (; *allowups; allowups = &(*allowups)->next)
+		if (strcmp((*allowups)->when, name) == 0)
+			break;
+
+	if (*allowups == NULL) {
+		*allowups = malloc(sizeof(allowup_defn));
+		if (*allowups == NULL)
+			return NULL;
+
+		(*allowups)->when = strdup(name);
+		(*allowups)->next = NULL;
+		(*allowups)->max_interfaces = 0;
+		(*allowups)->n_interfaces = 0;
+		(*allowups)->interfaces = NULL;
+	}
+
+	return *allowups;
+}
+
+static allowup_defn *add_allow_up(char *filename, int line, allowup_defn *allow_up, char *iface_name) {
+	int i;
+
+	for (i = 0; i < allow_up->n_interfaces; i++)
+		if (strcmp(iface_name, allow_up->interfaces[i]) == 0)
+			return allow_up;
+
+	if (allow_up->n_interfaces == allow_up->max_interfaces) {
+		char **tmp;
+
+		allow_up->max_interfaces *= 2;
+		allow_up->max_interfaces++;
+
+		tmp = realloc(allow_up->interfaces, sizeof(*tmp) * allow_up->max_interfaces);
+		if (tmp == NULL) {
+			perror(filename);
+			return NULL;
+		}
+
+		allow_up->interfaces = tmp;
+	}
+
+	allow_up->interfaces[allow_up->n_interfaces] = strdup(iface_name);
+	allow_up->n_interfaces++;
+
+	return allow_up;
+}
 
 variable *set_variable(char *filename, char *name, char *value, variable **var, int *n_vars, int *max_vars) {
 	/*
@@ -570,153 +737,6 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 	return defn;
 }
 
-static int get_line(char **result, size_t *result_len, FILE *f, int *line) {
-	size_t pos;
-
-	do {
-		pos = 0;
-
-		do {
-			if (*result_len - pos < 10) {
-				char *newstr = realloc(*result, *result_len * 2 + 80);
-				if (newstr == NULL) {
-					return 0;
-				}
-
-				*result = newstr;
-				*result_len = *result_len * 2 + 80;
-			}
-
-			if (!fgets(*result + pos, *result_len - pos, f)) {
-				if (ferror(f) == 0 && pos == 0)
-					return 0;
-
-				if (ferror(f) != 0)
-					return 0;
-			}
-
-			pos += strlen(*result + pos);
-		} while (pos == *result_len - 1 && (*result)[pos - 1] != '\n');
-
-		if (pos != 0 && (*result)[pos - 1] == '\n')
-			(*result)[--pos] = '\0';
-
-		(*line)++;
-
-		assert((*result)[pos] == '\0');
-
-		int first = 0;
-
-		while (isspace((*result)[first]) && (*result)[first])
-			first++;
-
-		memmove(*result, *result + first, pos - first + 1);
-		pos -= first;
-	} while ((*result)[0] == '#');
-
-	while ((*result)[pos - 1] == '\\') {
-		(*result)[--pos] = '\0';
-
-		do {
-			if (*result_len - pos < 10) {
-				char *newstr = realloc(*result, *result_len * 2 + 80);
-				if (newstr == NULL) {
-					return 0;
-				}
-
-				*result = newstr;
-				*result_len = *result_len * 2 + 80;
-			}
-			if (!fgets(*result + pos, *result_len - pos, f)) {
-				if (ferror(f) == 0 && pos == 0)
-					return 0;
-
-				if (ferror(f) != 0)
-					return 0;
-			}
-
-			pos += strlen(*result + pos);
-		} while (pos == *result_len - 1 && (*result)[pos - 1] != '\n');
-
-		if (pos != 0 && (*result)[pos - 1] == '\n')
-			(*result)[--pos] = '\0';
-
-		(*line)++;
-
-		assert((*result)[pos] == '\0');
-	}
-
-	while (isspace((*result)[pos - 1]))	/* remove trailing whitespace */
-		pos--;
-
-	(*result)[pos] = '\0';
-
-	return 1;
-}
-
-static char *next_word(char *buf, char *word, int maxlen) {
-	if (!buf)
-		return NULL;
-
-	if (!*buf)
-		return NULL;
-
-	while (!isspace(*buf) && *buf) {
-		if (maxlen-- > 1)
-			*word++ = *buf;
-
-		buf++;
-	}
-
-	if (maxlen > 0)
-		*word = '\0';
-
-	while (isspace(*buf) && *buf)
-		buf++;
-
-	return buf;
-}
-
-static address_family *get_address_family(address_family *af[], char *name) {
-	int i;
-
-	for (i = 0; af[i]; i++)
-		if (strcmp(af[i]->name, name) == 0)
-			return af[i];
-
-	return NULL;
-}
-
-static method *get_method(address_family *af, char *name) {
-	int i;
-
-	for (i = 0; i < af->n_methods; i++)
-		if (strcmp(af->method[i].name, name) == 0)
-			return &af->method[i];
-
-	return NULL;
-}
-
-allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
-	for (; *allowups; allowups = &(*allowups)->next)
-		if (strcmp((*allowups)->when, name) == 0)
-			break;
-
-	if (*allowups == NULL) {
-		*allowups = malloc(sizeof(allowup_defn));
-		if (*allowups == NULL)
-			return NULL;
-
-		(*allowups)->when = strdup(name);
-		(*allowups)->next = NULL;
-		(*allowups)->max_interfaces = 0;
-		(*allowups)->n_interfaces = 0;
-		(*allowups)->interfaces = NULL;
-	}
-
-	return *allowups;
-}
-
 allowup_defn *find_allowup(interfaces_file *defn, char *name) {
 	allowup_defn *allowups = defn->allowups;
 
@@ -725,32 +745,4 @@ allowup_defn *find_allowup(interfaces_file *defn, char *name) {
 			break;
 
 	return allowups;
-}
-
-allowup_defn *add_allow_up(char *filename, int line, allowup_defn *allow_up, char *iface_name) {
-	int i;
-
-	for (i = 0; i < allow_up->n_interfaces; i++)
-		if (strcmp(iface_name, allow_up->interfaces[i]) == 0)
-			return allow_up;
-
-	if (allow_up->n_interfaces == allow_up->max_interfaces) {
-		char **tmp;
-
-		allow_up->max_interfaces *= 2;
-		allow_up->max_interfaces++;
-
-		tmp = realloc(allow_up->interfaces, sizeof(*tmp) * allow_up->max_interfaces);
-		if (tmp == NULL) {
-			perror(filename);
-			return NULL;
-		}
-
-		allow_up->interfaces = tmp;
-	}
-
-	allow_up->interfaces[allow_up->n_interfaces] = strdup(iface_name);
-	allow_up->n_interfaces++;
-
-	return allow_up;
 }
