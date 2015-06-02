@@ -368,11 +368,13 @@ static char *parse(char *command, interface_defn *ifd) {
 				command++;
 				nextpercent = strchr(command, '%');
 				namelen = nextpercent - command;
+
 				if (!nextpercent) {
 					errno = EUNBALPER;
 					free(result);
 					return NULL;
 				}
+
 				/* %var/p/r% */
 				if (*(nextpercent - 4) == '/') {
 					pat = *(nextpercent - 3);
@@ -385,17 +387,16 @@ static char *parse(char *command, interface_defn *ifd) {
 				if (varvalue) {
 					char *position = varvalue;
 
-					for (; *position; position++) {
-						if (*position == pat) {
+					for (; *position; position++)
+						if (*position == pat)
 							*position = rep;
-						}
-					}
+
 					addstr(&result, &len, &pos, varvalue, strlen(varvalue));
 					free(varvalue);
 				} else {
-					if (opt_depth == 1) {
+					if (opt_depth == 1)
 						fprintf(stderr, "Missing required variable: %.*s\n", namelen, command);
-					}
+
 					okay[opt_depth - 1] = 0;
 				}
 
