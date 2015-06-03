@@ -425,6 +425,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 				pattern = malloc(s);
 				if (pattern == NULL) {
+					free(dir);
 					perror(filename);
 					return NULL;
 				}
@@ -435,6 +436,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 				pattern = malloc(s);
 				if (pattern == NULL) {
+					free(dir);
 					perror(filename);
 					return NULL;
 				}
@@ -496,6 +498,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 				pattern = malloc(s);
 				if (pattern == NULL) {
+					free(dir);
 					perror(filename);
 					return NULL;
 				}
@@ -506,6 +509,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 				pattern = malloc(s);
 				if (pattern == NULL) {
+					free(dir);
 					perror(filename);
 					return NULL;
 				}
@@ -582,6 +586,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 			if (rest == NULL) {
 				fprintf(stderr, "%s:%d: too few parameters for iface line\n", filename, line);
+				free(currif);
 				return NULL;
 			}
 

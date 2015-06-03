@@ -374,8 +374,9 @@ bool make_pidfile_name(char *name, size_t size, const char *command, interface_d
 
 	int n = snprintf(name, size, RUN_DIR "%s-%s.pid", command, iface);
 
+	free(iface);
+
 	if (n < 0 || (size_t) n >= size) {
-		free(iface);
 		return false;
 	}
 

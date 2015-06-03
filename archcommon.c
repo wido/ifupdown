@@ -220,8 +220,11 @@ void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv)
 	} else {
 		if (argc == 3) {
 			*pparam = realloc(*pparam, strlen(argv[2]) + 1);
-			if (*pparam == NULL)
+			if (*pparam == NULL) {
+				free(s);
 				return;
+			}
+
 			strcpy(*pparam, argv[2]);
 		}
 	}
