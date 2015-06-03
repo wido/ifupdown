@@ -484,7 +484,7 @@ int main(int argc, char **argv) {
 
 		case 'X':
 			excludeints++;
-			excludeint = realloc(excludeint, excludeints * sizeof(char *));
+			excludeint = realloc(excludeint, excludeints * sizeof *excludeint);
 			if (excludeint == NULL) {
 				char *filename = argv[0];
 

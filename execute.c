@@ -56,7 +56,7 @@ static void set_environ(interface_defn *iface, char *mode, char *phase) {
 	}
 
 	const int n_env_entries = iface->n_options + 8;
-	environ = malloc(sizeof(char *) * (n_env_entries + 1 /* for final NULL */ ));
+	environ = malloc(sizeof *environ * (n_env_entries + 1 /* for final NULL */ ));
 
 	char **ppch = environ;
 

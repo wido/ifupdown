@@ -219,7 +219,7 @@ variable *set_variable(char *filename, char *name, char *value, variable **var, 
 		variable *new_var;
 
 		*max_vars += 10;
-		new_var = realloc(*var, sizeof(variable) * *max_vars);
+		new_var = realloc(*var, sizeof *new_var * *max_vars);
 
 		if (new_var == NULL) {
 			perror(filename);
@@ -345,7 +345,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 			continue;	/* blank line */
 
 		if (strcmp(firstword, "mapping") == 0) {
-			currmap = calloc(1, sizeof(mapping_defn));
+			currmap = calloc(1, sizeof *currmap);
 			if (currmap == NULL) {
 				perror(filename);
 				return NULL;
@@ -547,7 +547,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 			char address_family_name[80];
 			char method_name[80];
 
-			currif = malloc(sizeof(interface_defn));
+			currif = malloc(sizeof *currif);
 			if (!currif) {
 				perror(filename);
 				return NULL;
