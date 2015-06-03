@@ -143,15 +143,11 @@ static allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
 			break;
 
 	if (*allowups == NULL) {
-		*allowups = malloc(sizeof(allowup_defn));
+		*allowups = calloc(1, sizeof *allowups);
 		if (*allowups == NULL)
 			return NULL;
 
 		(*allowups)->when = strdup(name);
-		(*allowups)->next = NULL;
-		(*allowups)->max_interfaces = 0;
-		(*allowups)->n_interfaces = 0;
-		(*allowups)->interfaces = NULL;
 	}
 
 	return *allowups;
@@ -279,13 +275,9 @@ void convert_variables(char *filename, conversion *conversions, interface_defn *
 interfaces_file *read_interfaces(char *filename) {
 	interfaces_file *defn;
 
-	defn = malloc(sizeof(interfaces_file));
+	defn = calloc(1, sizeof *defn);
 	if (defn == NULL)
 		return NULL;
-
-	defn->allowups = NULL;
-	defn->mappings = NULL;
-	defn->ifaces = NULL;
 
 	if (!no_loopback)
 		add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), LO_IFACE);
@@ -295,7 +287,7 @@ interfaces_file *read_interfaces(char *filename) {
 		return NULL;
 
 	if (!no_loopback) {
-		interface_defn *lo_if = malloc(sizeof(interface_defn));
+		interface_defn *lo_if = malloc(sizeof *lo_if);
 
 		if (!lo_if) {
 			perror(filename);
@@ -303,7 +295,11 @@ interfaces_file *read_interfaces(char *filename) {
 		}
 
 		*lo_if = (interface_defn) {
-		.logical_iface = strdup(LO_IFACE),.max_options = 0,.address_family = &addr_inet,.method = get_method(&addr_inet, "loopback"),.n_options = 0,.option = NULL,.next = defn->ifaces};
+			.logical_iface = strdup(LO_IFACE),
+			.address_family = &addr_inet,
+			.method = get_method(&addr_inet, "loopback"),
+			.next = defn->ifaces
+		};
 
 		defn->ifaces = lo_if;
 	}
@@ -349,15 +345,11 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 			continue;	/* blank line */
 
 		if (strcmp(firstword, "mapping") == 0) {
-			currmap = malloc(sizeof(mapping_defn));
+			currmap = calloc(1, sizeof(mapping_defn));
 			if (currmap == NULL) {
 				perror(filename);
 				return NULL;
 			}
-
-			currmap->max_matches = 0;
-			currmap->n_matches = 0;
-			currmap->match = NULL;
 
 			while ((rest = next_word(rest, firstword, 80))) {
 				if (currmap->max_matches == currmap->n_matches) {
@@ -375,11 +367,6 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 				currmap->match[currmap->n_matches++] = strdup(firstword);
 			}
-
-			currmap->script = NULL;
-			currmap->max_mappings = 0;
-			currmap->n_mappings = 0;
-			currmap->mapping = NULL;
 
 			mapping_defn **where = &defn->mappings;
 
@@ -727,11 +714,9 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 }
 
 allowup_defn *find_allowup(interfaces_file *defn, char *name) {
-	allowup_defn *allowups = defn->allowups;
-
-	for (; allowups; allowups = allowups->next)
+	for (allowup_defn *allowups = defn->allowups; allowups; allowups = allowups->next)
 		if (strcmp(allowups->when, name) == 0)
-			break;
+			return allowups;
 
-	return allowups;
+	return NULL;
 }

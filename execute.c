@@ -48,56 +48,34 @@ static char *setlocalenv(char *format, char *name, char *value) {
 }
 
 static void set_environ(interface_defn *iface, char *mode, char *phase) {
-	char **environend;
-	char **ppch;
-	int i;
-	const int n_env_entries = iface->n_options + 8;
-
 	if (environ != NULL) {
-		for (ppch = environ; *ppch; ppch++) {
+		for (char **ppch = environ; *ppch; ppch++)
 			free(*ppch);
-			*ppch = NULL;
-		}
 
 		free(environ);
-		environ = NULL;
 	}
 
+	const int n_env_entries = iface->n_options + 8;
 	environ = malloc(sizeof(char *) * (n_env_entries + 1 /* for final NULL */ ));
-	environend = environ;
-	*environend = NULL;
 
-	for (i = 0; i < iface->n_options; i++) {
+	char **ppch = environ;
+
+	for (int i = 0; i < iface->n_options; i++) {
 		if (strcmp(iface->option[i].name, "pre-up") == 0 || strcmp(iface->option[i].name, "up") == 0 || strcmp(iface->option[i].name, "down") == 0 || strcmp(iface->option[i].name, "post-down") == 0)
 			continue;
 
-		*(environend++) = setlocalenv("IF_%s=%s", iface->option[i].name, iface->option[i].value ? iface->option[i].value : "");
-		*environend = NULL;
+		*ppch++ = setlocalenv("IF_%s=%s", iface->option[i].name, iface->option[i].value ? iface->option[i].value : "");
 	}
 
-	*(environend++) = setlocalenv("%s=%s", "IFACE", iface->real_iface);
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "LOGICAL", iface->logical_iface);
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "ADDRFAM", iface->address_family->name);
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "METHOD", iface->method->name);
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "MODE", mode);
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "PHASE", phase);
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "VERBOSITY", verbose ? "1" : "0");
-	*environend = NULL;
-
-	*(environend++) = setlocalenv("%s=%s", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
-	*environend = NULL;
+	*ppch++ = setlocalenv("%s=%s", "IFACE", iface->real_iface);
+	*ppch++ = setlocalenv("%s=%s", "LOGICAL", iface->logical_iface);
+	*ppch++ = setlocalenv("%s=%s", "ADDRFAM", iface->address_family->name);
+	*ppch++ = setlocalenv("%s=%s", "METHOD", iface->method->name);
+	*ppch++ = setlocalenv("%s=%s", "MODE", mode);
+	*ppch++ = setlocalenv("%s=%s", "PHASE", phase);
+	*ppch++ = setlocalenv("%s=%s", "VERBOSITY", verbose ? "1" : "0");
+	*ppch++ = setlocalenv("%s=%s", "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
+	*ppch = NULL;
 }
 
 int doit(char *str) {
