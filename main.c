@@ -142,8 +142,6 @@ static const char *read_state(const char *argv0, const char *iface) {
 	char *ret = NULL;
 
 	FILE *lock_fp = lock_state(argv0);
-	char buf[80];
-	char *p;
 	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
 	if (state_fp == NULL) {
@@ -164,17 +162,11 @@ static const char *read_state(const char *argv0, const char *iface) {
 		}
 	}
 
+	char buf[80];
+	char *p;
+
 	while ((p = fgets(buf, sizeof buf, state_fp)) != NULL) {
-		char *pch;
-
-		pch = buf + strlen(buf) - 1;
-		while (pch > buf && isspace(*pch))
-			pch--;
-		*(pch + 1) = '\0';
-
-		pch = buf;
-		while (isspace(*pch))
-			pch++;
+		char *pch = strip(buf);
 
 		if (strncmp(iface, pch, strlen(iface)) == 0) {
 			if (pch[strlen(iface)] == '=') {
@@ -199,9 +191,6 @@ static const char *read_state(const char *argv0, const char *iface) {
 }
 
 static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
-	char buf[80];
-	char *p;
-
 	FILE *lock_fp = lock_state(argv0);
 	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
@@ -226,21 +215,13 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 	*n_ifaces = 0;
 	*ifaces = NULL;
 
+	char buf[80];
+	char *p;
+
 	while ((p = fgets(buf, sizeof buf, state_fp)) != NULL) {
-		char *pch;
-
-		pch = buf + strlen(buf) - 1;
-		while (pch > buf && isspace(*pch))
-			pch--;
-		*(pch + 1) = '\0';
-
-		pch = buf;
-		while (isspace(*pch))
-			pch++;
-
 		(*n_ifaces)++;
 		*ifaces = realloc(*ifaces, sizeof(**ifaces) * *n_ifaces);
-		(*ifaces)[(*n_ifaces) - 1] = strdup(pch);
+		(*ifaces)[(*n_ifaces) - 1] = strdup(strip(buf));
 	}
 
 	for (int i = 0; i < ((*n_ifaces) / 2); i++) {
@@ -265,9 +246,6 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 static void update_state(const char *argv0, const char *iface, const char *state) {
 	FILE *lock_fp = lock_state(argv0);
 	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
-
-	char buf[80];
-	char *p;
 
 	if (state_fp == NULL) {
 		if (!no_act) {
@@ -300,17 +278,11 @@ static void update_state(const char *argv0, const char *iface, const char *state
 		exit(1);
 	}
 
+	char buf[80];
+	char *p;
+
 	while ((p = fgets(buf, sizeof buf, state_fp)) != NULL) {
-		char *pch;
-
-		pch = buf + strlen(buf) - 1;
-		while (pch > buf && isspace(*pch))
-			pch--;
-		*(pch + 1) = '\0';
-
-		pch = buf;
-		while (isspace(*pch))
-			pch++;
+		char *pch = strip(buf);
 
 		if (strncmp(iface, pch, strlen(iface)) == 0) {
 			if (pch[strlen(iface)] == '=') {
