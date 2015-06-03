@@ -149,7 +149,7 @@ static const char *read_state(const char *argv0, const char *iface) {
 			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
 			exit(1);
 		} else {
-			goto noact;
+			goto end;
 		}
 	}
 
@@ -176,16 +176,12 @@ static const char *read_state(const char *argv0, const char *iface) {
 		}
 	}
 
- noact:
-	if (state_fp != NULL) {
+ end:
+	if (state_fp)
 		fclose(state_fp);
-		state_fp = NULL;
-	}
 
-	if (lock_fp != NULL) {
+	if (lock_fp)
 		fclose(lock_fp);
-		lock_fp = NULL;
-	}
 
 	return ret;
 }
@@ -199,7 +195,7 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
 			exit(1);
 		} else {
-			goto noact;
+			goto end;
 		}
 	}
 
@@ -231,16 +227,12 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 		(*ifaces)[(*n_ifaces) - i - 1] = temp;
 	}
 
- noact:
-	if (state_fp != NULL) {
+ end:
+	if (state_fp)
 		fclose(state_fp);
-		state_fp = NULL;
-	}
 
-	if (lock_fp != NULL) {
+	if (lock_fp)
 		fclose(lock_fp);
-		lock_fp = NULL;
-	}
 }
 
 static void update_state(const char *argv0, const char *iface, const char *state) {
@@ -252,12 +244,12 @@ static void update_state(const char *argv0, const char *iface, const char *state
 			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
 			exit(1);
 		} else {
-			goto noact;
+			goto end;
 		}
 	}
 
 	if (no_act)
-		goto noact;
+		goto end;
 
 	int flags = fcntl(fileno(state_fp), F_GETFD);
 
@@ -308,16 +300,12 @@ static void update_state(const char *argv0, const char *iface, const char *state
 		exit(1);
 	}
 
- noact:
-	if (state_fp != NULL) {
+ end:
+	if (state_fp)
 		fclose(state_fp);
-		state_fp = NULL;
-	}
 
-	if (lock_fp != NULL) {
+	if (lock_fp)
 		fclose(lock_fp);
-		lock_fp = NULL;
-	}
 }
 
 static int lock_fd(int fd) {
