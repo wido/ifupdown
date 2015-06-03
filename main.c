@@ -702,9 +702,7 @@ int main(int argc, char **argv) {
 		bool have_mapping = false;
 
 		if (((cmds == iface_up) && run_mappings) || (cmds == iface_query)) {
-			mapping_defn *currmap;
-
-			for (currmap = defn->mappings; currmap; currmap = currmap->next) {
+			for (mapping_defn *currmap = defn->mappings; currmap; currmap = currmap->next) {
 				for (int i = 0; i < currmap->n_matches; i++) {
 					if (fnmatch(currmap->match[i], liface, 0) != 0)
 						continue;
@@ -801,15 +799,12 @@ int main(int argc, char **argv) {
 
 				okay = true;
 
-				option_default *o;
+				for (option_default *o = currif->method->defaults; o && o->option && o->value; o++) {
+					bool found = false;
 
-				for (o = currif->method->defaults; o && o->option && o->value; o++) {
-					int j;
-					int found = 0;
-
-					for (j = 0; j < currif->n_options; j++) {
+					for (int j = 0; j < currif->n_options; j++) {
 						if (strcmp(currif->option[j].name, o->option) == 0) {
-							found = 1;
+							found = true;
 							break;
 						}
 					}

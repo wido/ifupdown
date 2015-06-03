@@ -309,12 +309,10 @@ interfaces_file *read_interfaces(const char *filename) {
 }
 
 static int directory_filter(const struct dirent *d) {
-	const char *p;
-
 	if (d == NULL || d->d_name[0] == 0)
 		return 0;
 
-	for (p = d->d_name; *p; p++)
+	for (const char *p = d->d_name; *p; p++)
 		if (!(((*p >= 'a') && (*p <= 'z')) || ((*p >= 'A') && (*p <= 'Z')) || ((*p >= '0') && (*p <= '9')) || (*p == '_') || (*p == '-')))
 			return 0;
 
@@ -421,19 +419,18 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filenam
 				strcat(pattern, dir);
 				strcat(pattern, "/");
 			}
+
 			strcat(pattern, rest);
 
 			wordexp_t p;
-			char **w;
-			size_t i;
-			struct stat sb;
-
 			int fail = wordexp(pattern, &p, WRDE_NOCMD);
 
 			if (!fail) {
-				w = p.we_wordv;
+				char **w = p.we_wordv;
 
-				for (i = 0; i < p.we_wordc; i++) {
+				for (size_t i = 0; i < p.we_wordc; i++) {
+					struct stat sb;
+
 					if (stat(w[i], &sb) == -1)
 						/* wordexp can't expand * in an empty dir */
 						if (errno == ENOENT)
@@ -498,11 +495,10 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filenam
 			strcat(pattern, rest);
 
 			wordexp_t p;
-			char **w;
 			int fail = wordexp(pattern, &p, WRDE_NOCMD);
 
 			if (!fail) {
-				w = p.we_wordv;
+				char **w = p.we_wordv;
 				for (size_t i = 0; i < p.we_wordc; i++) {
 					struct dirent **namelist;
 					int n = scandir(w[i], &namelist, directory_filter, alphasort);

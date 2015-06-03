@@ -122,9 +122,7 @@ int doit(const char *str) {
 }
 
 static int execute_options(interface_defn *ifd, execfn *exec, char *opt) {
-	int i;
-
-	for (i = 0; i < ifd->n_options; i++)
+	for (int i = 0; i < ifd->n_options; i++)
 		if (strcmp(ifd->option[i].name, opt) == 0)
 			if (!(*exec) (ifd->option[i].value))
 				if (!ignore_failures)
@@ -252,9 +250,7 @@ int iface_list(interface_defn *iface) {
 }
 
 int iface_query(interface_defn *iface) {
-	int i;
-
-	for (i = 0; i < iface->n_options; i++)
+	for (int i = 0; i < iface->n_options; i++)
 		printf("%s: %s\n", iface->option[i].name, iface->option[i].value);
 
 	return 0;
