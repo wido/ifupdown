@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
+#include <arpa/inet.h>
 
 #include "archcommon.h"
 
@@ -57,8 +58,6 @@ void make_hex_address(interface_defn *ifd, char **pparam, int argc, char **argv)
 		return;
 	snprintf(*pparam, maxlen + 1, "%.2hhx%.2hhx:%.2hhx%.2hhx", addrcomp[0], addrcomp[1], addrcomp[2], addrcomp[3]);
 }
-
-#include <arpa/inet.h>
 
 void compute_v4_addr(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	char s[INET_ADDRSTRLEN * 2 + 2];	/* 2 is for slash and \0 */
