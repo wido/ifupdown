@@ -16,21 +16,14 @@ bool run_scripts = true;
 bool verbose = false;
 bool no_loopback = false;
 bool ignore_failures = false;
-char lockfile[] = RUN_DIR ".ifstate.lock";
-char statefile[] = RUN_DIR "ifstate";
-char tmpstatefile[] = RUN_DIR ".ifstate.tmp";
+
 interfaces_file *defn;
 
-bool match_patterns(char *string, int argc, char *argv[]);
-static void usage(char *execname);
-static void help(char *execname, int (*cmds) (interface_defn *));
-static void version(char *execname);
-static const char *read_state(const char *argv0, const char *iface);
-static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces);
-static void update_state(const char *argv0, const char *iface, const char *liface);
-static int lock_fd(int fd);
+static char lockfile[] = RUN_DIR ".ifstate.lock";
+static char statefile[] = RUN_DIR "ifstate";
+static char tmpstatefile[] = RUN_DIR ".ifstate.tmp";
 
-bool match_patterns(char *string, int argc, char *argv[]) {
+static bool match_patterns(char *string, int argc, char *argv[]) {
 	if (!argc || !argv || !string)
 		return false;
 
@@ -99,6 +92,20 @@ static void help(char *execname, int (*cmds) (interface_defn *)) {
 			"\t--state                show the state of specified interfaces\n");
 
 	exit(0);
+}
+
+static int lock_fd(int fd) {
+	struct flock lock = {
+		.l_type = F_WRLCK,
+		.l_whence = SEEK_SET,
+		.l_start = 0,
+		.l_len = 0,
+	};
+
+	if (fcntl(fd, F_SETLKW, &lock) < 0)
+		return -1;
+
+	return 0;
 }
 
 static FILE *lock_state(const char *argv0) {
@@ -311,21 +318,7 @@ static void update_state(const char *argv0, const char *iface, const char *state
 		fclose(lock_fp);
 }
 
-static int lock_fd(int fd) {
-	struct flock lock = {
-		.l_type = F_WRLCK,
-		.l_whence = SEEK_SET,
-		.l_start = 0,
-		.l_len = 0,
-	};
-
-	if (fcntl(fd, F_SETLKW, &lock) < 0)
-		return -1;
-
-	return 0;
-}
-
-void sanitize_file_name(char *name) {
+static void sanitize_file_name(char *name) {
 	for (; *name; name++)
 		if (*name == '/')
 			*name = '.';

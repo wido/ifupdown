@@ -273,41 +273,6 @@ void convert_variables(const char *filename, conversion *conversions, interface_
 	}
 }
 
-interfaces_file *read_interfaces(const char *filename) {
-	interfaces_file *defn;
-
-	defn = calloc(1, sizeof *defn);
-	if (defn == NULL)
-		return NULL;
-
-	if (!no_loopback)
-		add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), LO_IFACE);
-
-	defn = read_interfaces_defn(defn, filename);
-	if (!defn)
-		return NULL;
-
-	if (!no_loopback) {
-		interface_defn *lo_if = malloc(sizeof *lo_if);
-
-		if (!lo_if) {
-			perror(filename);
-			return NULL;
-		}
-
-		*lo_if = (interface_defn) {
-			.logical_iface = strdup(LO_IFACE),
-			.address_family = &addr_inet,
-			.method = get_method(&addr_inet, "loopback"),
-			.next = defn->ifaces
-		};
-
-		defn->ifaces = lo_if;
-	}
-
-	return defn;
-}
-
 static int directory_filter(const struct dirent *d) {
 	if (d == NULL || d->d_name[0] == 0)
 		return 0;
@@ -319,7 +284,7 @@ static int directory_filter(const struct dirent *d) {
 	return 1;
 }
 
-interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {
+static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {
 	FILE *f;
 	int line;
 	char *buf = NULL;
@@ -706,6 +671,41 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filenam
 
 	fclose(f);
 	line = -1;
+
+	return defn;
+}
+
+interfaces_file *read_interfaces(const char *filename) {
+	interfaces_file *defn;
+
+	defn = calloc(1, sizeof *defn);
+	if (defn == NULL)
+		return NULL;
+
+	if (!no_loopback)
+		add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), LO_IFACE);
+
+	defn = read_interfaces_defn(defn, filename);
+	if (!defn)
+		return NULL;
+
+	if (!no_loopback) {
+		interface_defn *lo_if = malloc(sizeof *lo_if);
+
+		if (!lo_if) {
+			perror(filename);
+			return NULL;
+		}
+
+		*lo_if = (interface_defn) {
+			.logical_iface = strdup(LO_IFACE),
+			.address_family = &addr_inet,
+			.method = get_method(&addr_inet, "loopback"),
+			.next = defn->ifaces
+		};
+
+		defn->ifaces = lo_if;
+	}
 
 	return defn;
 }
