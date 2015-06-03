@@ -7,12 +7,6 @@
 
 #include "archcommon.h"
 
-#ifdef __GNUC__
-#define UNUSED __attribute__((unused))
-#else
-#define UNUSED
-#endif
-
 int _iface_has(char *iface, char *delims) {
 	char _iface[80];
 
@@ -34,7 +28,7 @@ int execable(char *program) {
 	return 0;
 }
 
-void cleanup_hwaddress(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char **argv UNUSED) {
+void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	char *rest = *pparam;
 
 	/* we're shrinking the text, so no realloc needed */
@@ -50,7 +44,7 @@ void cleanup_hwaddress(interface_defn *ifd UNUSED, char **pparam, int argc UNUSE
 		*space = ' ';
 }
 
-void make_hex_address(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char **argv UNUSED) {
+void make_hex_address(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	char addrcomp[4];
 	int maxlen = strlen("0000:0000");
 
@@ -66,7 +60,7 @@ void make_hex_address(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED
 
 #include <arpa/inet.h>
 
-void compute_v4_addr(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char **argv UNUSED) {
+void compute_v4_addr(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	char s[INET_ADDRSTRLEN * 2 + 2];	/* 2 is for slash and \0 */
 
 	strncpy(s, *pparam, sizeof(s));
@@ -82,7 +76,7 @@ void compute_v4_addr(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 	strcpy(*pparam, token);
 }
 
-void compute_v4_mask(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED, char **argv UNUSED) {
+void compute_v4_mask(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	char s[INET_ADDRSTRLEN * 2 + 2];	/* 2 is for slash and \0 */
 
 	strncpy(s, *pparam, sizeof(s));
@@ -133,7 +127,7 @@ void compute_v4_mask(interface_defn *ifd UNUSED, char **pparam, int argc UNUSED,
 	strcpy(*pparam, s);
 }
 
-void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, char **argv UNUSED) {
+void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	/* If we don't get special value don't do anything */
 	if (strcmp(*pparam, "+") && strcmp(*pparam, "-"))
 		return;
@@ -184,7 +178,7 @@ void compute_v4_broadcast(interface_defn *ifd, char **pparam, int argc UNUSED, c
 	strcpy(*pparam, buffer);
 }
 
-void set_preferred_lft(interface_defn *ifd, char **pparam, int argc UNUSED, char **argv UNUSED) {
+void set_preferred_lft(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	if (!ifd->real_iface)
 		return;
 
@@ -198,7 +192,7 @@ void set_preferred_lft(interface_defn *ifd, char **pparam, int argc UNUSED, char
 	}
 }
 
-void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
+void get_token(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	if (argc < 1)
 		return;
 
@@ -232,7 +226,7 @@ void get_token(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv)
 	free(s);
 }
 
-void to_decimal(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
+void to_decimal(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	int base = 10;
 
 	if (argc > 0)
@@ -247,7 +241,7 @@ void to_decimal(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv
 	snprintf(*pparam, strlen(*pparam) + 1, "%ld", value);
 }
 
-void map_value(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
+void map_value(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	if (argc < 2)
 		return;
 
@@ -266,7 +260,7 @@ void map_value(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv)
 	}
 }
 
-void if_set(interface_defn *ifd UNUSED, char **pparam, int argc, char **argv) {
+void if_set(interface_defn *ifd, char **pparam, int argc, char **argv) {
 	if (argc < 1)
 		return;
 

@@ -1,5 +1,5 @@
 VERSION ?= 0.7
-CFLAGS ?= -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
+CFLAGS ?= -Wall -W -Wno-unused-parameter -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
 ARCH ?= linux
 
 BASEDIR ?= $(DESTDIR)
