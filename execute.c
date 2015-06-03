@@ -217,7 +217,7 @@ int iface_predown(interface_defn *iface) {
 		if (pidfile) {
 			int pid;
 
-			if (fscanf(pidfile, "%d", &pid)) {
+			if (fscanf(pidfile, "%d", &pid) == 1) {
 				if (verbose)
 					fprintf(stderr, "Terminating ifup (pid %d)\n", pid);
 
