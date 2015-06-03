@@ -1,8 +1,11 @@
 VERSION ?= 0.7
-CFLAGS ?= -Wall -W -Wno-unused-parameter -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
+CFLAGS ?= -Wall -W -Wno-unused-parameter -g -O2
 ARCH ?= linux
 
 BASEDIR ?= $(DESTDIR)
+
+CFLAGS += -std=c99 -D_DEFAULT_SOURCE
+CFLAGS += -D'IFUPDOWN_VERSION="$(VERSION)"'
 
 CFILES := addrfam.c execute.c config.c main.c archcommon.c arch$(ARCH).c
 HFILES := header.h archcommon.h arch$(ARCH).h
