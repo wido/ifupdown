@@ -11,9 +11,9 @@
 
 #include "header.h"
 
-int no_act = 0;
-int run_scripts = 1;
-int verbose = 0;
+bool no_act = false;
+bool run_scripts = true;
+bool verbose = false;
 bool no_loopback = false;
 bool ignore_failures = false;
 char lockfile[] = RUN_DIR ".ifstate.lock";
@@ -34,9 +34,7 @@ bool match_patterns(char *string, int argc, char *argv[]) {
 	if (!argc || !argv || !string)
 		return false;
 
-	int i;
-
-	for (i = 0; i < argc; i++)
+	for (int i = 0; i < argc; i++)
 		if (fnmatch(argv[i], string, 0) == 0)
 			return true;
 
@@ -101,9 +99,8 @@ static void help(char *execname, int (*cmds) (interface_defn *)) {
 }
 
 static FILE *lock_state(const char *argv0) {
-	FILE *lock_fp;
+	FILE *lock_fp = fopen(lockfile, no_act ? "r" : "a+");
 
-	lock_fp = fopen(lockfile, no_act ? "r" : "a+");
 	if (lock_fp == NULL) {
 		if (!no_act) {
 			fprintf(stderr, "%s: failed to open lockfile %s: %s\n", argv0, lockfile, strerror(errno));
@@ -113,9 +110,9 @@ static FILE *lock_state(const char *argv0) {
 		}
 	}
 
-	int flags;
+	int flags = fcntl(fileno(lock_fp), F_GETFD);
 
-	if ((flags = fcntl(fileno(lock_fp), F_GETFD)) < 0 || fcntl(fileno(lock_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
+	if (flags < 0 || fcntl(fileno(lock_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
 		fprintf(stderr, "%s: failed to set FD_CLOEXEC on lockfile %s: %s\n", argv0, lockfile, strerror(errno));
 		exit(1);
 	}
@@ -130,17 +127,25 @@ static FILE *lock_state(const char *argv0) {
 	return lock_fp;
 }
 
+static char *strip(char *buf) {
+	char *pch = buf + strlen(buf) - 1;
+	while (pch > buf && isspace(*pch))
+		*pch-- = '\0';
+
+	while (isspace(buf))
+		buf++;
+
+	return buf;
+}
+
 static const char *read_state(const char *argv0, const char *iface) {
 	char *ret = NULL;
 
-	FILE *lock_fp;
-	FILE *state_fp;
+	FILE *lock_fp = lock_state(argv0);
 	char buf[80];
 	char *p;
+	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
-	lock_fp = lock_state(argv0);
-
-	state_fp = fopen(statefile, no_act ? "r" : "a+");
 	if (state_fp == NULL) {
 		if (!no_act) {
 			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
@@ -151,9 +156,9 @@ static const char *read_state(const char *argv0, const char *iface) {
 	}
 
 	if (!no_act) {
-		int flags;
+		int flags = fcntl(fileno(state_fp), F_GETFD);
 
-		if ((flags = fcntl(fileno(state_fp), F_GETFD)) < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
+		if (flags < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
 			fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
 			exit(1);
 		}
@@ -194,15 +199,12 @@ static const char *read_state(const char *argv0, const char *iface) {
 }
 
 static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
-	int i;
-	FILE *lock_fp;
-	FILE *state_fp;
 	char buf[80];
 	char *p;
 
-	lock_fp = lock_state(argv0);
+	FILE *lock_fp = lock_state(argv0);
+	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
-	state_fp = fopen(statefile, no_act ? "r" : "a+");
 	if (state_fp == NULL) {
 		if (!no_act) {
 			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
@@ -213,9 +215,9 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 	}
 
 	if (!no_act) {
-		int flags;
+		int flags = fcntl(fileno(state_fp), F_GETFD);
 
-		if ((flags = fcntl(fileno(state_fp), F_GETFD)) < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
+		if (flags < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
 			fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
 			exit(1);
 		}
@@ -241,7 +243,7 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 		(*ifaces)[(*n_ifaces) - 1] = strdup(pch);
 	}
 
-	for (i = 0; i < ((*n_ifaces) / 2); i++) {
+	for (int i = 0; i < ((*n_ifaces) / 2); i++) {
 		char *temp = (*ifaces)[i];
 
 		(*ifaces)[i] = (*ifaces)[(*n_ifaces) - i - 1];
@@ -261,16 +263,12 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 }
 
 static void update_state(const char *argv0, const char *iface, const char *state) {
-	FILE *tmp_fp;
+	FILE *lock_fp = lock_state(argv0);
+	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
-	FILE *lock_fp;
-	FILE *state_fp;
 	char buf[80];
 	char *p;
 
-	lock_fp = lock_state(argv0);
-
-	state_fp = fopen(statefile, no_act ? "r" : "a+");
 	if (state_fp == NULL) {
 		if (!no_act) {
 			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
@@ -280,24 +278,23 @@ static void update_state(const char *argv0, const char *iface, const char *state
 		}
 	}
 
-	if (!no_act) {
-		int flags;
-
-		if ((flags = fcntl(fileno(state_fp), F_GETFD)) < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
-			fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
-			exit(1);
-		}
-
-		if (lock_fd(fileno(state_fp)) < 0) {
-			fprintf(stderr, "%s: failed to lock statefile %s: %s\n", argv0, statefile, strerror(errno));
-			exit(1);
-		}
-	}
-
 	if (no_act)
 		goto noact;
 
-	tmp_fp = fopen(tmpstatefile, "w");
+	int flags = fcntl(fileno(state_fp), F_GETFD);
+
+	if (flags < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
+		fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
+		exit(1);
+	}
+
+	if (lock_fd(fileno(state_fp)) < 0) {
+		fprintf(stderr, "%s: failed to lock statefile %s: %s\n", argv0, statefile, strerror(errno));
+		exit(1);
+	}
+
+	FILE *tmp_fp = fopen(tmpstatefile, "w");
+
 	if (tmp_fp == NULL) {
 		fprintf(stderr, "%s: failed to open temporary statefile %s: %s\n", argv0, tmpstatefile, strerror(errno));
 		exit(1);
@@ -333,6 +330,7 @@ static void update_state(const char *argv0, const char *iface, const char *state
 		fprintf(tmp_fp, "%s=%s\n", iface, state);
 
 	fclose(tmp_fp);
+
 	if (rename(tmpstatefile, statefile)) {
 		fprintf(stderr, "%s: failed to overwrite statefile %s: %s\n", argv0, statefile, strerror(errno));
 		exit(1);
@@ -351,12 +349,12 @@ static void update_state(const char *argv0, const char *iface, const char *state
 }
 
 static int lock_fd(int fd) {
-	struct flock lock;
-
-	lock.l_type = F_WRLCK;
-	lock.l_whence = SEEK_SET;
-	lock.l_start = 0;
-	lock.l_len = 0;
+	struct flock lock = {
+		.l_type = F_WRLCK,
+		.l_whence = SEEK_SET,
+		.l_start = 0,
+		.l_len = 0,
+	};
 
 	if (fcntl(fd, F_SETLKW, &lock) < 0)
 		return -1;
@@ -411,10 +409,10 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 
-	int do_all = 0;
-	int run_mappings = 1;
-	int force = 0;
-	int list = 0;
+	bool do_all = false;
+	bool run_mappings = true;
+	bool force = false;
+	bool list = false;
 	bool state_query = false;
 	char *allow_class = NULL;
 	char *interfaces = "/etc/network/interfaces";
@@ -426,9 +424,7 @@ int main(int argc, char **argv) {
 	int n_target_ifaces;
 	char **target_iface;
 
-	int i;
-
-	for (i = 0; i <= 2; i++) {
+	for (int i = 0; i <= 2; i++) {
 		if (fcntl(i, F_GETFD) == -1) {
 			if (errno == EBADF && open("/dev/null", 0) == -1) {
 				fprintf(stderr, "%s: fd %d not available; aborting\n", argv[0], i);
@@ -457,16 +453,15 @@ int main(int argc, char **argv) {
 		cmds = iface_down;
 	} else if (strcmp(command, "ifquery") == 0) {
 		cmds = iface_query;
-		no_act = 1;
+		no_act = true;
 	} else {
 		fprintf(stderr, "This command should be called as ifup, ifdown, or ifquery\n");
 		exit(1);
 	}
 
 	for (;;) {
-		int c;
+		int c = getopt_long(argc, argv, "X:s:i:o:hVvnal", long_opts, NULL);
 
-		c = getopt_long(argc, argv, "X:s:i:o:hVvnal", long_opts, NULL);
 		if (c == EOF)
 			break;
 
@@ -476,11 +471,11 @@ int main(int argc, char **argv) {
 			break;
 
 		case 'v':
-			verbose = 1;
+			verbose = true;
 			break;
 
 		case 'a':
-			do_all = 1;
+			do_all = true;
 			break;
 
 		case 3:
@@ -490,15 +485,15 @@ int main(int argc, char **argv) {
 		case 'n':
 			if ((cmds == iface_list) || (cmds == iface_query))
 				usage(argv[0]);
-			no_act = 1;
+			no_act = true;
 			break;
 
 		case 1:
-			run_mappings = 0;
+			run_mappings = false;
 			break;
 
 		case 4:
-			run_scripts = 0;
+			run_scripts = false;
 			break;
 
 		case 5:
@@ -508,11 +503,11 @@ int main(int argc, char **argv) {
 		case 2:
 			if ((cmds == iface_list) || (cmds == iface_query))
 				usage(argv[0]);
-			force = 1;
+			force = true;
 			break;
 
 		case 7:
-			ignore_failures = 1;
+			ignore_failures = true;
 			break;
 
 		case 'X':
@@ -554,7 +549,7 @@ int main(int argc, char **argv) {
 			if (!(cmds == iface_query))
 				usage(argv[0]);
 
-			list = 1;
+			list = true;
 			cmds = iface_list;
 			break;
 
@@ -588,19 +583,15 @@ int main(int argc, char **argv) {
 		n_target_ifaces = argc - optind;
 		bool ret = true;
 
-		int i;
-
 		if (n_target_ifaces == 0) {
-			for (i = 0; i < n_up_ifaces; i++)
+			for (int i = 0; i < n_up_ifaces; i++)
 				puts(up_ifaces[i]);
 		} else {
-			int j;
-
-			for (j = 0; j < n_target_ifaces; j++) {
+			for (int j = 0; j < n_target_ifaces; j++) {
 				size_t l = strlen(target_iface[j]);
 				bool found = false;
 
-				for (i = 0; i < n_up_ifaces; i++) {
+				for (int i = 0; i < n_up_ifaces; i++) {
 					if (strncmp(target_iface[j], up_ifaces[i], l) == 0) {
 						if (up_ifaces[i][l] == '=') {
 							puts(up_ifaces[i]);
@@ -627,6 +618,7 @@ int main(int argc, char **argv) {
 		usage(argv[0]);
 
 	defn = read_interfaces(interfaces);
+
 	if (!defn) {
 		fprintf(stderr, "%s: couldn't read interfaces file \"%s\"\n", argv[0], interfaces);
 		exit(1);
@@ -654,7 +646,7 @@ int main(int argc, char **argv) {
 		.real_iface = "--all",
 		.address_family = &addr_meta,
 		.method = &(addr_meta.method[0]),
-		.automatic = 1,
+		.automatic = true,
 		.max_options = 0,
 		.n_options = 0,
 		.option = NULL
@@ -663,7 +655,7 @@ int main(int argc, char **argv) {
 	if (do_all) {
 		meta_iface.logical_iface = allow_class ? allow_class : "auto";
 
-		int okay = 1;
+		bool okay = true;
 
 		if (cmds == iface_up)
 			okay = iface_preup(&meta_iface);
@@ -677,7 +669,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	for (i = 0; i < n_target_ifaces; i++) {
+	for (int i = 0; i < n_target_ifaces; i++) {
 		char iface[80], liface[80];
 		const char *current_state;
 
@@ -718,7 +710,7 @@ int main(int argc, char **argv) {
 				if (current_state != NULL) {
 					strncpy(liface, current_state, 80);
 					liface[79] = 0;
-					run_mappings = 0;
+					run_mappings = false;
 				}
 			} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 				assert(0);
@@ -726,11 +718,12 @@ int main(int argc, char **argv) {
 		}
 
 		if (allow_class != NULL) {
-			int i;
 			allowup_defn *allowup = find_allowup(defn, allow_class);
 
 			if (allowup == NULL)
 				continue;
+
+			int i;
 
 			for (i = 0; i < allowup->n_interfaces; i++)
 				if (strcmp(allowup->interfaces[i], iface) == 0)
@@ -749,9 +742,7 @@ int main(int argc, char **argv) {
 			mapping_defn *currmap;
 
 			for (currmap = defn->mappings; currmap; currmap = currmap->next) {
-				int i;
-
-				for (i = 0; i < currmap->n_matches; i++) {
+				for (int i = 0; i < currmap->n_matches; i++) {
 					if (fnmatch(currmap->match[i], liface, 0) != 0)
 						continue;
 
@@ -773,8 +764,8 @@ int main(int argc, char **argv) {
 		}
 
 		interface_defn *currif;
-		int okay = 0;
-		int failed = 0;
+		bool okay = false;
+		bool failed = false;
 
 		if (cmds == iface_up) {
 			if ((current_state == NULL) || (no_act)) {
@@ -796,19 +787,17 @@ int main(int argc, char **argv) {
 		if (cmds == iface_list) {
 			for (currif = defn->ifaces; currif; currif = currif->next)
 				if (strcmp(liface, currif->logical_iface) == 0)
-					okay = 1;
+					okay = true;
 
 			if (!okay) {
 				mapping_defn *currmap;
 
 				for (currmap = defn->mappings; currmap; currmap = currmap->next) {
-					int i;
-
-					for (i = 0; i < currmap->n_matches; i++) {
+					for (int i = 0; i < currmap->n_matches; i++) {
 						if (fnmatch(currmap->match[i], liface, 0) != 0)
 							continue;
 
-						okay = 1;
+						okay = true;
 						break;
 					}
 				}
@@ -821,7 +810,7 @@ int main(int argc, char **argv) {
 				currif->real_iface = NULL;
 			}
 
-			okay = 0;
+			okay = false;
 			continue;
 		}
 
@@ -847,7 +836,7 @@ int main(int argc, char **argv) {
 						free(link.option);
 				}
 
-				okay = 1;
+				okay = true;
 
 				option_default *o;
 
@@ -866,7 +855,7 @@ int main(int argc, char **argv) {
 						set_variable(argv[0], o->option, o->value, &currif->option, &currif->n_options, &currif->max_options);
 				}
 
-				for (i = 0; i < n_options; i++) {
+				for (int i = 0; i < n_options; i++) {
 					if (option[i].value[0] == '\0') {
 						if (strcmp(option[i].name, "pre-up") != 0 && strcmp(option[i].name, "up") != 0 && strcmp(option[i].name, "down") != 0 && strcmp(option[i].name, "post-down") != 0) {
 							int j;
@@ -922,22 +911,22 @@ int main(int argc, char **argv) {
 				switch (cmds(currif)) {
 				case -1:
 					fprintf(stderr, "Missing required configuration variables for interface %s/%s.\n", liface, currif->address_family->name);
-					failed = 1;
+					failed = true;
 					break;
 
 				case 0:
-					failed = 1;
+					failed = true;
 					break;
 					/* not entirely successful */
 
 				case 1:
-					failed = 0;
+					failed = false;
 					break;
 					/* successful */
 
 				default:
 					fprintf(stderr, "Unexpected value when configuring interface %s/%s; considering it failed.\n", liface, currif->address_family->name);
-					failed = 1;
+					failed = true;
 					/* what happened here? */
 				}
 
@@ -974,7 +963,7 @@ int main(int argc, char **argv) {
 		if (!okay && (cmds == iface_query)) {
 			if (!run_mappings)
 				if (have_mapping)
-					okay = 1;
+					okay = true;
 
 			if (!okay) {
 				fprintf(stderr, "Unknown interface %s\n", iface);
@@ -988,7 +977,7 @@ int main(int argc, char **argv) {
 		} else {
 			if (cmds == iface_up) {
 				if ((current_state == NULL) || (no_act)) {
-					if (failed == 1) {
+					if (failed == true) {
 						printf("Failed to bring up %s.\n", liface);
 						update_state(argv[0], iface, NULL);
 					} else {
@@ -1006,7 +995,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (do_all) {
-		int okay = 1;
+		int okay = true;
 
 		if (cmds == iface_up)
 			okay = iface_postup(&meta_iface);

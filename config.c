@@ -122,9 +122,7 @@ static char *next_word(char *buf, char *word, int maxlen) {
 }
 
 static address_family *get_address_family(address_family *af[], char *name) {
-	int i;
-
-	for (i = 0; af[i]; i++)
+	for (int i = 0; af[i]; i++)
 		if (strcmp(af[i]->name, name) == 0)
 			return af[i];
 
@@ -132,9 +130,7 @@ static address_family *get_address_family(address_family *af[], char *name) {
 }
 
 static method *get_method(address_family *af, char *name) {
-	int i;
-
-	for (i = 0; i < af->n_methods; i++)
+	for (int i = 0; i < af->n_methods; i++)
 		if (strcmp(af->method[i].name, name) == 0)
 			return &af->method[i];
 
@@ -162,9 +158,7 @@ static allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
 }
 
 static allowup_defn *add_allow_up(char *filename, int line, allowup_defn *allow_up, char *iface_name) {
-	int i;
-
-	for (i = 0; i < allow_up->n_interfaces; i++)
+	for (int i = 0; i < allow_up->n_interfaces; i++)
 		if (strcmp(iface_name, allow_up->interfaces[i]) == 0)
 			return allow_up;
 
@@ -204,9 +198,7 @@ variable *set_variable(char *filename, char *name, char *value, variable **var, 
 	}
 
 	if (strcmp(name, "pre-up") != 0 && strcmp(name, "up") != 0 && strcmp(name, "down") != 0 && strcmp(name, "post-down") != 0) {
-		int j;
-
-		for (j = 0; j < *n_vars; j++) {
+		for (int j = 0; j < *n_vars; j++) {
 			if (strncmpz(name, (*var)[j].name, len) == 0) {
 				if (dont_update)
 					return NULL;
@@ -259,9 +251,7 @@ variable *set_variable(char *filename, char *name, char *value, variable **var, 
 }
 
 void convert_variables(char *filename, conversion *conversions, interface_defn *ifd) {
-	conversion *c;
-
-	for (c = conversions; c && c->option && c->fn; c++) {
+	for (conversion *c = conversions; c && c->option && c->fn; c++) {
 		if (strcmp(c->option, "iface") == 0) {
 			if (c->newoption) {
 				variable *o = set_variable(filename, c->newoption, ifd->real_iface, &ifd->option, &ifd->n_options, &ifd->max_options);
@@ -271,9 +261,7 @@ void convert_variables(char *filename, conversion *conversions, interface_defn *
 			}
 		}
 
-		int j;
-
-		for (j = 0; j < ifd->n_options; j++) {
+		for (int j = 0; j < ifd->n_options; j++) {
 			if (strcmp(ifd->option[j].name, c->option) == 0) {
 				if (c->newoption) {
 					variable *o = set_variable(filename, c->newoption, ifd->option[j].value, &ifd->option, &ifd->n_options, &ifd->max_options);
@@ -523,12 +511,11 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 
 			wordexp_t p;
 			char **w;
-			size_t i;
 			int fail = wordexp(pattern, &p, WRDE_NOCMD);
 
 			if (!fail) {
 				w = p.we_wordv;
-				for (i = 0; i < p.we_wordc; i++) {
+				for (size_t i = 0; i < p.we_wordc; i++) {
 					struct dirent **namelist;
 					int n = scandir(w[i], &namelist, directory_filter, alphasort);
 
@@ -536,10 +523,9 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 						if (verbose)
 							fprintf(stderr, "Reading directory %s\n", w[i]);
 
-						int j;
 						size_t ll = strlen(w[i]);
 
-						for (j = 0; j < n; j++) {
+						for (int j = 0; j < n; j++) {
 							size_t s = ll + strlen(namelist[j]->d_name) + 2;	/* + slash + NUL */
 
 							char *name = malloc(s);
@@ -614,9 +600,9 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 			}
 
 			if (((!strcmp(address_family_name, "inet")) || (!strcmp(address_family_name, "inet6"))) && (!strcmp(method_name, "loopback")))
-				no_loopback = 1;
+				no_loopback = true;
 
-			currif->automatic = 1;
+			currif->automatic = true;
 			currif->max_options = 0;
 			currif->n_options = 0;
 			currif->option = NULL;
@@ -665,15 +651,13 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 				if (strcmp(firstword, "pre-down") == 0)
 					strcpy(firstword, "down");
 
-				int i;
-
 				if (strlen(rest) == 0) {
 					fprintf(stderr, "%s:%d: option with empty value\n", filename, line);
 					return NULL;
 				}
 
 				if (strcmp(firstword, "pre-up") != 0 && strcmp(firstword, "up") != 0 && strcmp(firstword, "down") != 0 && strcmp(firstword, "post-down") != 0) {
-					for (i = 0; i < currif->n_options; i++) {
+					for (int i = 0; i < currif->n_options; i++) {
 						if (strcmp(currif->option[i].name, firstword) == 0) {
 							size_t l = strlen(currif->option[i].value);
 

@@ -385,9 +385,7 @@ static char *parse(char *command, interface_defn *ifd) {
 				varvalue = get_var(command, namelen, ifd);
 
 				if (varvalue) {
-					char *position = varvalue;
-
-					for (; *position; position++)
+					for (char *position = varvalue; *position; position++)
 						if (*position == pat)
 							*position = rep;
 
@@ -446,12 +444,10 @@ int strncmpz(char *l, char *r, size_t llen) {
 }
 
 char *get_var(char *id, size_t idlen, interface_defn *ifd) {
-	int i;
-
 	if (strncmpz(id, "iface", idlen) == 0)
 		return strdup(ifd->real_iface);
 
-	for (i = 0; i < ifd->n_options; i++) {
+	for (int i = 0; i < ifd->n_options; i++) {
 		if (strncmpz(id, ifd->option[i].name, idlen) == 0) {
 			if (!ifd->option[i].value)
 				return NULL;
@@ -466,51 +462,46 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	return NULL;
 }
 
-int var_true(char *id, interface_defn *ifd) {
-	char *varvalue;
+bool var_true(char *id, interface_defn *ifd) {
+	char *varvalue = get_var(id, strlen(id), ifd);
 
-	varvalue = get_var(id, strlen(id), ifd);
 	if (varvalue) {
 		if (atoi(varvalue) || strcasecmp(varvalue, "on") == 0 || strcasecmp(varvalue, "true") == 0 || strcasecmp(varvalue, "yes") == 0) {
 			free(varvalue);
-			return 1;
+			return true;
 		} else {
 			free(varvalue);
-			return 0;
+			return false;
 		}
 	} else {
-		return 0;
+		return false;
 	}
 }
 
-int var_set(char *id, interface_defn *ifd) {
-	char *varvalue;
-
-	varvalue = get_var(id, strlen(id), ifd);
+bool var_set(char *id, interface_defn *ifd) {
+	char *varvalue = get_var(id, strlen(id), ifd);
 
 	if (varvalue) {
 		free(varvalue);
-		return 1;
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 
-int var_set_anywhere(char *id, interface_defn *ifd) {
-	char *varvalue;
-	interface_defn *currif;
-
-	for (currif = defn->ifaces; currif; currif = currif->next) {
+bool var_set_anywhere(char *id, interface_defn *ifd) {
+	for (interface_defn *currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(ifd->logical_iface, currif->logical_iface) == 0) {
-			varvalue = get_var(id, strlen(id), currif);
+			char *varvalue = get_var(id, strlen(id), currif);
+
 			if (varvalue) {
 				free(varvalue);
-				return 1;
+				return true;
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }
 
 static int popen2(FILE **in, FILE **out, char *command, ...) {
@@ -571,16 +562,16 @@ static int popen2(FILE **in, FILE **out, char *command, ...) {
 	/* unreached */
 }
 
-int run_mapping(char *physical, char *logical, int len, mapping_defn *map) {
+bool run_mapping(char *physical, char *logical, int len, mapping_defn *map) {
 	FILE *in, *out;
-	int i, status;
+	int status;
 	pid_t pid;
 
 	pid = popen2(&in, &out, map->script, physical, NULL);
 	if (pid == 0)
-		return 0;
+		return false;
 
-	for (i = 0; i < map->n_mappings; i++)
+	for (int i = 0; i < map->n_mappings; i++)
 		fprintf(in, "%s\n", map->mapping[i]);
 
 	fclose(in);
@@ -597,5 +588,5 @@ int run_mapping(char *physical, char *logical, int len, mapping_defn *map) {
 
 	fclose(out);
 
-	return 1;
+	return true;
 }

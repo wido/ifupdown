@@ -66,7 +66,7 @@ struct interface_defn {
 	address_family *address_family;
 	method *method;
 
-	int automatic;
+	bool automatic;
 
 	int max_options;
 	int n_options;
@@ -127,16 +127,16 @@ int strncmpz(char *l, char *r, size_t llen);
 #define strlmatch(l,r) strncmp(l,r,strlen(r))
 
 char *get_var(char *id, size_t idlen, interface_defn *ifd);
-int var_true(char *id, interface_defn *ifd);
-int var_set(char *id, interface_defn *ifd);
-int var_set_anywhere(char *id, interface_defn *ifd);
-int run_mapping(char *physical, char *logical, int len, mapping_defn *map);
+bool var_true(char *id, interface_defn *ifd);
+bool var_set(char *id, interface_defn *ifd);
+bool var_set_anywhere(char *id, interface_defn *ifd);
+bool run_mapping(char *physical, char *logical, int len, mapping_defn *map);
 void sanitize_file_name(char *name);
 bool make_pidfile_name(char *name, size_t size, const char *command, interface_defn *fd);
 
-extern int no_act;
-extern int verbose;
-extern int run_scripts;
+extern bool no_act;
+extern bool verbose;
+extern bool run_scripts;
 extern bool no_loopback;
 extern bool ignore_failures;
 extern interfaces_file *defn;

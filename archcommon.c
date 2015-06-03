@@ -7,7 +7,7 @@
 
 #include "archcommon.h"
 
-int _iface_has(char *iface, char *delims) {
+bool _iface_has(char *iface, char *delims) {
 	char _iface[80];
 
 	strncpy(_iface, iface, sizeof(_iface));
@@ -18,14 +18,14 @@ int _iface_has(char *iface, char *delims) {
 	return (token != NULL);
 }
 
-int execable(char *program) {
+bool execable(char *program) {
 	struct stat buf;
 
 	if (0 == stat(program, &buf))
 		if (S_ISREG(buf.st_mode) && (S_IXUSR & buf.st_mode))
-			return 1;
+			return true;
 
-	return 0;
+	return false;
 }
 
 void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char **argv) {
