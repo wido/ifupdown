@@ -638,7 +638,7 @@ int main(int argc, char **argv) {
 
 			target_iface = autos ? autos->interfaces : NULL;
 			n_target_ifaces = autos ? autos->n_interfaces : 0;
-		} else if ((cmds == iface_down)) {
+		} else if (cmds == iface_down) {
 			read_all_state(argv[0], &target_iface, &n_target_ifaces);
 		} else {
 			fprintf(stderr, "%s: can't tell if interfaces are going up or down\n", argv[0]);
@@ -665,10 +665,10 @@ int main(int argc, char **argv) {
 
 		int okay = 1;
 
-		if ((cmds == iface_up))
+		if (cmds == iface_up)
 			okay = iface_preup(&meta_iface);
 
-		if ((cmds == iface_down))
+		if (cmds == iface_down)
 			okay = iface_predown(&meta_iface);
 
 		if (!okay) {
@@ -697,14 +697,14 @@ int main(int argc, char **argv) {
 
 		current_state = read_state(argv[0], iface);
 		if (!force) {
-			if ((cmds == iface_up)) {
+			if (cmds == iface_up) {
 				if (current_state != NULL) {
 					if (!do_all)
 						fprintf(stderr, "%s: interface %s already configured\n", argv[0], iface);
 
 					continue;
 				}
-			} else if ((cmds == iface_down)) {
+			} else if (cmds == iface_down) {
 				if (current_state == NULL) {
 					if (!do_all)
 						fprintf(stderr, "%s: interface %s not configured\n", argv[0], iface);
@@ -714,7 +714,7 @@ int main(int argc, char **argv) {
 
 				strncpy(liface, current_state, 80);
 				liface[79] = 0;
-			} else if ((cmds == iface_query)) {
+			} else if (cmds == iface_query) {
 				if (current_state != NULL) {
 					strncpy(liface, current_state, 80);
 					liface[79] = 0;
@@ -776,7 +776,7 @@ int main(int argc, char **argv) {
 		int okay = 0;
 		int failed = 0;
 
-		if ((cmds == iface_up)) {
+		if (cmds == iface_up) {
 			if ((current_state == NULL) || (no_act)) {
 				if (failed == 1) {
 					printf("Failed to bring up %s.\n", liface);
@@ -787,13 +787,13 @@ int main(int argc, char **argv) {
 			} else {
 				update_state(argv[0], iface, liface);
 			}
-		} else if ((cmds == iface_down)) {
+		} else if (cmds == iface_down) {
 			update_state(argv[0], iface, NULL);
 		} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 			assert(0);
 		}
 
-		if ((cmds == iface_list)) {
+		if (cmds == iface_list) {
 			for (currif = defn->ifaces; currif; currif = currif->next)
 				if (strcmp(liface, currif->logical_iface) == 0)
 					okay = 1;
@@ -986,7 +986,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Ignoring unknown interface %s=%s.\n", iface, liface);
 			update_state(argv[0], iface, NULL);
 		} else {
-			if ((cmds == iface_up)) {
+			if (cmds == iface_up) {
 				if ((current_state == NULL) || (no_act)) {
 					if (failed == 1) {
 						printf("Failed to bring up %s.\n", liface);
@@ -997,7 +997,7 @@ int main(int argc, char **argv) {
 				} else {
 					update_state(argv[0], iface, liface);
 				}
-			} else if ((cmds == iface_down)) {
+			} else if (cmds == iface_down) {
 				update_state(argv[0], iface, NULL);
 			} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 				assert(0);
@@ -1008,10 +1008,10 @@ int main(int argc, char **argv) {
 	if (do_all) {
 		int okay = 1;
 
-		if ((cmds == iface_up))
+		if (cmds == iface_up)
 			okay = iface_postup(&meta_iface);
 
-		if ((cmds == iface_down))
+		if (cmds == iface_down)
 			okay = iface_postdown(&meta_iface);
 
 		if (!okay) {

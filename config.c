@@ -326,7 +326,7 @@ interfaces_file *read_interfaces(char *filename) {
 static int directory_filter(const struct dirent *d) {
 	const char *p;
 
-	if ((d == NULL) || (d->d_name == NULL))
+	if (d == NULL || d->d_name == NULL)
 		return 0;
 
 	for (p = d->d_name; *p; p++)
