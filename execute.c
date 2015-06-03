@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
-#include "header.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <sys/wait.h>
+
+#include "header.h"
 
 static char **environ = NULL;
 

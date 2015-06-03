@@ -4,7 +4,6 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include "header.h"
 #include <errno.h>
 #include <ctype.h>
 #include <libgen.h>
@@ -13,6 +12,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "header.h"
 
 static int get_line(char **result, size_t *result_len, FILE *f, int *line) {
 	size_t pos;
