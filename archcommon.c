@@ -7,7 +7,7 @@
 
 #include "archcommon.h"
 
-bool _iface_has(char *iface, char *delims) {
+bool _iface_has(const char *iface, const char *delims) {
 	char _iface[80];
 
 	strncpy(_iface, iface, sizeof(_iface));
@@ -18,7 +18,7 @@ bool _iface_has(char *iface, char *delims) {
 	return (token != NULL);
 }
 
-bool execable(char *program) {
+bool execable(const char *program) {
 	struct stat buf;
 
 	if (0 == stat(program, &buf))

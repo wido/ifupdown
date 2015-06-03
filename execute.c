@@ -260,7 +260,7 @@ int iface_query(interface_defn *iface) {
 	return 0;
 }
 
-static void addstr(char **buf, size_t *len, size_t *pos, char *str, size_t strlen) {
+static void addstr(char **buf, size_t *len, size_t *pos, const char *str, size_t strlen) {
 	assert(*len >= *pos);
 	assert(*len == 0 || (*buf)[*pos] == '\0');
 
@@ -286,7 +286,7 @@ static void addstr(char **buf, size_t *len, size_t *pos, char *str, size_t strle
 }
 
 
-static char *parse(char *command, interface_defn *ifd) {
+static char *parse(const char *command, interface_defn *ifd) {
 	char *result = NULL;
 	size_t pos = 0, len = 0;
 	size_t old_pos[MAX_OPT_DEPTH] = { 0 };
@@ -398,7 +398,7 @@ static char *parse(char *command, interface_defn *ifd) {
 	return result;
 }
 
-int execute(char *command, interface_defn *ifd, execfn *exec) {
+int execute(const char *command, interface_defn *ifd, execfn *exec) {
 	char *out;
 	int ret;
 
@@ -412,7 +412,7 @@ int execute(char *command, interface_defn *ifd, execfn *exec) {
 	return ret;
 }
 
-int strncmpz(char *l, char *r, size_t llen) {
+int strncmpz(const char *l, const char *r, size_t llen) {
 	int i = strncmp(l, r, llen);
 
 	if (i == 0)
@@ -421,7 +421,7 @@ int strncmpz(char *l, char *r, size_t llen) {
 		return i;
 }
 
-char *get_var(char *id, size_t idlen, interface_defn *ifd) {
+char *get_var(const char *id, size_t idlen, interface_defn *ifd) {
 	if (strncmpz(id, "iface", idlen) == 0)
 		return strdup(ifd->real_iface);
 
@@ -440,7 +440,7 @@ char *get_var(char *id, size_t idlen, interface_defn *ifd) {
 	return NULL;
 }
 
-bool var_true(char *id, interface_defn *ifd) {
+bool var_true(const char *id, interface_defn *ifd) {
 	char *varvalue = get_var(id, strlen(id), ifd);
 
 	if (varvalue) {
@@ -456,7 +456,7 @@ bool var_true(char *id, interface_defn *ifd) {
 	}
 }
 
-bool var_set(char *id, interface_defn *ifd) {
+bool var_set(const char *id, interface_defn *ifd) {
 	char *varvalue = get_var(id, strlen(id), ifd);
 
 	if (varvalue) {
@@ -467,7 +467,7 @@ bool var_set(char *id, interface_defn *ifd) {
 	}
 }
 
-bool var_set_anywhere(char *id, interface_defn *ifd) {
+bool var_set_anywhere(const char *id, interface_defn *ifd) {
 	for (interface_defn *currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(ifd->logical_iface, currif->logical_iface) == 0) {
 			char *varvalue = get_var(id, strlen(id), currif);
@@ -540,7 +540,7 @@ static int popen2(FILE **in, FILE **out, char *command, ...) {
 	/* unreached */
 }
 
-bool run_mapping(char *physical, char *logical, int len, mapping_defn *map) {
+bool run_mapping(const char *physical, char *logical, int len, mapping_defn *map) {
 	FILE *in, *out;
 	int status;
 	pid_t pid;

@@ -121,7 +121,7 @@ static char *next_word(char *buf, char *word, int maxlen) {
 	return buf;
 }
 
-static address_family *get_address_family(address_family *af[], char *name) {
+static address_family *get_address_family(address_family *af[], const char *name) {
 	for (int i = 0; af[i]; i++)
 		if (strcmp(af[i]->name, name) == 0)
 			return af[i];
@@ -129,7 +129,7 @@ static address_family *get_address_family(address_family *af[], char *name) {
 	return NULL;
 }
 
-static method *get_method(address_family *af, char *name) {
+static method *get_method(address_family *af, const char *name) {
 	for (int i = 0; i < af->n_methods; i++)
 		if (strcmp(af->method[i].name, name) == 0)
 			return &af->method[i];
@@ -137,7 +137,7 @@ static method *get_method(address_family *af, char *name) {
 	return NULL;
 }
 
-static allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
+static allowup_defn *get_allowup(allowup_defn **allowups, const char *name) {
 	for (; *allowups; allowups = &(*allowups)->next)
 		if (strcmp((*allowups)->when, name) == 0)
 			break;
@@ -153,7 +153,7 @@ static allowup_defn *get_allowup(allowup_defn **allowups, char *name) {
 	return *allowups;
 }
 
-static allowup_defn *add_allow_up(char *filename, int line, allowup_defn *allow_up, char *iface_name) {
+static allowup_defn *add_allow_up(const char *filename, int line, allowup_defn *allow_up, const char *iface_name) {
 	for (int i = 0; i < allow_up->n_interfaces; i++)
 		if (strcmp(iface_name, allow_up->interfaces[i]) == 0)
 			return allow_up;
@@ -179,7 +179,7 @@ static allowup_defn *add_allow_up(char *filename, int line, allowup_defn *allow_
 	return allow_up;
 }
 
-variable *set_variable(char *filename, char *name, char *value, variable **var, int *n_vars, int *max_vars) {
+variable *set_variable(const char *filename, const char *name, const char *value, variable **var, int *n_vars, int *max_vars) {
 	/*
 	 * if name ends with '?', don't update
 	 * the variable if it already exists
@@ -246,7 +246,7 @@ variable *set_variable(char *filename, char *name, char *value, variable **var, 
 	return &((*var)[(*n_vars) - 1]);
 }
 
-void convert_variables(char *filename, conversion *conversions, interface_defn *ifd) {
+void convert_variables(const char *filename, conversion *conversions, interface_defn *ifd) {
 	for (conversion *c = conversions; c && c->option && c->fn; c++) {
 		if (strcmp(c->option, "iface") == 0) {
 			if (c->newoption) {
@@ -272,7 +272,7 @@ void convert_variables(char *filename, conversion *conversions, interface_defn *
 	}
 }
 
-interfaces_file *read_interfaces(char *filename) {
+interfaces_file *read_interfaces(const char *filename) {
 	interfaces_file *defn;
 
 	defn = calloc(1, sizeof *defn);
@@ -320,7 +320,7 @@ static int directory_filter(const struct dirent *d) {
 	return 1;
 }
 
-interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
+interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {
 	FILE *f;
 	int line;
 	char *buf = NULL;
@@ -713,7 +713,7 @@ interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename) {
 	return defn;
 }
 
-allowup_defn *find_allowup(interfaces_file *defn, char *name) {
+allowup_defn *find_allowup(interfaces_file *defn, const char *name) {
 	for (allowup_defn *allowups = defn->allowups; allowups; allowups = allowups->next)
 		if (strcmp(allowups->when, name) == 0)
 			return allowups;

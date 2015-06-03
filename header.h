@@ -107,11 +107,11 @@ struct mapping_defn {
 
 extern address_family *addr_fams[];
 
-variable *set_variable(char *filename, char *name, char *value, variable **var, int *n_vars, int *max_vars);
-void convert_variables(char *filename, conversion *conversions, interface_defn *ifd);
-interfaces_file *read_interfaces(char *filename);
-interfaces_file *read_interfaces_defn(interfaces_file *defn, char *filename);
-allowup_defn *find_allowup(interfaces_file *defn, char *name);
+variable *set_variable(const char *filename, const char *name, const char *value, variable **var, int *n_vars, int *max_vars);
+void convert_variables(const char *filename, conversion *conversions, interface_defn *ifd);
+interfaces_file *read_interfaces(const char *filename);
+interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename);
+allowup_defn *find_allowup(interfaces_file *defn, const char *name);
 int doit(char *str);
 int iface_preup(interface_defn *iface);
 int iface_postup(interface_defn *iface);
@@ -121,16 +121,16 @@ int iface_postdown(interface_defn *iface);
 int iface_down(interface_defn *iface);
 int iface_list(interface_defn *iface);
 int iface_query(interface_defn *iface);
-int execute(char *command, interface_defn *ifd, execfn *exec);
-int strncmpz(char *l, char *r, size_t llen);
+int execute(const char *command, interface_defn *ifd, execfn *exec);
+int strncmpz(const char *l, const char *r, size_t llen);
 
 #define strlmatch(l,r) strncmp(l,r,strlen(r))
 
-char *get_var(char *id, size_t idlen, interface_defn *ifd);
-bool var_true(char *id, interface_defn *ifd);
-bool var_set(char *id, interface_defn *ifd);
-bool var_set_anywhere(char *id, interface_defn *ifd);
-bool run_mapping(char *physical, char *logical, int len, mapping_defn *map);
+char *get_var(const char *id, size_t idlen, interface_defn *ifd);
+bool var_true(const char *id, interface_defn *ifd);
+bool var_set(const char *id, interface_defn *ifd);
+bool var_set_anywhere(const char *id, interface_defn *ifd);
+bool run_mapping(const char *physical, char *logical, int len, mapping_defn *map);
 void sanitize_file_name(char *name);
 bool make_pidfile_name(char *name, size_t size, const char *command, interface_defn *fd);
 
