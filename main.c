@@ -49,10 +49,14 @@ static void usage(char *execname) {
 }
 
 static void version(char *execname) {
-	printf("%s version " IFUPDOWN_VERSION "\n", execname);
-	printf("Copyright (c) 1999-2009 Anthony Towns\n");
-	printf("Copyright (c) 2010-2013 Andrew Shadura\n\n");
-	printf("This program is free software; you can redistribute it and/or modify\n" "it under the terms of the GNU General Public License as published by\n" "the Free Software Foundation; either version 2 of the License, or (at\n" "your option) any later version.\n");
+	printf("%s version " IFUPDOWN_VERSION "\n"
+		"Copyright (c) 1999-2009 Anthony Towns\n"
+		"Copyright (c) 2010-2013 Andrew Shadura\n\n"
+		"This program is free software; you can redistribute it and/or modify\n"
+		"it under the terms of the GNU General Public License as published by\n"
+		"the Free Software Foundation; either version 2 of the License, or (at\n"
+		"your option) any later version.\n", execname);
+
 	exit(0);
 }
 
@@ -64,35 +68,34 @@ static void help(char *execname, int (*cmds) (interface_defn *)) {
 		printf("       %s --state <ifaces...>\n", execname);
 	}
 
-	printf("\n");
-	printf("Options:\n");
-	printf("\t-h, --help\t\tthis help\n");
-	printf("\t-V, --version\t\tcopyright and version information\n");
-	printf("\t-a, --all\t\tprocess all interfaces marked \"auto\"\n");
-	printf("\t--allow CLASS\t\tignore non-\"allow-CLASS\" interfaces\n");
-	printf("\t-i, --interfaces FILE\tuse FILE for interface definitions\n");
-	printf("\t-X, --exclude PATTERN\texclude interfaces from the list of\n\t\t\t\tinterfaces to operate on by a PATTERN\n");
+	printf("\n"
+		"Options:\n"
+		"\t-h, --help             this help\n"
+		"\t-V, --version          copyright and version information\n"
+		"\t-a, --all              process all interfaces marked \"auto\"\n"
+		"\t--allow CLASS          ignore non-\"allow-CLASS\" interfaces\n"
+		"\t-i, --interfaces FILE  use FILE for interface definitions\n"
+		"\t-X, --exclude PATTERN  exclude interfaces from the list of\n"
+		"\t                       interfaces to operate on by a PATTERN\n");
 
 	if (!(cmds == iface_list) && !(cmds == iface_query))
-		printf("\t-n, --no-act\t\tprint out what would happen, but don't do it\n");
+		printf(	"\t-n, --no-act           print out what would happen, but don't do it\n"
+			"\t                       (note that this option doesn't disable mappings)\n");
 
-	printf("\t\t\t\t(note that this option doesn't disable mappings)\n");
-	printf("\t-v, --verbose\t\tprint out what would happen before doing it\n");
-	printf("\t-o OPTION=VALUE\t\tset OPTION to VALUE as though it were in\n");
-	printf("\t\t\t\t/etc/network/interfaces\n");
-	printf("\t--no-mappings\t\tdon't run any mappings\n");
-	printf("\t--no-scripts\t\tdon't run any hook scripts\n");
-	printf("\t--no-loopback\t\tdon't act specially on the loopback device\n");
+	printf(	"\t-v, --verbose          print out what would happen before doing it\n"
+		"\t-o OPTION=VALUE        set OPTION to VALUE as though it were in\n"
+		"\t                       /etc/network/interfaces\n"
+		"\t--no-mappings          don't run any mappings\n"
+		"\t--no-scripts           don't run any hook scripts\n"
+		"\t--no-loopback          don't act specially on the loopback device\n");
 
-	if (!(cmds == iface_list) && !(cmds == iface_query)) {
-		printf("\t--force\t\t\tforce de/configuration\n");
-		printf("\t--ignore-errors\t\t\tignore errors\n");
-	}
+	if (!(cmds == iface_list) && !(cmds == iface_query))
+		printf(	"\t--force                force de/configuration\n"
+			"\t--ignore-errors        ignore errors\n");
 
-	if ((cmds == iface_list) || (cmds == iface_query)) {
-		printf("\t--list\t\t\tlist all matching known interfaces\n");
-		printf("\t--state\t\t\tshow the state of specified interfaces\n");
-	}
+	if ((cmds == iface_list) || (cmds == iface_query))
+		printf(	"\t--list                 list all matching known interfaces\n"
+			"\t--state                show the state of specified interfaces\n");
 
 	exit(0);
 }
