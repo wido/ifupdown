@@ -12,7 +12,7 @@
 
 static char **environ = NULL;
 
-static int check(char *str) {
+static int check(const char *str) {
 	return str != NULL;
 }
 
@@ -78,7 +78,7 @@ static void set_environ(interface_defn *iface, char *mode, char *phase) {
 	*ppch = NULL;
 }
 
-int doit(char *str) {
+int doit(const char *str) {
 	assert(str);
 	bool ignore_status = false;
 

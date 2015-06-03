@@ -13,7 +13,7 @@ typedef struct allowup_defn allowup_defn;
 typedef struct interface_defn interface_defn;
 typedef struct variable variable;
 typedef struct mapping_defn mapping_defn;
-typedef int (execfn) (char *command);
+typedef int (execfn) (const char *command);
 typedef int (command_set) (interface_defn *ifd, execfn *e);
 
 struct address_family {
@@ -112,7 +112,7 @@ void convert_variables(const char *filename, conversion *conversions, interface_
 interfaces_file *read_interfaces(const char *filename);
 interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename);
 allowup_defn *find_allowup(interfaces_file *defn, const char *name);
-int doit(char *str);
+int doit(const char *str);
 int iface_preup(interface_defn *iface);
 int iface_postup(interface_defn *iface);
 int iface_up(interface_defn *iface);
