@@ -48,8 +48,11 @@ static void usage(char *execname) {
 
 static void version(char *execname) {
 	printf("%s version " IFUPDOWN_VERSION "\n"
+		"\n"
 		"Copyright (c) 1999-2009 Anthony Towns\n"
-		"Copyright (c) 2010-2013 Andrew Shadura\n\n"
+		"              2010-2015 Andrew Shadura\n"
+		"              2015      Guus Sliepen\n"
+		"\n"
 		"This program is free software; you can redistribute it and/or modify\n"
 		"it under the terms of the GNU General Public License as published by\n"
 		"the Free Software Foundation; either version 2 of the License, or (at\n"
