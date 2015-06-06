@@ -144,7 +144,7 @@ static allowup_defn *get_allowup(allowup_defn **allowups, const char *name) {
 			break;
 
 	if (*allowups == NULL) {
-		*allowups = calloc(1, sizeof *allowups);
+		*allowups = calloc(1, sizeof **allowups);
 		if (*allowups == NULL)
 			return NULL;
 

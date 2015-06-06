@@ -142,7 +142,7 @@ static char *strip(char *buf) {
 	while (pch > buf && isspace(*pch))
 		*pch-- = '\0';
 
-	while (isspace(buf))
+	while (isspace(*buf))
 		buf++;
 
 	return buf;
