@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <fnmatch.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "header.h"
 
@@ -572,6 +574,8 @@ int main(int argc, char **argv) {
 
 	if (do_all && (cmds == iface_query))
 		usage(argv[0]);
+
+	mkdir(RUN_DIR, 0511);
 
 	defn = read_interfaces(interfaces);
 
