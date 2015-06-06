@@ -575,7 +575,7 @@ int main(int argc, char **argv) {
 	if (do_all && (cmds == iface_query))
 		usage(argv[0]);
 
-	mkdir(RUN_DIR, 0511);
+	mkdir(RUN_DIR, 0755);
 
 	defn = read_interfaces(interfaces);
 
