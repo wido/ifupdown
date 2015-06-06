@@ -284,6 +284,46 @@ static int directory_filter(const struct dirent *d) {
 	return 1;
 }
 
+struct seen_file {
+	struct seen_file *next;
+	char *filename;
+} *seen_files = NULL;
+
+static bool already_seen(const char *filename) {
+	if(seen_files)
+		for(struct seen_file *seen = seen_files; seen; seen = seen->next)
+			if(strcmp(seen->filename, filename) == 0)
+				return true;
+
+	struct seen_file *seen = malloc(sizeof *seen);
+	if(!seen) {
+		perror("malloc");
+		return false;
+	}
+
+	seen->filename = strdup(filename);
+	if(!seen->filename) {
+		free(seen);
+		perror("strdup");
+		return false;
+	}
+
+	seen->next = seen_files;
+	seen_files = seen;
+
+	return false;
+}
+
+static void clear_seen(void) {
+	while(seen_files) {
+		struct seen_file *seen = seen_files;
+		seen_files = seen->next;
+		free(seen->filename);
+		free(seen);
+	}
+}
+
+
 static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {
 	FILE *f;
 	int line;
@@ -294,6 +334,9 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 	enum { NONE, IFACE, MAPPING } currently_processing = NONE;
 	char firstword[80];
 	char *rest;
+
+	if(already_seen(filename))
+		return NULL;
 
 	f = fopen(filename, "r");
 	if (f == NULL) {
@@ -706,6 +749,8 @@ interfaces_file *read_interfaces(const char *filename) {
 
 		defn->ifaces = lo_if;
 	}
+
+	clear_seen();
 
 	return defn;
 }
