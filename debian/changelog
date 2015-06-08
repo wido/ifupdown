@@ -15,6 +15,7 @@ ifupdown (0.7.54) UNRELEASED; urgency=medium
   * Update debian/copyright and convert it to DEP-5 format.
   * Remove debian/README and debian/TODO, which are no longer relevant.
   * Update timestamp in manpages. Closes: #717266
+  * Do not attempt to kill udhcpc if there is no pidfile. Closes: #744167
 
   [ Yuriy Vostrikov ]
   * When using dhcpcd, pass the metric option. Closes: #784611

@@ -102,7 +102,7 @@ method dhcp
         elsif (execable("/sbin/dhclient3"))
     pump -i %iface% -r \
         elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
-    kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid) \
+    if test -f /run/udhcpc.%iface%.pid; then kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid); fi \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
@@ -287,7 +287,7 @@ method dhcp
         if (execable("/sbin/dhclient"))
     dhclient3 -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
         elsif (execable("/sbin/dhclient3"))
-    kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid) \
+    if test -f /run/udhcpc.%iface%.pid; then kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid); fi \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
@@ -437,7 +437,7 @@ method dhcp
   down
     dhclient -v -r -pf /run/dhclient.%iface///.%.pid -lf /var/lib/dhcp/dhclient.%iface///.%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    kill -USR2 $(cat /run/udhcpc.%iface///.%.pid); kill -TERM $(cat /run/udhcpc.%iface///.%.pid) \
+    if test -f /run/udhcpc.%iface///.%.pid; then kill -USR2 $(cat /run/udhcpc.%iface///.%.pid); kill -TERM $(cat /run/udhcpc.%iface///.%.pid); fi \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
