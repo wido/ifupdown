@@ -1,15 +1,17 @@
 Source: ifupdown
 Section: admin
 Priority: important
-Maintainer: Andrew Shadura <andrewsh@debian.org>
-Standards-Version: 3.9.4
+Maintainer: Guus Sliepen <guus@debian.org>
+Standards-Version: 3.9.6
 Build-Depends: debhelper (>= 9.20120410~)
-Vcs-Hg: http://anonscm.debian.org/hg/collab-maint/ifupdown/
-Vcs-Browser: http://anonscm.debian.org/hg/collab-maint/ifupdown/
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/ifupdown.git
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/ifupdown.git
 
 Package: ifupdown
 Architecture: any
-Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base (>= 4.1+Debian3), initscripts (>= 2.88dsf-25), adduser
+Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends},
+ lsb-base (>= 4.1+Debian3), initscripts (>= 2.88dsf-25), adduser,
+ iproute2 [linux-any], net-tools [kfreebsd-any], inetutils-tools [hurd-any]
 Recommends: isc-dhcp-client | dhcp-client
 Suggests: ppp, rdnssd, ${net:Suggests}
 Replaces: netbase (<< 5.0)
