@@ -50,9 +50,6 @@ endif
 %:
 	dh $@
 
-override_dh_auto_configure:
-	chmod a+rx makecdep.sh makenwdep.sh
-
 override_dh_installinit:
 	dh_installinit --name=networking --no-start
 	install -p -m 0644 debian/networking.defaults $(DESTDIR)/etc/default/networking
