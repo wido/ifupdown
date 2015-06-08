@@ -1,0 +1,2 @@
+# Allow rfkill for users in the netdev group
+KERNEL=="rfkill", MODE="0664", GROUP="netdev"
