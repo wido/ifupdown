@@ -1,4 +1,4 @@
-ifupdown (0.7.54) UNRELEASED; urgency=medium
+ifupdown (0.7.54) unstable; urgency=medium
 
   [ Guus Sliepen ]
   * Adopting this package from Andrew Shadura. Closes: #786902
@@ -21,7 +21,7 @@ ifupdown (0.7.54) UNRELEASED; urgency=medium
   [ Yuriy Vostrikov ]
   * When using dhcpcd, pass the metric option. Closes: #784611
 
- -- Guus Sliepen <guus@debian.org>  Mon, 08 Jun 2015 21:27:09 +0200
+ -- Guus Sliepen <guus@debian.org>  Mon, 08 Jun 2015 23:39:41 +0200
 
 ifupdown (0.7.53.1) unstable; urgency=medium
 
