@@ -150,6 +150,59 @@ static char *strip(char *buf) {
 	return buf;
 }
 
+static FILE *lock_interface(const char *argv0, const char *iface, char **state) {
+	char filename[sizeof statefile + strlen(iface) + 2];
+	snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
+
+	FILE *lock_fp = fopen(filename, no_act ? "r" : "a+");
+
+	if (lock_fp == NULL) {
+		if (!no_act) {
+			fprintf(stderr, "%s: failed to open lockfile %s: %s\n", argv0, filename, strerror(errno));
+			exit(1);
+		} else {
+			return NULL;
+		}
+	}
+
+	int flags = fcntl(fileno(lock_fp), F_GETFD);
+
+	if (flags < 0 || fcntl(fileno(lock_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
+		fprintf(stderr, "%s: failed to set FD_CLOEXEC on lockfile %s: %s\n", argv0, filename, strerror(errno));
+		exit(1);
+	}
+
+	struct flock lock = {.l_type = F_WRLCK, .l_whence = SEEK_SET};
+
+	if (fcntl(fileno(lock_fp), F_SETLK, &lock) < 0) {
+		if (errno == EACCES || errno == EAGAIN) {
+			fprintf(stderr, "%s: waiting for lock on %s\n", argv0, filename);
+			if (fcntl(fileno(lock_fp), F_SETLKW, &lock) < 0) {
+				if (!no_act) {
+					fprintf(stderr, "%s: failed to lock lockfile %s: %s\n", argv0, filename, strerror(errno));
+					exit(1);
+				}
+			}
+		} else if (!no_act) {
+			fprintf(stderr, "%s: failed to lock lockfile %s: %s\n", argv0, filename, strerror(errno));
+			exit(1);
+		}
+	}
+
+	if (state) {
+		char buf[80];
+		char *p = fgets(buf, sizeof buf, lock_fp);
+		if(p) {
+			p = strip(buf);
+			*state = *p ? strdup(p) : NULL;
+		} else {
+			*state = NULL;
+		}
+	}
+
+	return lock_fp;
+}
+
 static const char *read_state(const char *argv0, const char *iface) {
 	char *ret = NULL;
 
@@ -247,8 +300,15 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 		fclose(lock_fp);
 }
 
-static void update_state(const char *argv0, const char *iface, const char *state) {
-	FILE *lock_fp = lock_state(argv0);
+static void update_state(const char *argv0, const char *iface, const char *state, FILE *lock_fp) {
+	if (lock_fp) {
+		rewind(lock_fp);
+		ftruncate(fileno(lock_fp), 0);
+		fprintf(lock_fp, "%s\n", state ? state : "");
+		fflush(lock_fp);
+	}
+
+	lock_fp = lock_state(argv0);
 	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
 	if (state_fp == NULL) {
@@ -629,9 +689,16 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	FILE *lock = NULL;
+
 	for (int i = 0; i < n_target_ifaces; i++) {
+		if(lock) {
+			fclose(lock);
+			lock = NULL;
+		}
+
 		char iface[80], liface[80];
-		const char *current_state;
+		char *current_state;
 
 		strncpy(iface, target_iface[i], sizeof(iface));
 		iface[sizeof(iface) - 1] = '\0';
@@ -656,7 +723,8 @@ int main(int argc, char **argv) {
 			continue;
 		}
 
-		current_state = read_state(argv[0], iface);
+		lock = lock_interface(argv[0], iface, &current_state);
+
 		if (!force) {
 			if (cmds == iface_up) {
 				if (current_state != NULL) {
@@ -738,15 +806,15 @@ int main(int argc, char **argv) {
 			if ((current_state == NULL) || (no_act)) {
 				if (failed == 1) {
 					printf("Failed to bring up %s.\n", liface);
-					update_state(argv[0], iface, NULL);
+					update_state(argv[0], iface, NULL, lock);
 				} else {
-					update_state(argv[0], iface, liface);
+					update_state(argv[0], iface, liface, lock);
 				}
 			} else {
-				update_state(argv[0], iface, liface);
+				update_state(argv[0], iface, liface, lock);
 			}
 		} else if (cmds == iface_down) {
-			update_state(argv[0], iface, NULL);
+			update_state(argv[0], iface, NULL, lock);
 		} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 			assert(0);
 		}
@@ -937,25 +1005,30 @@ int main(int argc, char **argv) {
 
 		if (!okay && !force) {
 			fprintf(stderr, "Ignoring unknown interface %s=%s.\n", iface, liface);
-			update_state(argv[0], iface, NULL);
+			update_state(argv[0], iface, NULL, lock);
 		} else {
 			if (cmds == iface_up) {
 				if ((current_state == NULL) || (no_act)) {
 					if (failed == true) {
 						printf("Failed to bring up %s.\n", liface);
-						update_state(argv[0], iface, NULL);
+						update_state(argv[0], iface, NULL, lock);
 					} else {
-						update_state(argv[0], iface, liface);
+						update_state(argv[0], iface, liface, lock);
 					}
 				} else {
-					update_state(argv[0], iface, liface);
+					update_state(argv[0], iface, liface, lock);
 				}
 			} else if (cmds == iface_down) {
-				update_state(argv[0], iface, NULL);
+				update_state(argv[0], iface, NULL, lock);
 			} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 				assert(0);
 			}
 		}
+	}
+
+	if(lock) {
+		fclose(lock);
+		lock = NULL;
 	}
 
 	if (do_all) {
