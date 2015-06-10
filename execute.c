@@ -10,10 +10,25 @@
 
 #include "header.h"
 
-static char **environ = NULL;
+extern char **environ;
+static char **localenv = NULL;
 
 static int check(const char *str) {
 	return str != NULL;
+}
+
+static char *setlocalenv_nomangle(char *format, char *name, char *value) {
+	char *result;
+
+	result = malloc(strlen(format) + strlen(name) + strlen(value) + 1);	/* -4 for the two %s's */
+	if (!result) {
+		perror("malloc");
+		exit(1);
+	}
+
+	sprintf(result, format, name, value);
+
+	return result;
 }
 
 static char *setlocalenv(char *format, char *name, char *value) {
@@ -48,17 +63,22 @@ static char *setlocalenv(char *format, char *name, char *value) {
 }
 
 static void set_environ(interface_defn *iface, char *mode, char *phase) {
-	if (environ != NULL) {
-		for (char **ppch = environ; *ppch; ppch++)
+	if (localenv != NULL) {
+		for (char **ppch = localenv; *ppch; ppch++)
 			free(*ppch);
 
-		free(environ);
+		free(localenv);
 	}
 
-	const int n_env_entries = iface->n_options + 8;
-	environ = malloc(sizeof *environ * (n_env_entries + 1 /* for final NULL */ ));
+	int n_recursion = 0;
+	for(char **envp = environ; *envp; envp++)
+		if(strncmp(*envp, "IFUPDOWN_", 9) == 0)
+			n_recursion++;
 
-	char **ppch = environ;
+	const int n_env_entries = iface->n_options + 9 + n_recursion;
+	localenv = malloc(sizeof *localenv * (n_env_entries + 1 /* for final NULL */ ));
+
+	char **ppch = localenv;
 
 	for (int i = 0; i < iface->n_options; i++) {
 		if (strcmp(iface->option[i].name, "pre-up") == 0 || strcmp(iface->option[i].name, "up") == 0 || strcmp(iface->option[i].name, "down") == 0 || strcmp(iface->option[i].name, "post-down") == 0)
@@ -67,6 +87,11 @@ static void set_environ(interface_defn *iface, char *mode, char *phase) {
 		*ppch++ = setlocalenv("IF_%s=%s", iface->option[i].name, iface->option[i].value ? iface->option[i].value : "");
 	}
 
+	for(char **envp = environ; *envp; envp++)
+		if(strncmp(*envp, "IFUPDOWN_", 9) == 0)
+			*ppch++ = strdup(*envp);
+
+	*ppch++ = setlocalenv_nomangle("IFUPDOWN_%s=%s", iface->real_iface, phase);
 	*ppch++ = setlocalenv("%s=%s", "IFACE", iface->real_iface);
 	*ppch++ = setlocalenv("%s=%s", "LOGICAL", iface->logical_iface);
 	*ppch++ = setlocalenv("%s=%s", "ADDRFAM", iface->address_family->name);
@@ -102,7 +127,7 @@ int doit(const char *str) {
 			return 0;
 
 		case 0:	/* child */
-			execle("/bin/sh", "/bin/sh", "-c", str, NULL, environ);
+			execle("/bin/sh", "/bin/sh", "-c", str, NULL, localenv);
 			exit(127);
 
 		default:	/* parent */

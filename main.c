@@ -647,6 +647,15 @@ int main(int argc, char **argv) {
 			liface[sizeof(liface) - 1] = '\0';
 		}
 
+		// Bail out if we are being called recursively on the same interface.
+		char envname[160];
+		snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
+		char *envval = getenv(envname);
+		if(envval) {
+			fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv[0], iface, envval);
+			continue;
+		}
+
 		current_state = read_state(argv[0], iface);
 		if (!force) {
 			if (cmds == iface_up) {
