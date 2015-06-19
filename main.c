@@ -723,6 +723,358 @@ static void do_post_all(void) {
 	}
 }
 
+static bool do_interface(const char *target_iface) {
+	bool success = false;
+	FILE *lock = NULL;
+
+	char iface[80], liface[80];
+	char *current_state;
+
+	strncpy(iface, target_iface, sizeof(iface));
+	iface[sizeof(iface) - 1] = '\0';
+
+	char *pch;
+
+	if ((pch = strchr(iface, '='))) {
+		*pch = '\0';
+		strncpy(liface, pch + 1, sizeof(liface));
+		liface[sizeof(liface) - 1] = '\0';
+	} else {
+		strncpy(liface, iface, sizeof(liface));
+		liface[sizeof(liface) - 1] = '\0';
+	}
+
+	// Bail out if we are being called recursively on the same interface.
+	char envname[160];
+	snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
+	char *envval = getenv(envname);
+	if(envval) {
+		fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv0, iface, envval);
+		goto end;
+	}
+
+	lock = lock_interface(iface, &current_state);
+
+	if (!force) {
+		if (cmds == iface_up) {
+			if (current_state != NULL) {
+				if (!do_all)
+					fprintf(stderr, "%s: interface %s already configured\n", argv0, iface);
+
+				success = true;
+				goto end;
+			}
+		} else if (cmds == iface_down) {
+			if (current_state == NULL) {
+				if (!do_all)
+					fprintf(stderr, "%s: interface %s not configured\n", argv0, iface);
+
+				success = true;
+				goto end;
+			}
+
+			strncpy(liface, current_state, 80);
+			liface[79] = 0;
+		} else if (cmds == iface_query) {
+			if (current_state != NULL) {
+				strncpy(liface, current_state, 80);
+				liface[79] = 0;
+				run_mappings = false;
+			}
+		} else {
+			assert(cmds == iface_list ||cmds == iface_query);
+		}
+	}
+
+	/* If --allow is used, ignore interfaces that are not in the given class */
+	if (allow_class != NULL) {
+		allowup_defn *allowup = find_allowup(defn, allow_class);
+
+		if (allowup == NULL) {
+			success = true;
+			goto end;
+		}
+
+		int i;
+
+		for (i = 0; i < allowup->n_interfaces; i++)
+			if (strcmp(allowup->interfaces[i], iface) == 0)
+				break;
+
+		if (i >= allowup->n_interfaces) {
+			success = true;
+			goto end;
+		}
+	}
+
+	/* Ignore interfaces specified with --exclude */
+	if ((excludeints != 0 && match_patterns(iface, excludeints, excludeint))) {
+		success = true;
+		goto end;
+	}
+
+	bool have_mapping = false;
+
+	if (((cmds == iface_up) && run_mappings) || (cmds == iface_query)) {
+		for (mapping_defn *currmap = defn->mappings; currmap; currmap = currmap->next) {
+			for (int i = 0; i < currmap->n_matches; i++) {
+				if (fnmatch(currmap->match[i], liface, 0) != 0)
+					continue;
+
+				if ((cmds == iface_query) && !run_mappings) {
+					if (verbose)
+						fprintf(stderr, "Not running mapping scripts for %s\n", liface);
+
+					have_mapping = true;
+					break;
+				}
+
+				if (verbose)
+					fprintf(stderr, "Running mapping script %s on %s\n", currmap->script, liface);
+
+				run_mapping(iface, liface, sizeof(liface), currmap);
+				break;
+			}
+		}
+	}
+
+	interface_defn *currif;
+	bool okay = false;
+	bool failed = false;
+
+	if (cmds == iface_up) {
+		if ((current_state == NULL) || (no_act)) {
+			if (failed == 1) {
+				printf("Failed to bring up %s.\n", liface);
+				update_state(iface, NULL, lock);
+			} else {
+				update_state(iface, liface, lock);
+			}
+		} else {
+			update_state(iface, liface, lock);
+		}
+	} else if (cmds == iface_down) {
+		update_state(iface, NULL, lock);
+	} else  {
+		assert(cmds == iface_list ||cmds == iface_query);
+	}
+
+	if (cmds == iface_list) {
+		for (currif = defn->ifaces; currif; currif = currif->next)
+			if (strcmp(liface, currif->logical_iface) == 0)
+				okay = true;
+
+		if (!okay) {
+			mapping_defn *currmap;
+
+			for (currmap = defn->mappings; currmap; currmap = currmap->next) {
+				for (int i = 0; i < currmap->n_matches; i++) {
+					if (fnmatch(currmap->match[i], liface, 0) != 0)
+						continue;
+
+					okay = true;
+					break;
+				}
+			}
+		}
+
+		if (okay) {
+			currif = defn->ifaces;
+			currif->real_iface = iface;
+			cmds(currif);
+			currif->real_iface = NULL;
+			success = true;
+		}
+
+		goto end;
+	}
+
+	for (currif = defn->ifaces; currif; currif = currif->next) {
+		if (strcmp(liface, currif->logical_iface) == 0) {
+			if (!okay && (cmds == iface_up)) {
+				interface_defn link = {
+					.real_iface = iface,
+					.logical_iface = liface,
+					.max_options = 0,
+					.address_family = &addr_link,
+					.method = &(addr_link.method[0]),
+					.n_options = 0,
+					.option = NULL
+				};
+
+				convert_variables(link.method->conversions, &link);
+
+				if (!link.method->up(&link, doit))
+					break;
+
+				if (link.option)
+					free(link.option);
+			}
+
+			okay = true;
+
+			for (option_default *o = currif->method->defaults; o && o->option && o->value; o++) {
+				bool found = false;
+
+				for (int j = 0; j < currif->n_options; j++) {
+					if (strcmp(currif->option[j].name, o->option) == 0) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					set_variable(o->option, o->value, &currif->option, &currif->n_options, &currif->max_options);
+			}
+
+			for (int i = 0; i < n_options; i++) {
+				if (option[i].value[0] == '\0') {
+					if (strcmp(option[i].name, "pre-up") != 0 && strcmp(option[i].name, "up") != 0 && strcmp(option[i].name, "down") != 0 && strcmp(option[i].name, "post-down") != 0) {
+						int j;
+
+						for (j = 0; j < currif->n_options; j++) {
+							if (strcmp(currif->option[j].name, option[i].name) == 0) {
+								currif->n_options--;
+								break;
+							}
+						}
+
+						for (; j < currif->n_options; j++) {
+							option[j].name = option[j + 1].name;
+							option[j].value = option[j + 1].value;
+						}
+					} else {
+						/* do nothing */
+					}
+				} else {
+					set_variable(option[i].name, option[i].value, &currif->option, &currif->n_options, &currif->max_options);
+				}
+			}
+
+			currif->real_iface = iface;
+
+			convert_variables(currif->method->conversions, currif);
+
+			if (verbose) {
+				fprintf(stderr, "%s interface %s=%s (%s)\n", (cmds == iface_query) ? "Querying" : "Configuring", iface, liface, currif->address_family->name);
+			}
+
+			char pidfilename[100];
+			const char *command;
+
+			if ((command = strrchr(argv0, '/')))
+				command++;	/* first char after / */
+			else
+				command = argv0;	/* no /'s in argv0 */
+
+			make_pidfile_name(pidfilename, sizeof(pidfilename), command, currif);
+
+			if (!no_act) {
+				FILE *pidfile = fopen(pidfilename, "w");
+
+				if (pidfile) {
+					fprintf(pidfile, "%d", getpid());
+					fclose(pidfile);
+				} else {
+					fprintf(stderr, "%s: failed to open pid file %s: %s\n", command, pidfilename, strerror(errno));
+				}
+			}
+
+			switch (cmds(currif)) {
+			case -1:
+				fprintf(stderr, "Missing required configuration variables for interface %s/%s.\n", liface, currif->address_family->name);
+				failed = true;
+				break;
+
+			case 0:
+				failed = true;
+				break;
+				/* not entirely successful */
+
+			case 1:
+				failed = false;
+				break;
+				/* successful */
+
+			default:
+				fprintf(stderr, "Unexpected value when configuring interface %s/%s; considering it failed.\n", liface, currif->address_family->name);
+				failed = true;
+				/* what happened here? */
+			}
+
+			if (!no_act)
+				unlink(pidfilename);
+
+			currif->real_iface = NULL;
+
+			if (failed)
+				break;
+			/* Otherwise keep going: this interface may have
+			 * match with other address families */
+		}
+	}
+
+	if (okay && (cmds == iface_down)) {
+		interface_defn link = {
+			.real_iface = iface,
+			.logical_iface = liface,
+			.max_options = 0,
+			.address_family = &addr_link,
+			.method = &(addr_link.method[0]),
+			.n_options = 0,
+			.option = NULL
+		};
+		convert_variables(link.method->conversions, &link);
+
+		if (!link.method->down(&link, doit))
+			goto end;
+		if (link.option)
+			free(link.option);
+	}
+
+	if (!okay && (cmds == iface_query)) {
+		if (!run_mappings)
+			if (have_mapping)
+				okay = true;
+
+		if (!okay) {
+			fprintf(stderr, "Unknown interface %s\n", iface);
+			goto end;
+		}
+	}
+
+	if (!okay && !force) {
+		fprintf(stderr, "Ignoring unknown interface %s=%s.\n", iface, liface);
+		update_state(iface, NULL, lock);
+	} else {
+		if (cmds == iface_up) {
+			if ((current_state == NULL) || (no_act)) {
+				if (failed == true) {
+					printf("Failed to bring up %s.\n", liface);
+					update_state(iface, NULL, lock);
+					goto end;
+				} else {
+					update_state(iface, liface, lock);
+				}
+			} else {
+				update_state(iface, liface, lock);
+			}
+		} else if (cmds == iface_down) {
+			update_state(iface, NULL, lock);
+		} else {
+			assert(cmds == iface_list ||cmds == iface_query);
+		}
+	}
+
+	success = true;
+
+end:
+	if(lock)
+		fclose(lock);
+
+	return success;
+}
+
 int main(int argc, char *argv[]) {
 	argv0 = argv[0];
 
@@ -742,347 +1094,8 @@ int main(int argc, char *argv[]) {
 	if (do_all)
 		do_pre_all();
 
-	FILE *lock = NULL;
-
-	for (int i = 0; i < n_target_ifaces; i++) {
-		if(lock) {
-			fclose(lock);
-			lock = NULL;
-		}
-
-		char iface[80], liface[80];
-		char *current_state;
-
-		strncpy(iface, target_iface[i], sizeof(iface));
-		iface[sizeof(iface) - 1] = '\0';
-
-		char *pch;
-
-		if ((pch = strchr(iface, '='))) {
-			*pch = '\0';
-			strncpy(liface, pch + 1, sizeof(liface));
-			liface[sizeof(liface) - 1] = '\0';
-		} else {
-			strncpy(liface, iface, sizeof(liface));
-			liface[sizeof(liface) - 1] = '\0';
-		}
-
-		// Bail out if we are being called recursively on the same interface.
-		char envname[160];
-		snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
-		char *envval = getenv(envname);
-		if(envval) {
-			fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv0, iface, envval);
-			continue;
-		}
-
-		lock = lock_interface(iface, &current_state);
-
-		if (!force) {
-			if (cmds == iface_up) {
-				if (current_state != NULL) {
-					if (!do_all)
-						fprintf(stderr, "%s: interface %s already configured\n", argv0, iface);
-
-					continue;
-				}
-			} else if (cmds == iface_down) {
-				if (current_state == NULL) {
-					if (!do_all)
-						fprintf(stderr, "%s: interface %s not configured\n", argv0, iface);
-
-					continue;
-				}
-
-				strncpy(liface, current_state, 80);
-				liface[79] = 0;
-			} else if (cmds == iface_query) {
-				if (current_state != NULL) {
-					strncpy(liface, current_state, 80);
-					liface[79] = 0;
-					run_mappings = false;
-				}
-			} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
-				assert(0);
-			}
-		}
-
-		if (allow_class != NULL) {
-			allowup_defn *allowup = find_allowup(defn, allow_class);
-
-			if (allowup == NULL)
-				continue;
-
-			int i;
-
-			for (i = 0; i < allowup->n_interfaces; i++)
-				if (strcmp(allowup->interfaces[i], iface) == 0)
-					break;
-
-			if (i >= allowup->n_interfaces)
-				continue;
-		}
-
-		if ((excludeints != 0 && match_patterns(iface, excludeints, excludeint)))
-			continue;
-
-		bool have_mapping = false;
-
-		if (((cmds == iface_up) && run_mappings) || (cmds == iface_query)) {
-			for (mapping_defn *currmap = defn->mappings; currmap; currmap = currmap->next) {
-				for (int i = 0; i < currmap->n_matches; i++) {
-					if (fnmatch(currmap->match[i], liface, 0) != 0)
-						continue;
-
-					if ((cmds == iface_query) && !run_mappings) {
-						if (verbose)
-							fprintf(stderr, "Not running mapping scripts for %s\n", liface);
-
-						have_mapping = true;
-						break;
-					}
-
-					if (verbose)
-						fprintf(stderr, "Running mapping script %s on %s\n", currmap->script, liface);
-
-					run_mapping(iface, liface, sizeof(liface), currmap);
-					break;
-				}
-			}
-		}
-
-		interface_defn *currif;
-		bool okay = false;
-		bool failed = false;
-
-		if (cmds == iface_up) {
-			if ((current_state == NULL) || (no_act)) {
-				if (failed == 1) {
-					printf("Failed to bring up %s.\n", liface);
-					update_state(iface, NULL, lock);
-				} else {
-					update_state(iface, liface, lock);
-				}
-			} else {
-				update_state(iface, liface, lock);
-			}
-		} else if (cmds == iface_down) {
-			update_state(iface, NULL, lock);
-		} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
-			assert(0);
-		}
-
-		if (cmds == iface_list) {
-			for (currif = defn->ifaces; currif; currif = currif->next)
-				if (strcmp(liface, currif->logical_iface) == 0)
-					okay = true;
-
-			if (!okay) {
-				mapping_defn *currmap;
-
-				for (currmap = defn->mappings; currmap; currmap = currmap->next) {
-					for (int i = 0; i < currmap->n_matches; i++) {
-						if (fnmatch(currmap->match[i], liface, 0) != 0)
-							continue;
-
-						okay = true;
-						break;
-					}
-				}
-			}
-
-			if (okay) {
-				currif = defn->ifaces;
-				currif->real_iface = iface;
-				cmds(currif);
-				currif->real_iface = NULL;
-			}
-
-			okay = false;
-			continue;
-		}
-
-		for (currif = defn->ifaces; currif; currif = currif->next) {
-			if (strcmp(liface, currif->logical_iface) == 0) {
-				if (!okay && (cmds == iface_up)) {
-					interface_defn link = {
-						.real_iface = iface,
-						.logical_iface = liface,
-						.max_options = 0,
-						.address_family = &addr_link,
-						.method = &(addr_link.method[0]),
-						.n_options = 0,
-						.option = NULL
-					};
-
-					convert_variables(link.method->conversions, &link);
-
-					if (!link.method->up(&link, doit))
-						break;
-
-					if (link.option)
-						free(link.option);
-				}
-
-				okay = true;
-
-				for (option_default *o = currif->method->defaults; o && o->option && o->value; o++) {
-					bool found = false;
-
-					for (int j = 0; j < currif->n_options; j++) {
-						if (strcmp(currif->option[j].name, o->option) == 0) {
-							found = true;
-							break;
-						}
-					}
-
-					if (!found)
-						set_variable(o->option, o->value, &currif->option, &currif->n_options, &currif->max_options);
-				}
-
-				for (int i = 0; i < n_options; i++) {
-					if (option[i].value[0] == '\0') {
-						if (strcmp(option[i].name, "pre-up") != 0 && strcmp(option[i].name, "up") != 0 && strcmp(option[i].name, "down") != 0 && strcmp(option[i].name, "post-down") != 0) {
-							int j;
-
-							for (j = 0; j < currif->n_options; j++) {
-								if (strcmp(currif->option[j].name, option[i].name) == 0) {
-									currif->n_options--;
-									break;
-								}
-							}
-
-							for (; j < currif->n_options; j++) {
-								option[j].name = option[j + 1].name;
-								option[j].value = option[j + 1].value;
-							}
-						} else {
-							/* do nothing */
-						}
-					} else {
-						set_variable(option[i].name, option[i].value, &currif->option, &currif->n_options, &currif->max_options);
-					}
-				}
-
-				currif->real_iface = iface;
-
-				convert_variables(currif->method->conversions, currif);
-
-				if (verbose) {
-					fprintf(stderr, "%s interface %s=%s (%s)\n", (cmds == iface_query) ? "Querying" : "Configuring", iface, liface, currif->address_family->name);
-				}
-
-				char pidfilename[100];
-				const char *command;
-
-				if ((command = strrchr(argv0, '/')))
-					command++;	/* first char after / */
-				else
-					command = argv0;	/* no /'s in argv0 */
-
-				make_pidfile_name(pidfilename, sizeof(pidfilename), command, currif);
-
-				if (!no_act) {
-					FILE *pidfile = fopen(pidfilename, "w");
-
-					if (pidfile) {
-						fprintf(pidfile, "%d", getpid());
-						fclose(pidfile);
-					} else {
-						fprintf(stderr, "%s: failed to open pid file %s: %s\n", command, pidfilename, strerror(errno));
-					}
-				}
-
-				switch (cmds(currif)) {
-				case -1:
-					fprintf(stderr, "Missing required configuration variables for interface %s/%s.\n", liface, currif->address_family->name);
-					failed = true;
-					break;
-
-				case 0:
-					failed = true;
-					break;
-					/* not entirely successful */
-
-				case 1:
-					failed = false;
-					break;
-					/* successful */
-
-				default:
-					fprintf(stderr, "Unexpected value when configuring interface %s/%s; considering it failed.\n", liface, currif->address_family->name);
-					failed = true;
-					/* what happened here? */
-				}
-
-				if (!no_act)
-					unlink(pidfilename);
-
-				currif->real_iface = NULL;
-
-				if (failed)
-					break;
-				/* Otherwise keep going: this interface may have
-				 * match with other address families */
-			}
-		}
-
-		if (okay && (cmds == iface_down)) {
-			interface_defn link = {
-				.real_iface = iface,
-				.logical_iface = liface,
-				.max_options = 0,
-				.address_family = &addr_link,
-				.method = &(addr_link.method[0]),
-				.n_options = 0,
-				.option = NULL
-			};
-			convert_variables(link.method->conversions, &link);
-
-			if (!link.method->down(&link, doit))
-				break;
-			if (link.option)
-				free(link.option);
-		}
-
-		if (!okay && (cmds == iface_query)) {
-			if (!run_mappings)
-				if (have_mapping)
-					okay = true;
-
-			if (!okay) {
-				fprintf(stderr, "Unknown interface %s\n", iface);
-				return 1;
-			}
-		}
-
-		if (!okay && !force) {
-			fprintf(stderr, "Ignoring unknown interface %s=%s.\n", iface, liface);
-			update_state(iface, NULL, lock);
-		} else {
-			if (cmds == iface_up) {
-				if ((current_state == NULL) || (no_act)) {
-					if (failed == true) {
-						printf("Failed to bring up %s.\n", liface);
-						update_state(iface, NULL, lock);
-					} else {
-						update_state(iface, liface, lock);
-					}
-				} else {
-					update_state(iface, liface, lock);
-				}
-			} else if (cmds == iface_down) {
-				update_state(iface, NULL, lock);
-			} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
-				assert(0);
-			}
-		}
-	}
-
-	if(lock) {
-		fclose(lock);
-		lock = NULL;
-	}
+	for (int i = 0; i < n_target_ifaces; i++)
+		do_interface(target_iface[i]);
 
 	if (do_all)
 		do_post_all();
