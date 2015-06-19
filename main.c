@@ -450,12 +450,24 @@ static cmds_t determine_command(void) {
 	}
 }
 
-int main(int argc, char **argv) {
-	argv0 = argv[0];
-	check_stdio();
-	cmds_t cmds = determine_command();
+static cmds_t cmds = NULL;
+static bool do_all = false;
+static bool run_mappings = true;
+static bool force = false;
+static bool list = false;
+static bool state_query = false;
+static char *allow_class = NULL;
+static char *interfaces = "/etc/network/interfaces";
+static char **excludeint = NULL;
+static int excludeints = 0;
+static variable *option = NULL;
+static int n_options = 0;
+static int max_options = 0;
+static int n_target_ifaces;
+static char **target_iface;
 
-	struct option long_opts[] = {
+static void parse_options(int *argc, char **argv[]) {
+	static const struct option long_opts[] = {
 		{"help", no_argument, NULL, 'h'},
 		{"version", no_argument, NULL, 'V'},
 		{"verbose", no_argument, NULL, 'v'},
@@ -475,23 +487,8 @@ int main(int argc, char **argv) {
 		{0, 0, 0, 0}
 	};
 
-	bool do_all = false;
-	bool run_mappings = true;
-	bool force = false;
-	bool list = false;
-	bool state_query = false;
-	char *allow_class = NULL;
-	char *interfaces = "/etc/network/interfaces";
-	char **excludeint = NULL;
-	int excludeints = 0;
-	variable *option = NULL;
-	int n_options = 0;
-	int max_options = 0;
-	int n_target_ifaces;
-	char **target_iface;
-
 	for (;;) {
-		int c = getopt_long(argc, argv, "X:s:i:o:hVvnal", long_opts, NULL);
+		int c = getopt_long(*argc, *argv, "X:s:i:o:hVvnal", long_opts, NULL);
 
 		if (c == EOF)
 			break;
@@ -602,6 +599,13 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
+}
+
+int main(int argc, char *argv[]) {
+	argv0 = argv[0];
+	check_stdio();
+	cmds = determine_command();
+	parse_options(&argc, &argv);
 
 	if (state_query) {
 		char **up_ifaces;
