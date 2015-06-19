@@ -678,6 +678,51 @@ static void select_interfaces(int argc, char *argv[]) {
 	}
 }
 
+static interface_defn meta_iface = {
+	.next = NULL,
+	.real_iface = "--all",
+	.address_family = &addr_meta,
+	.automatic = true,
+	.max_options = 0,
+	.n_options = 0,
+	.option = NULL
+};
+
+/* Run pre hooks for the meta interface when calling ifup/down with --all */
+static void do_pre_all(void) {
+	meta_iface.logical_iface = allow_class ? allow_class : "auto";
+	meta_iface.method = meta_iface.address_family->method;
+
+	bool okay = true;
+
+	if (cmds == iface_up)
+		okay = iface_preup(&meta_iface);
+
+	if (cmds == iface_down)
+		okay = iface_predown(&meta_iface);
+
+	if (!okay) {
+		fprintf(stderr, "%s: pre-%s script failed.\n", argv0, cmds == iface_up ? "up" : "down");
+		exit(1);
+	}
+}
+
+/* Run post hooks for the meta interface when calling ifup/down with --all */
+static void do_post_all(void) {
+	bool okay = true;
+
+	if (cmds == iface_up)
+		okay = iface_postup(&meta_iface);
+
+	if (cmds == iface_down)
+		okay = iface_postdown(&meta_iface);
+
+	if (!okay) {
+		fprintf(stderr, "%s: post-%s script failed.\n", argv0, cmds == iface_up ? "up" : "down");
+		exit(1);
+	}
+}
+
 int main(int argc, char *argv[]) {
 	argv0 = argv[0];
 
@@ -694,33 +739,8 @@ int main(int argc, char *argv[]) {
 
 	select_interfaces(argc, argv);
 
-	interface_defn meta_iface = {
-		.next = NULL,
-		.real_iface = "--all",
-		.address_family = &addr_meta,
-		.method = &(addr_meta.method[0]),
-		.automatic = true,
-		.max_options = 0,
-		.n_options = 0,
-		.option = NULL
-	};
-
-	if (do_all) {
-		meta_iface.logical_iface = allow_class ? allow_class : "auto";
-
-		bool okay = true;
-
-		if (cmds == iface_up)
-			okay = iface_preup(&meta_iface);
-
-		if (cmds == iface_down)
-			okay = iface_predown(&meta_iface);
-
-		if (!okay) {
-			fprintf(stderr, "%s: pre-%s script failed.\n", argv0, cmds == iface_up ? "up" : "down");
-			exit(1);
-		}
-	}
+	if (do_all)
+		do_pre_all();
 
 	FILE *lock = NULL;
 
@@ -1064,20 +1084,8 @@ int main(int argc, char *argv[]) {
 		lock = NULL;
 	}
 
-	if (do_all) {
-		int okay = true;
-
-		if (cmds == iface_up)
-			okay = iface_postup(&meta_iface);
-
-		if (cmds == iface_down)
-			okay = iface_postdown(&meta_iface);
-
-		if (!okay) {
-			fprintf(stderr, "%s: post-%s script failed.\n", argv0, cmds == iface_up ? "up" : "down");
-			exit(1);
-		}
-	}
+	if (do_all)
+		do_post_all();
 
 	return 0;
 }
