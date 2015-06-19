@@ -599,6 +599,9 @@ static void parse_options(int *argc, char **argv[]) {
 			break;
 		}
 	}
+
+	*argc -= optind;
+	*argv += optind;
 }
 
 /* Report the state of interfaces. Return 0 (success) if all reported interfaces are up, 1 (failure) otherwise */
@@ -642,12 +645,12 @@ int main(int argc, char *argv[]) {
 	parse_options(&argc, &argv);
 
 	if (state_query)
-		return do_state(argc - optind, argv + optind);
+		return do_state(argc, argv);
 
-	if (argc - optind > 0 && (do_all || list))
+	if (argc > 0 && (do_all || list))
 		usage();
 
-	if (argc - optind == 0 && !do_all && !list)
+	if (argc == 0 && !do_all && !list)
 		usage();
 
 	if (do_all && (cmds == iface_query))
@@ -675,8 +678,8 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 	} else {
-		target_iface = argv + optind;
-		n_target_ifaces = argc - optind;
+		target_iface = argv;
+		n_target_ifaces = argc;
 	}
 
 	interface_defn meta_iface = {
