@@ -406,7 +406,7 @@ bool make_pidfile_name(char *name, size_t size, const char *command, interface_d
 }
 
 /* Ensure stdin, stdout and stderr are valid, open filedescriptors */
-void check_stdio(void) {
+static void check_stdio(void) {
 	for (int i = 0; i <= 2; i++) {
 		errno = 0;
 		if (fcntl(i, F_GETFD) == -1) {
@@ -425,11 +425,35 @@ void check_stdio(void) {
 	}
 }
 
+typedef int (*cmds_t)(interface_defn *);
+
+/* Determine whether we are being called as ifup, ifdown or ifquery */
+static cmds_t determine_command(void) {
+	const char *command;
+
+	if ((command = strrchr(argv0, '/')))
+		command++;	/* first char after / */
+	else
+		command = argv0;	/* no /'s in argv0 */
+
+	if (strcmp(command, "ifup") == 0) {
+		return iface_up;
+	} else if (strcmp(command, "ifdown") == 0) {
+		ignore_failures = true;
+		return iface_down;
+	} else if (strcmp(command, "ifquery") == 0) {
+		no_act = true;
+		return iface_query;
+	} else {
+		fprintf(stderr, "This command should be called as ifup, ifdown, or ifquery\n");
+		exit(1);
+	}
+}
+
 int main(int argc, char **argv) {
 	argv0 = argv[0];
 	check_stdio();
-
-	int (*cmds) (interface_defn *) = NULL;
+	cmds_t cmds = determine_command();
 
 	struct option long_opts[] = {
 		{"help", no_argument, NULL, 'h'},
@@ -465,26 +489,6 @@ int main(int argc, char **argv) {
 	int max_options = 0;
 	int n_target_ifaces;
 	char **target_iface;
-
-	const char *command;
-
-	if ((command = strrchr(argv0, '/')))
-		command++;	/* first char after / */
-	else
-		command = argv0;	/* no /'s in argv0 */
-
-	if (strcmp(command, "ifup") == 0) {
-		cmds = iface_up;
-	} else if (strcmp(command, "ifdown") == 0) {
-		ignore_failures = true;
-		cmds = iface_down;
-	} else if (strcmp(command, "ifquery") == 0) {
-		cmds = iface_query;
-		no_act = true;
-	} else {
-		fprintf(stderr, "This command should be called as ifup, ifdown, or ifquery\n");
-		exit(1);
-	}
 
 	for (;;) {
 		int c = getopt_long(argc, argv, "X:s:i:o:hVvnal", long_opts, NULL);
