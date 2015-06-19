@@ -405,8 +405,29 @@ bool make_pidfile_name(char *name, size_t size, const char *command, interface_d
 	return true;
 }
 
+/* Ensure stdin, stdout and stderr are valid, open filedescriptors */
+void check_stdio(void) {
+	for (int i = 0; i <= 2; i++) {
+		errno = 0;
+		if (fcntl(i, F_GETFD) == -1) {
+			if (errno == EBADF) {
+				/* filedescriptor closed, try to open /dev/null in its place */
+				if (open("/dev/null", 0) != i) {
+					fprintf(stderr, "%s: fd %d not available; aborting\n", argv0, i);
+					exit(2);
+				}
+			} else {
+				/* some other problem -- eeek */
+				perror(argv0);
+				exit(2);
+			}
+		}
+	}
+}
+
 int main(int argc, char **argv) {
 	argv0 = argv[0];
+	check_stdio();
 
 	int (*cmds) (interface_defn *) = NULL;
 
@@ -444,21 +465,6 @@ int main(int argc, char **argv) {
 	int max_options = 0;
 	int n_target_ifaces;
 	char **target_iface;
-
-	for (int i = 0; i <= 2; i++) {
-		if (fcntl(i, F_GETFD) == -1) {
-			if (errno == EBADF && open("/dev/null", 0) == -1) {
-				fprintf(stderr, "%s: fd %d not available; aborting\n", argv0, i);
-				exit(2);
-			} else if (errno == EBADF) {
-				errno = 0;	/* no more problems */
-			} else {
-				/* some other problem -- eeek */
-				perror(argv0);
-				exit(2);
-			}
-		}
-	}
 
 	const char *command;
 
