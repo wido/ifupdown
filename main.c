@@ -638,25 +638,20 @@ static int do_state(int n_target_ifaces, char *target_iface[]) {
 	return ret;
 }
 
-int main(int argc, char *argv[]) {
-	argv0 = argv[0];
-	check_stdio();
-	cmds = determine_command();
-	parse_options(&argc, &argv);
-
-	if (state_query)
-		return do_state(argc, argv);
-
-	if (argc > 0 && (do_all || list))
+/* Check non-option arguments and build a list of interfaces to act upon */
+static void select_interfaces(int argc, char *argv[]) {
+	if (argc > 0 && (do_all || list)) {
+		fprintf(stderr, "%s: either use the --all/--list options, or specify interface(s), but not both\n", argv0);
 		usage();
+	}
 
-	if (argc == 0 && !do_all && !list)
+	if (argc == 0 && !do_all && !list) {
+		fprintf(stderr, "%s: no interface(s) specified\n", argv0);
 		usage();
+	}
 
 	if (do_all && (cmds == iface_query))
 		usage();
-
-	mkdir(RUN_DIR, 0755);
 
 	defn = read_interfaces(interfaces);
 
@@ -675,12 +670,29 @@ int main(int argc, char *argv[]) {
 			read_all_state(&target_iface, &n_target_ifaces);
 		} else {
 			fprintf(stderr, "%s: can't tell if interfaces are going up or down\n", argv0);
-			exit(1);
+			usage();
 		}
 	} else {
 		target_iface = argv;
 		n_target_ifaces = argc;
 	}
+}
+
+int main(int argc, char *argv[]) {
+	argv0 = argv[0];
+
+	check_stdio();
+
+	cmds = determine_command();
+
+	parse_options(&argc, &argv);
+
+	mkdir(RUN_DIR, 0755);
+
+	if (state_query)
+		return do_state(argc, argv);
+
+	select_interfaces(argc, argv);
 
 	interface_defn meta_iface = {
 		.next = NULL,
