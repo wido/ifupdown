@@ -13,6 +13,7 @@
 
 #include "header.h"
 
+const char *argv0;
 bool no_act = false;
 bool run_scripts = true;
 bool verbose = false;
@@ -36,12 +37,12 @@ static bool match_patterns(char *string, int argc, char *argv[]) {
 	return false;
 }
 
-static void usage(char *execname) {
-	fprintf(stderr, "%s: Use --help for help\n", execname);
+static void usage() {
+	fprintf(stderr, "%s: Use --help for help\n", argv0);
 	exit(1);
 }
 
-static void version(char *execname) {
+static void version() {
 	printf("%s version " IFUPDOWN_VERSION "\n"
 		"\n"
 		"Copyright (c) 1999-2009 Anthony Towns\n"
@@ -51,17 +52,17 @@ static void version(char *execname) {
 		"This program is free software; you can redistribute it and/or modify\n"
 		"it under the terms of the GNU General Public License as published by\n"
 		"the Free Software Foundation; either version 2 of the License, or (at\n"
-		"your option) any later version.\n", execname);
+		"your option) any later version.\n", argv0);
 
 	exit(0);
 }
 
-static void help(char *execname, int (*cmds) (interface_defn *)) {
-	printf("Usage: %s <options> <ifaces...>\n", execname);
+static void help(int (*cmds) (interface_defn *)) {
+	printf("Usage: %s <options> <ifaces...>\n", argv0);
 
 	if ((cmds == iface_list) || (cmds == iface_query)) {
-		printf("       %s <options> --list\n", execname);
-		printf("       %s --state <ifaces...>\n", execname);
+		printf("       %s <options> --list\n", argv0);
+		printf("       %s --state <ifaces...>\n", argv0);
 	}
 
 	printf("\n"
@@ -110,7 +111,7 @@ static int lock_fd(int fd) {
 	return 0;
 }
 
-static FILE *lock_state(const char *argv0) {
+static FILE *lock_state() {
 	FILE *lock_fp = fopen(lockfile, no_act ? "r" : "a+");
 
 	if (lock_fp == NULL) {
@@ -150,7 +151,7 @@ static char *strip(char *buf) {
 	return buf;
 }
 
-static FILE *lock_interface(const char *argv0, const char *iface, char **state) {
+static FILE *lock_interface(const char *iface, char **state) {
 	char filename[sizeof statefile + strlen(iface) + 2];
 	snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
 
@@ -203,7 +204,7 @@ static FILE *lock_interface(const char *argv0, const char *iface, char **state) 
 	return lock_fp;
 }
 
-static const char *read_state(const char *argv0, const char *iface) {
+static const char *read_state(const char *iface) {
 	char *ret = NULL;
 
 	FILE *lock_fp = lock_state(argv0);
@@ -251,7 +252,7 @@ static const char *read_state(const char *argv0, const char *iface) {
 	return ret;
 }
 
-static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
+static void read_all_state(char ***ifaces, int *n_ifaces) {
 	FILE *lock_fp = lock_state(argv0);
 	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
 
@@ -300,7 +301,7 @@ static void read_all_state(const char *argv0, char ***ifaces, int *n_ifaces) {
 		fclose(lock_fp);
 }
 
-static void update_state(const char *argv0, const char *iface, const char *state, FILE *lock_fp) {
+static void update_state(const char *iface, const char *state, FILE *lock_fp) {
 	if (lock_fp) {
 		rewind(lock_fp);
 		ftruncate(fileno(lock_fp), 0);
@@ -405,6 +406,8 @@ bool make_pidfile_name(char *name, size_t size, const char *command, interface_d
 }
 
 int main(int argc, char **argv) {
+	argv0 = argv[0];
+
 	int (*cmds) (interface_defn *) = NULL;
 
 	struct option long_opts[] = {
@@ -445,24 +448,24 @@ int main(int argc, char **argv) {
 	for (int i = 0; i <= 2; i++) {
 		if (fcntl(i, F_GETFD) == -1) {
 			if (errno == EBADF && open("/dev/null", 0) == -1) {
-				fprintf(stderr, "%s: fd %d not available; aborting\n", argv[0], i);
+				fprintf(stderr, "%s: fd %d not available; aborting\n", argv0, i);
 				exit(2);
 			} else if (errno == EBADF) {
 				errno = 0;	/* no more problems */
 			} else {
 				/* some other problem -- eeek */
-				perror(argv[0]);
+				perror(argv0);
 				exit(2);
 			}
 		}
 	}
 
-	char *command;
+	const char *command;
 
-	if ((command = strrchr(argv[0], '/')))
+	if ((command = strrchr(argv0, '/')))
 		command++;	/* first char after / */
 	else
-		command = argv[0];	/* no /'s in argv[0] */
+		command = argv0;	/* no /'s in argv0 */
 
 	if (strcmp(command, "ifup") == 0) {
 		cmds = iface_up;
@@ -502,7 +505,7 @@ int main(int argc, char **argv) {
 
 		case 'n':
 			if ((cmds == iface_list) || (cmds == iface_query))
-				usage(argv[0]);
+				usage();
 			no_act = true;
 			break;
 
@@ -520,7 +523,7 @@ int main(int argc, char **argv) {
 
 		case 2:
 			if ((cmds == iface_list) || (cmds == iface_query))
-				usage(argv[0]);
+				usage();
 			force = true;
 			break;
 
@@ -532,9 +535,7 @@ int main(int argc, char **argv) {
 			excludeints++;
 			excludeint = realloc(excludeint, excludeints * sizeof *excludeint);
 			if (excludeint == NULL) {
-				char *filename = argv[0];
-
-				perror(filename);
+				perror(argv0);
 				exit(1);
 			}
 			excludeint[excludeints - 1] = strdup(optarg);
@@ -557,7 +558,7 @@ int main(int argc, char **argv) {
 				if (strcmp(name, "pre-down") == 0)
 					strcpy(name, "down");
 
-				set_variable(argv[0], name, val, &option, &n_options, &max_options);
+				set_variable(name, val, &option, &n_options, &max_options);
 				free(name);
 
 				break;
@@ -565,29 +566,29 @@ int main(int argc, char **argv) {
 
 		case 'l':
 			if (!(cmds == iface_query))
-				usage(argv[0]);
+				usage();
 
 			list = true;
 			cmds = iface_list;
 			break;
 
 		case 'h':
-			help(argv[0], cmds);
+			help(cmds);
 			break;
 
 		case 'V':
-			version(argv[0]);
+			version();
 			break;
 
 		case 6: /* --state */
 			if (cmds != iface_query)
-				usage(argv[0]);
+				usage();
 
 			state_query = true;
 			break;
 
 		default:
-			usage(argv[0]);
+			usage();
 			break;
 		}
 	}
@@ -596,7 +597,7 @@ int main(int argc, char **argv) {
 		char **up_ifaces;
 		int n_up_ifaces;
 
-		read_all_state(argv[0], &up_ifaces, &n_up_ifaces);
+		read_all_state(&up_ifaces, &n_up_ifaces);
 		target_iface = argv + optind;
 		n_target_ifaces = argc - optind;
 		bool ret = true;
@@ -627,20 +628,20 @@ int main(int argc, char **argv) {
 	}
 
 	if (argc - optind > 0 && (do_all || list))
-		usage(argv[0]);
+		usage();
 
 	if (argc - optind == 0 && !do_all && !list)
-		usage(argv[0]);
+		usage();
 
 	if (do_all && (cmds == iface_query))
-		usage(argv[0]);
+		usage();
 
 	mkdir(RUN_DIR, 0755);
 
 	defn = read_interfaces(interfaces);
 
 	if (!defn) {
-		fprintf(stderr, "%s: couldn't read interfaces file \"%s\"\n", argv[0], interfaces);
+		fprintf(stderr, "%s: couldn't read interfaces file \"%s\"\n", argv0, interfaces);
 		exit(1);
 	}
 
@@ -651,9 +652,9 @@ int main(int argc, char **argv) {
 			target_iface = autos ? autos->interfaces : NULL;
 			n_target_ifaces = autos ? autos->n_interfaces : 0;
 		} else if (cmds == iface_down) {
-			read_all_state(argv[0], &target_iface, &n_target_ifaces);
+			read_all_state(&target_iface, &n_target_ifaces);
 		} else {
-			fprintf(stderr, "%s: can't tell if interfaces are going up or down\n", argv[0]);
+			fprintf(stderr, "%s: can't tell if interfaces are going up or down\n", argv0);
 			exit(1);
 		}
 	} else {
@@ -684,7 +685,7 @@ int main(int argc, char **argv) {
 			okay = iface_predown(&meta_iface);
 
 		if (!okay) {
-			fprintf(stderr, "%s: pre-%s script failed.\n", argv[0], &argv[0][2]);
+			fprintf(stderr, "%s: pre-%s script failed.\n", argv0, cmds == iface_up ? "up" : "down");
 			exit(1);
 		}
 	}
@@ -719,24 +720,24 @@ int main(int argc, char **argv) {
 		snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
 		char *envval = getenv(envname);
 		if(envval) {
-			fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv[0], iface, envval);
+			fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv0, iface, envval);
 			continue;
 		}
 
-		lock = lock_interface(argv[0], iface, &current_state);
+		lock = lock_interface(iface, &current_state);
 
 		if (!force) {
 			if (cmds == iface_up) {
 				if (current_state != NULL) {
 					if (!do_all)
-						fprintf(stderr, "%s: interface %s already configured\n", argv[0], iface);
+						fprintf(stderr, "%s: interface %s already configured\n", argv0, iface);
 
 					continue;
 				}
 			} else if (cmds == iface_down) {
 				if (current_state == NULL) {
 					if (!do_all)
-						fprintf(stderr, "%s: interface %s not configured\n", argv[0], iface);
+						fprintf(stderr, "%s: interface %s not configured\n", argv0, iface);
 
 					continue;
 				}
@@ -806,15 +807,15 @@ int main(int argc, char **argv) {
 			if ((current_state == NULL) || (no_act)) {
 				if (failed == 1) {
 					printf("Failed to bring up %s.\n", liface);
-					update_state(argv[0], iface, NULL, lock);
+					update_state(iface, NULL, lock);
 				} else {
-					update_state(argv[0], iface, liface, lock);
+					update_state(iface, liface, lock);
 				}
 			} else {
-				update_state(argv[0], iface, liface, lock);
+				update_state(iface, liface, lock);
 			}
 		} else if (cmds == iface_down) {
-			update_state(argv[0], iface, NULL, lock);
+			update_state(iface, NULL, lock);
 		} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 			assert(0);
 		}
@@ -862,7 +863,7 @@ int main(int argc, char **argv) {
 						.option = NULL
 					};
 
-					convert_variables(argv[0], link.method->conversions, &link);
+					convert_variables(link.method->conversions, &link);
 
 					if (!link.method->up(&link, doit))
 						break;
@@ -884,7 +885,7 @@ int main(int argc, char **argv) {
 					}
 
 					if (!found)
-						set_variable(argv[0], o->option, o->value, &currif->option, &currif->n_options, &currif->max_options);
+						set_variable(o->option, o->value, &currif->option, &currif->n_options, &currif->max_options);
 				}
 
 				for (int i = 0; i < n_options; i++) {
@@ -907,25 +908,25 @@ int main(int argc, char **argv) {
 							/* do nothing */
 						}
 					} else {
-						set_variable(argv[0], option[i].name, option[i].value, &currif->option, &currif->n_options, &currif->max_options);
+						set_variable(option[i].name, option[i].value, &currif->option, &currif->n_options, &currif->max_options);
 					}
 				}
 
 				currif->real_iface = iface;
 
-				convert_variables(argv[0], currif->method->conversions, currif);
+				convert_variables(currif->method->conversions, currif);
 
 				if (verbose) {
 					fprintf(stderr, "%s interface %s=%s (%s)\n", (cmds == iface_query) ? "Querying" : "Configuring", iface, liface, currif->address_family->name);
 				}
 
 				char pidfilename[100];
-				char *command;
+				const char *command;
 
-				if ((command = strrchr(argv[0], '/')))
+				if ((command = strrchr(argv0, '/')))
 					command++;	/* first char after / */
 				else
-					command = argv[0];	/* no /'s in argv[0] */
+					command = argv0;	/* no /'s in argv0 */
 
 				make_pidfile_name(pidfilename, sizeof(pidfilename), command, currif);
 
@@ -984,7 +985,7 @@ int main(int argc, char **argv) {
 				.n_options = 0,
 				.option = NULL
 			};
-			convert_variables(argv[0], link.method->conversions, &link);
+			convert_variables(link.method->conversions, &link);
 
 			if (!link.method->down(&link, doit))
 				break;
@@ -1005,21 +1006,21 @@ int main(int argc, char **argv) {
 
 		if (!okay && !force) {
 			fprintf(stderr, "Ignoring unknown interface %s=%s.\n", iface, liface);
-			update_state(argv[0], iface, NULL, lock);
+			update_state(iface, NULL, lock);
 		} else {
 			if (cmds == iface_up) {
 				if ((current_state == NULL) || (no_act)) {
 					if (failed == true) {
 						printf("Failed to bring up %s.\n", liface);
-						update_state(argv[0], iface, NULL, lock);
+						update_state(iface, NULL, lock);
 					} else {
-						update_state(argv[0], iface, liface, lock);
+						update_state(iface, liface, lock);
 					}
 				} else {
-					update_state(argv[0], iface, liface, lock);
+					update_state(iface, liface, lock);
 				}
 			} else if (cmds == iface_down) {
-				update_state(argv[0], iface, NULL, lock);
+				update_state(iface, NULL, lock);
 			} else if (!(cmds == iface_list) && !(cmds == iface_query)) {
 				assert(0);
 			}
@@ -1041,7 +1042,7 @@ int main(int argc, char **argv) {
 			okay = iface_postdown(&meta_iface);
 
 		if (!okay) {
-			fprintf(stderr, "%s: post-%s script failed.\n", argv[0], &argv[0][2]);
+			fprintf(stderr, "%s: post-%s script failed.\n", argv0, cmds == iface_up ? "up" : "down");
 			exit(1);
 		}
 	}

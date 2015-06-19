@@ -180,7 +180,7 @@ static allowup_defn *add_allow_up(const char *filename, int line, allowup_defn *
 	return allow_up;
 }
 
-variable *set_variable(const char *filename, const char *name, const char *value, variable **var, int *n_vars, int *max_vars) {
+variable *set_variable(const char *name, const char *value, variable **var, int *n_vars, int *max_vars) {
 	/*
 	 * if name ends with '?', don't update
 	 * the variable if it already exists
@@ -207,7 +207,7 @@ variable *set_variable(const char *filename, const char *name, const char *value
 				(*var)[j].value = strdup(value);
 
 				if (!(*var)[j].value) {
-					perror(filename);
+					perror(argv0);
 					return NULL;
 				}
 
@@ -223,7 +223,7 @@ variable *set_variable(const char *filename, const char *name, const char *value
 		new_var = realloc(*var, sizeof *new_var * *max_vars);
 
 		if (new_var == NULL) {
-			perror(filename);
+			perror(argv0);
 			return NULL;
 		}
 
@@ -234,12 +234,12 @@ variable *set_variable(const char *filename, const char *name, const char *value
 	(*var)[*n_vars].value = strdup(value);
 
 	if (!(*var)[*n_vars].name) {
-		perror(filename);
+		perror(argv0);
 		return NULL;
 	}
 
 	if (!(*var)[*n_vars].value) {
-		perror(filename);
+		perror(argv0);
 		return NULL;
 	}
 
@@ -247,11 +247,11 @@ variable *set_variable(const char *filename, const char *name, const char *value
 	return &((*var)[(*n_vars) - 1]);
 }
 
-void convert_variables(const char *filename, conversion *conversions, interface_defn *ifd) {
+void convert_variables(conversion *conversions, interface_defn *ifd) {
 	for (conversion *c = conversions; c && c->option && c->fn; c++) {
 		if (strcmp(c->option, "iface") == 0) {
 			if (c->newoption) {
-				variable *o = set_variable(filename, c->newoption, ifd->real_iface, &ifd->option, &ifd->n_options, &ifd->max_options);
+				variable *o = set_variable(c->newoption, ifd->real_iface, &ifd->option, &ifd->n_options, &ifd->max_options);
 				if (o)
 					c->fn(ifd, &o->value, c->argc, c->argv);
 				continue;
@@ -261,7 +261,7 @@ void convert_variables(const char *filename, conversion *conversions, interface_
 		for (int j = 0; j < ifd->n_options; j++) {
 			if (strcmp(ifd->option[j].name, c->option) == 0) {
 				if (c->newoption) {
-					variable *o = set_variable(filename, c->newoption, ifd->option[j].value, &ifd->option, &ifd->n_options, &ifd->max_options);
+					variable *o = set_variable(c->newoption, ifd->option[j].value, &ifd->option, &ifd->n_options, &ifd->max_options);
 					if (o)
 						c->fn(ifd, &o->value, c->argc, c->argv);
 				} else {
@@ -666,7 +666,7 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 					}
 				}
 
-				set_variable(filename, firstword, rest, &currif->option, &currif->n_options, &currif->max_options);
+				set_variable(firstword, rest, &currif->option, &currif->n_options, &currif->max_options);
 				break;
 
 			case MAPPING:

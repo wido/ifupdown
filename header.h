@@ -107,8 +107,8 @@ struct mapping_defn {
 
 extern address_family *addr_fams[];
 
-variable *set_variable(const char *filename, const char *name, const char *value, variable **var, int *n_vars, int *max_vars);
-void convert_variables(const char *filename, conversion *conversions, interface_defn *ifd);
+variable *set_variable(const char *name, const char *value, variable **var, int *n_vars, int *max_vars);
+void convert_variables(conversion *conversions, interface_defn *ifd);
 interfaces_file *read_interfaces(const char *filename);
 allowup_defn *find_allowup(interfaces_file *defn, const char *name);
 int doit(const char *str);
@@ -132,6 +132,7 @@ bool var_set_anywhere(const char *id, interface_defn *ifd);
 bool run_mapping(const char *physical, char *logical, int len, mapping_defn *map);
 bool make_pidfile_name(char *name, size_t size, const char *command, interface_defn *fd);
 
+extern const char *argv0;
 extern bool no_act;
 extern bool verbose;
 extern bool run_scripts;
