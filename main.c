@@ -26,17 +26,6 @@ static char lockfile[] = RUN_DIR ".ifstate.lock";
 static char statefile[] = RUN_DIR "ifstate";
 static char tmpstatefile[] = RUN_DIR ".ifstate.tmp";
 
-static bool match_patterns(char *string, int argc, char *argv[]) {
-	if (!argc || !argv || !string)
-		return false;
-
-	for (int i = 0; i < argc; i++)
-		if (fnmatch(argv[i], string, 0) == 0)
-			return true;
-
-	return false;
-}
-
 static void usage() {
 	fprintf(stderr, "%s: Use --help for help\n", argv0);
 	exit(1);
@@ -723,12 +712,51 @@ static void do_post_all(void) {
 	}
 }
 
+static bool match_patterns(const char *string, int argc, char *argv[]) {
+	if (!argc || !argv || !string)
+		return false;
+
+	for (int i = 0; i < argc; i++)
+		if (fnmatch(argv[i], string, 0) == 0)
+			return true;
+
+	return false;
+}
+
+/* Check whether we should ignore the given interface */
+static bool ignore_interface(const char *iface) {
+	/* If --allow is used, ignore interfaces that are not in the given class */
+	if (allow_class != NULL) {
+		allowup_defn *allowup = find_allowup(defn, allow_class);
+
+		if (allowup == NULL) // empty class
+			return true;
+
+		bool found = false;
+
+		for (int i = 0; i < allowup->n_interfaces; i++) {
+			if (strcmp(allowup->interfaces[i], iface) == 0) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			return true;
+	}
+
+	/* Ignore interfaces specified with --exclude */
+	if ((excludeints != 0 && match_patterns(iface, excludeints, excludeint)))
+		return true;
+
+	return false;
+}
+
+
 static bool do_interface(const char *target_iface) {
-	bool success = false;
-	FILE *lock = NULL;
+	/* Split into physical and logical interface */
 
 	char iface[80], liface[80];
-	char *current_state;
 
 	strncpy(iface, target_iface, sizeof(iface));
 	iface[sizeof(iface) - 1] = '\0';
@@ -744,16 +772,30 @@ static bool do_interface(const char *target_iface) {
 		liface[sizeof(liface) - 1] = '\0';
 	}
 
-	// Bail out if we are being called recursively on the same interface.
+	/* Check if we really want to process this interface */
+
+	if(ignore_interface(iface))
+		return true;
+
+	/* Bail out if we are being called recursively on the same interface */
+
 	char envname[160];
 	snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
 	char *envval = getenv(envname);
 	if(envval) {
 		fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv0, iface, envval);
-		goto end;
+		return false;
 	}
 
+	/* Start by locking this interface */
+
+	bool success = false;
+	FILE *lock = NULL;
+	char *current_state;
+
 	lock = lock_interface(iface, &current_state);
+
+	/* If we are not forcing the command, then exit with success if it is a no-op */
 
 	if (!force) {
 		if (cmds == iface_up) {
@@ -786,32 +828,7 @@ static bool do_interface(const char *target_iface) {
 		}
 	}
 
-	/* If --allow is used, ignore interfaces that are not in the given class */
-	if (allow_class != NULL) {
-		allowup_defn *allowup = find_allowup(defn, allow_class);
-
-		if (allowup == NULL) {
-			success = true;
-			goto end;
-		}
-
-		int i;
-
-		for (i = 0; i < allowup->n_interfaces; i++)
-			if (strcmp(allowup->interfaces[i], iface) == 0)
-				break;
-
-		if (i >= allowup->n_interfaces) {
-			success = true;
-			goto end;
-		}
-	}
-
-	/* Ignore interfaces specified with --exclude */
-	if ((excludeints != 0 && match_patterns(iface, excludeints, excludeint))) {
-		success = true;
-		goto end;
-	}
+	/* Run mapping scripts if necessary */
 
 	bool have_mapping = false;
 
@@ -838,29 +855,23 @@ static bool do_interface(const char *target_iface) {
 		}
 	}
 
-	interface_defn *currif;
 	bool okay = false;
 	bool failed = false;
 
+	/* Update the state file already? */
+
 	if (cmds == iface_up) {
-		if ((current_state == NULL) || (no_act)) {
-			if (failed == 1) {
-				printf("Failed to bring up %s.\n", liface);
-				update_state(iface, NULL, lock);
-			} else {
-				update_state(iface, liface, lock);
-			}
-		} else {
-			update_state(iface, liface, lock);
-		}
+		update_state(iface, liface, lock);
 	} else if (cmds == iface_down) {
 		update_state(iface, NULL, lock);
 	} else  {
 		assert(cmds == iface_list ||cmds == iface_query);
 	}
 
+	/* Handle ifquery --list */
+
 	if (cmds == iface_list) {
-		for (currif = defn->ifaces; currif; currif = currif->next)
+		for (interface_defn *currif = defn->ifaces; currif; currif = currif->next)
 			if (strcmp(liface, currif->logical_iface) == 0)
 				okay = true;
 
@@ -879,7 +890,7 @@ static bool do_interface(const char *target_iface) {
 		}
 
 		if (okay) {
-			currif = defn->ifaces;
+			interface_defn *currif = defn->ifaces;
 			currif->real_iface = iface;
 			cmds(currif);
 			currif->real_iface = NULL;
@@ -889,8 +900,11 @@ static bool do_interface(const char *target_iface) {
 		goto end;
 	}
 
-	for (currif = defn->ifaces; currif; currif = currif->next) {
+	/* Run the desired command for all matching logical interfaces */
+
+	for (interface_defn *currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(liface, currif->logical_iface) == 0) {
+			/* Bring the link up if necessary, but only once for each physical interface */
 			if (!okay && (cmds == iface_up)) {
 				interface_defn link = {
 					.real_iface = iface,
@@ -955,9 +969,8 @@ static bool do_interface(const char *target_iface) {
 
 			convert_variables(currif->method->conversions, currif);
 
-			if (verbose) {
+			if (verbose)
 				fprintf(stderr, "%s interface %s=%s (%s)\n", (cmds == iface_query) ? "Querying" : "Configuring", iface, liface, currif->address_family->name);
-			}
 
 			char pidfilename[100];
 			const char *command;
@@ -1009,10 +1022,12 @@ static bool do_interface(const char *target_iface) {
 
 			if (failed)
 				break;
-			/* Otherwise keep going: this interface may have
-			 * match with other address families */
+
+			/* Otherwise keep going: this interface may have match with other address families */
 		}
 	}
+
+	/* Bring the link down if necessary */
 
 	if (okay && (cmds == iface_down)) {
 		interface_defn link = {
@@ -1042,6 +1057,8 @@ static bool do_interface(const char *target_iface) {
 			goto end;
 		}
 	}
+
+	/* Update the state */
 
 	if (!okay && !force) {
 		fprintf(stderr, "Ignoring unknown interface %s=%s.\n", iface, liface);
