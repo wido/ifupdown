@@ -601,45 +601,48 @@ static void parse_options(int *argc, char **argv[]) {
 	}
 }
 
+/* Report the state of interfaces. Return 0 (success) if all reported interfaces are up, 1 (failure) otherwise */
+static int do_state(int n_target_ifaces, char *target_iface[]) {
+	char **up_ifaces;
+	int n_up_ifaces;
+
+	read_all_state(&up_ifaces, &n_up_ifaces);
+	int ret = 0;
+
+	if (n_target_ifaces == 0) {
+		for (int i = 0; i < n_up_ifaces; i++)
+			puts(up_ifaces[i]);
+	} else {
+		for (int j = 0; j < n_target_ifaces; j++) {
+			size_t l = strlen(target_iface[j]);
+			bool found = false;
+
+			for (int i = 0; i < n_up_ifaces; i++) {
+				if (strncmp(target_iface[j], up_ifaces[i], l) == 0) {
+					if (up_ifaces[i][l] == '=') {
+						puts(up_ifaces[i]);
+						found = true;
+						break;
+					}
+				}
+			}
+
+			if (!found)
+				ret = 1;
+		}
+	}
+
+	return ret;
+}
+
 int main(int argc, char *argv[]) {
 	argv0 = argv[0];
 	check_stdio();
 	cmds = determine_command();
 	parse_options(&argc, &argv);
 
-	if (state_query) {
-		char **up_ifaces;
-		int n_up_ifaces;
-
-		read_all_state(&up_ifaces, &n_up_ifaces);
-		target_iface = argv + optind;
-		n_target_ifaces = argc - optind;
-		bool ret = true;
-
-		if (n_target_ifaces == 0) {
-			for (int i = 0; i < n_up_ifaces; i++)
-				puts(up_ifaces[i]);
-		} else {
-			for (int j = 0; j < n_target_ifaces; j++) {
-				size_t l = strlen(target_iface[j]);
-				bool found = false;
-
-				for (int i = 0; i < n_up_ifaces; i++) {
-					if (strncmp(target_iface[j], up_ifaces[i], l) == 0) {
-						if (up_ifaces[i][l] == '=') {
-							puts(up_ifaces[i]);
-							found = true;
-							break;
-						}
-					}
-				}
-
-				ret &= found;
-			}
-		}
-
-		exit(!ret);
-	}
+	if (state_query)
+		return do_state(argc - optind, argv + optind);
 
 	if (argc - optind > 0 && (do_all || list))
 		usage();
