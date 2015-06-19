@@ -1094,11 +1094,13 @@ int main(int argc, char *argv[]) {
 	if (do_all)
 		do_pre_all();
 
+	bool success = true;
+
 	for (int i = 0; i < n_target_ifaces; i++)
-		do_interface(target_iface[i]);
+		success &= do_interface(target_iface[i]);
 
 	if (do_all)
 		do_post_all();
 
-	return 0;
+	return success ? 0 : 1;
 }
