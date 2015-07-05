@@ -30,7 +30,8 @@ A line may be extended across multiple lines by making the last character
 a backslash.
 .P
 The file consists of zero or more "iface", "mapping", "auto", "allow-",
-"source" and "source-directory" stanzas. Here is an example.
+"source" and "source-directory" stanzas. Here is an example:
+.P
 .EX
 auto eth0
 allow-hotplug eth1
@@ -53,6 +54,7 @@ iface eth0\-work inet dhcp
 
 iface eth1 inet dhcp
 .EE
+.P
 Lines beginning with the word "auto" are used to identify the physical
 interfaces to be brought up when
 .B ifup
