@@ -71,7 +71,7 @@ check_network_file_systems() {
 
     while read DEV MTPT FSTYPE REST; do
 	case $DEV in
-	/dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*)
+	/dev/nbd*|/dev/nd[a-z]*|/dev/etherd/e*|curlftpfs*)
 	    log_warning_msg "not deconfiguring network interfaces: network devices still mounted."
 	    exit 0
 	    ;;
