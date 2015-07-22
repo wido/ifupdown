@@ -79,7 +79,8 @@ method static
     /lib/ifupdown/settle-dad.sh if (execable("/lib/ifupdown/settle-dad.sh") && (var_true("dad-attempts", ifd)))
 
   down
-    ip -6 addr flush dev %iface% scope global
+    [[ ip -6 route del default via %gateway% dev %iface% ]]
+    ip -6 addr del %address%[[/%netmask%]] [[scope %scope%]] dev %iface%
     ip link set dev %iface% down \
 		if (iface_is_link())
 
