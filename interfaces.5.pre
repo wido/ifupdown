@@ -13,7 +13,7 @@
 ..
 .TH INTERFACES 5 "29 November 2014" "ifupdown" "File formats"
 .SH NAME
-/etc/network/interfaces \- network interface configuration for ifup and ifdown 
+/etc/network/interfaces \- network interface configuration for ifup and ifdown
 .SH DESCRIPTION
 /etc/network/interfaces contains network interface configuration
 information for the
@@ -40,7 +40,7 @@ source interfaces.d/machine\-dependent
 
 source-directory interfaces.d
 
-mapping eth0 
+mapping eth0
  	script /usr/local/sbin/map\-scheme
  	map HOME eth0\-home
  	map WORK eth0\-work
@@ -73,8 +73,8 @@ up eth0 or eth1 if it is listed in an "allow-hotplug" line. Note that
 "allow-auto" and "auto" are synonyms.
 .P
 Lines beginning with "source" are used to include stanzas from other files,
-so configuration can be split into many files. The word "source" is 
-followed by the path of file to be sourced. Shell wildcards can be 
+so configuration can be split into many files. The word "source" is
+followed by the path of file to be sourced. Shell wildcards can be
 used.
 (See
 .BR wordexp (3)
@@ -111,10 +111,10 @@ brought up.  The first line of a mapping stanza consists of the word
 must contain a
 .BR script
 definition.  The named script is run with the physical interface name as
-its argument and with the contents of all following "map" lines 
+its argument and with the contents of all following "map" lines
 (\fBwithout\fR the leading "map") in the
 stanza provided to it on its standard input. The script must print a
-string on its standard output before exiting. See 
+string on its standard output before exiting. See
 .IR /usr/share/doc/ifupdown/examples
 for examples of what the script must print.
 .P
@@ -131,7 +131,7 @@ ifup chooses \fILOGICAL\fR as the initial logical name for the interface.
 It then maps this name, possibly more than once according to successive
 mapping specifications,  until no further mappings are possible.  If the
 resulting name is the name of some defined logical interface then
-.B ifup 
+.B ifup
 attempts to bring up the physical interface
 as that logical interface.  Otherwise
 .B ifup
@@ -200,7 +200,7 @@ prints an error message,
 and exits with status 0.
 This behavior may change in the future.
 .TP
-.BI up " command" 
+.BI up " command"
 .TP
 .BI post\-up " command"
 Run
@@ -241,7 +241,7 @@ and exits with status 0.
 This behavior may change in the future.
 .P
 There exists for each of the above mentioned options a directory
-.IR /etc/network/if\-\fB<option>\fI.d/ 
+.IR /etc/network/if\-\fB<option>\fI.d/
 the scripts in which are run (with no arguments) using
 .BR run\-parts (8)
 after the option itself has been processed. Please note that as
@@ -273,7 +273,7 @@ method of the interface (e.g.,
 .B MODE
 .IR start " if run from ifup, " stop " if run from ifdown"
 .TP
-.B PHASE 
+.B PHASE
 as per MODE, but with finer granularity, distinguishing the
 \fIpre-up\fR, \fIpost-up\fR, \fIpre-down\fR and \fIpost-down\fR phases.
 .TP
