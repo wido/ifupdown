@@ -212,7 +212,7 @@ while($line) {
 print "static method methods[] = {\n";
 %ourmethods = %methods if (our_arch());
 my $method;
-foreach $method (keys %ourmethods) {
+foreach $method (sort keys %ourmethods) {
         print <<EOF;
         {
                 "$method",
