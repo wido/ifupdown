@@ -787,6 +787,23 @@ static bool do_interface(const char *target_iface) {
 		return false;
 	}
 
+	/* Are we configuring a VLAN interface? If so, lock the parent interface as well. */
+
+	char piface[80];
+	FILE *plock = NULL;
+	strncpy(piface, iface, sizeof piface);
+	if ((pch = strchr(piface, '.'))) {
+		*pch = '\0';
+		snprintf(envname, sizeof envname, "IFUPDOWN_%s", piface);
+		char *envval = getenv(envname);
+		if(envval) {
+			fprintf(stderr, "%s: recursion detected for parent interface %s in %s phase\n", argv0, piface, envval);
+			return false;
+		}
+
+		plock = lock_interface(piface, NULL);
+	}
+
 	/* Start by locking this interface */
 
 	bool success = false;
@@ -1088,6 +1105,9 @@ static bool do_interface(const char *target_iface) {
 end:
 	if(lock)
 		fclose(lock);
+
+	if(plock)
+		fclose(plock);
 
 	return success;
 }
