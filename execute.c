@@ -75,7 +75,7 @@ static void set_environ(interface_defn *iface, char *mode, char *phase) {
 		if(strncmp(*envp, "IFUPDOWN_", 9) == 0)
 			n_recursion++;
 
-	const int n_env_entries = iface->n_options + 9 + n_recursion;
+	const int n_env_entries = iface->n_options + 10 + n_recursion;
 	localenv = malloc(sizeof *localenv * (n_env_entries + 1 /* for final NULL */ ));
 
 	char **ppch = localenv;
