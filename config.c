@@ -59,7 +59,7 @@ static int get_line(char **result, size_t *result_len, FILE *f, int *line) {
 		pos -= first;
 	} while ((*result)[0] == '#');
 
-	while ((*result)[pos - 1] == '\\') {
+	while (pos && (*result)[pos - 1] == '\\') {
 		(*result)[--pos] = '\0';
 
 		do {
@@ -91,7 +91,7 @@ static int get_line(char **result, size_t *result_len, FILE *f, int *line) {
 		assert((*result)[pos] == '\0');
 	}
 
-	while (isspace((*result)[pos - 1]))	/* remove trailing whitespace */
+	while (pos && isspace((*result)[pos - 1]))	/* remove trailing whitespace */
 		pos--;
 
 	(*result)[pos] = '\0';
