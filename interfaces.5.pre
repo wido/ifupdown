@@ -164,6 +164,25 @@ for details.)
 Options are usually indented for clarity (as in the example above)
 but are not required to be.
 .P
+.SH INTERFACE TEMPLATES
+It is possible to define interface definition templates and extend
+them using
+.B inherit
+keyword:
+.P
+.EX
+iface ethernet inet static
+    mtu 1500
+    hwaddress 11:22:33:44:55:66
+
+iface eth0 inet static inherits ethernet
+    address 192.168.1.1/24
+.EE
+.P
+This may be useful to separate link-level settings shared by multiple
+interfaces from, for example, IP address settings specific to every
+interface.
+.P
 .SH VLAN AND BRIDGE INTERFACES
 To ease the configuration of VLAN interfaces, interfaces having
 .B .

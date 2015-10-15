@@ -323,6 +323,46 @@ static void clear_seen(void) {
 	}
 }
 
+static interface_defn *get_interface(interfaces_file *defn, const char *iface) {
+	for (interface_defn *currif = defn->ifaces; currif; currif = currif->next) {
+		if (strcmp(iface, currif->logical_iface) == 0) {
+			return currif;
+		}
+	}
+	return NULL;
+}
+
+static interface_defn *copy_variables(interface_defn *destif, interface_defn *srcif) {
+	if (srcif->n_options > destif->max_options) {
+		variable *new_option;
+		new_option = realloc(destif->option, sizeof *new_option * srcif->n_options);
+
+		if (new_option == NULL) {
+			perror(argv0);
+			return NULL;
+		}
+
+		destif->option = new_option;
+		destif->max_options = srcif->n_options;
+	}
+
+	for (int i = 0; i < srcif->n_options; i++) {
+		destif->option[i].name = strdup(srcif->option[i].name);
+		if (!destif->option[i].name) {
+			perror(argv0);
+			return NULL;
+		}
+
+		destif->option[i].value = strdup(srcif->option[i].value);
+		if (!destif->option[i].value) {
+			perror(argv0);
+			return NULL;
+		}
+	}
+	destif->n_options = srcif->n_options;
+
+	return destif;
+}
 
 static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {
 	FILE *f;
@@ -559,6 +599,11 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 				return NULL;
 			}
 
+			currif->automatic = true;
+			currif->max_options = 0;
+			currif->n_options = 0;
+			currif->option = NULL;
+
 			rest = next_word(rest, iface_name, 80);
 			rest = next_word(rest, address_family_name, 80);
 			rest = next_word(rest, method_name, 80);
@@ -580,7 +625,15 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 						return NULL;
 					}
 
-					/* clone_interface(currif, inherits); */
+					interface_defn *otherif = get_interface(defn, inherits);
+					if (otherif == NULL) {
+						fprintf(stderr, "%s:%d: unknown iface to inherit from: %s\n", filename, line, inherits);
+						return NULL;
+					}
+
+					if (copy_variables(currif, otherif) == NULL) {
+						return NULL;
+					}
 				}
 			}
 
@@ -604,11 +657,6 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 
 			if (((!strcmp(address_family_name, "inet")) || (!strcmp(address_family_name, "inet6"))) && (!strcmp(method_name, "loopback")))
 				no_loopback = true;
-
-			currif->automatic = true;
-			currif->max_options = 0;
-			currif->n_options = 0;
-			currif->option = NULL;
 
 			interface_defn **where = &defn->ifaces;
 
