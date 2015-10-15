@@ -603,6 +603,79 @@ run-parts --exit-on-error --verbose /etc/network/if-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
+cat >tests/testcase.14 <<EOF
+auto eth0 eth1 eth2 eth3
+
+iface eth0 inet static
+    address 1.2.3.4/24
+
+iface eth1 inet static wrong
+
+iface eth2 inet static inherits eth0
+
+iface eth3 inet static inherits 
+EOF
+cat >tests/up.14 <<EOF
+====stdout====
+====stderr====
+tests/testcase.14:6: extra parameter for the iface line not understood and ignored: wrong
+tests/testcase.14:10: 'inherits' keyword is missing a parameter
+./ifup: couldn't read interfaces file "tests/testcase.14"
+EOF
+
+cat >tests/testcase.15 <<EOF
+auto eth0 eth3
+
+iface eth0 inet static
+    address 1.2.3.4/24
+
+iface eth3 inet static inherits
+EOF
+cat >tests/up.15 <<EOF
+====stdout====
+====stderr====
+tests/testcase.15:6: 'inherits' keyword is missing a parameter
+./ifup: couldn't read interfaces file "tests/testcase.15"
+EOF
+
+cat >tests/testcase.16 <<EOF
+auto eth0 eth1
+
+iface ethernet inet static
+    mtu 1500
+    hwaddress 12:34:56:89:0a:bc
+
+iface eth0 inet static
+    address 1.2.3.4/24
+
+iface eth1 inet static inherits ethernet
+    address 1.2.3.4/24
+
+EOF
+cat >tests/up.16 <<EOF
+====stdout====
+====stderr====
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip link set up dev lo 2>/dev/null
+Configuring interface lo=lo (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth0=eth0 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.0 broadcast 1.2.3.255     dev eth0 label eth0
+ip link set dev eth0   up
+
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth1=eth1 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.4/255.255.255.0 broadcast 1.2.3.255     dev eth1 label eth1
+ip link set dev eth1   up
+
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+EOF
+
+
 result=true
 for test in 1 2 3 4 5 6 7 8 9 10; do
         args="$(cat tests/testcase.$test | sed -n 's/^# RUN: //p')"
@@ -623,7 +696,7 @@ for test in 1 2 3 4 5 6 7 8 9 10; do
         echo "=========="
 done
 
-for test in 11 12 13; do
+for test in 11 12 13 14 15 16; do
         args="-a"
         ./ifup -nv --force -i tests/testcase.$test $args \
                 >tests/up-res-out.$test 2>tests/up-res-err.$test || 

@@ -551,6 +551,7 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			char iface_name[80];
 			char address_family_name[80];
 			char method_name[80];
+			char inherits[80];
 
 			currif = malloc(sizeof *currif);
 			if (!currif) {
@@ -569,8 +570,18 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			}
 
 			if (rest[0] != '\0') {
-				fprintf(stderr, "%s:%d: too many parameters for iface line\n", filename, line);
-				return NULL;
+				rest = next_word(rest, inherits, 80);
+				if (strcmp(inherits, "inherits") != 0) {
+					fprintf(stderr, "%s:%d: extra parameter for the iface line not understood and ignored: %s\n", filename, line, inherits);
+				} else {
+					rest = next_word(rest, inherits, 80);
+					if (rest == NULL) {
+						fprintf(stderr, "%s:%d: 'inherits' keyword is missing a parameter\n", filename, line);
+						return NULL;
+					}
+
+					/* clone_interface(currif, inherits); */
+				}
 			}
 
 			currif->logical_iface = strdup(iface_name);
