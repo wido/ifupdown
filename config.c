@@ -323,10 +323,12 @@ static void clear_seen(void) {
 	}
 }
 
-static interface_defn *get_interface(interfaces_file *defn, const char *iface) {
+static interface_defn *get_interface(interfaces_file *defn, const char *iface, const char *addr_fam) {
 	for (interface_defn *currif = defn->ifaces; currif; currif = currif->next) {
 		if (strcmp(iface, currif->logical_iface) == 0) {
-			return currif;
+			/* addr_fam == NULL matches any address family */
+			if ((addr_fam == NULL) || (strcmp(addr_fam, currif->address_family->name) == 0))
+				return currif;
 		}
 	}
 	return NULL;
@@ -625,9 +627,9 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 						return NULL;
 					}
 
-					interface_defn *otherif = get_interface(defn, inherits);
+					interface_defn *otherif = get_interface(defn, inherits, address_family_name);
 					if (otherif == NULL) {
-						fprintf(stderr, "%s:%d: unknown iface to inherit from: %s\n", filename, line, inherits);
+						fprintf(stderr, "%s:%d: unknown iface to inherit from: %s (%s)\n", filename, line, inherits, address_family_name);
 						return NULL;
 					}
 

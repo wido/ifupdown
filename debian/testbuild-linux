@@ -645,11 +645,18 @@ iface ethernet inet static
     mtu 1500
     hwaddress 12:34:56:89:0a:bc
 
+iface ethernet inet6 static
+    mtu 1492
+    hwaddress 12:34:ff:fe:0a:bc
+
 iface eth0 inet static
     address 1.2.3.4/24
 
 iface eth1 inet static inherits ethernet
     address 1.2.3.4/24
+
+iface eth1 inet6 static inherits ethernet
+    address 3ffe:ffff:120::fffe:1/64
 
 EOF
 cat >tests/up.16 <<EOF
@@ -671,6 +678,17 @@ run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 ip addr add 1.2.3.4/255.255.255.0 broadcast 1.2.3.255     dev eth1 label eth1
 ip link set dev eth1 mtu 1500 address 12:34:56:89:0a:bc up
 
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth1=eth1 (inet6)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl -q -e -w net.ipv6.conf.eth1.autoconf=0
+ip link set dev eth1 mtu 1492 address 12:34:ff:fe:0a:bc up
+ip -6 addr add 3ffe:ffff:120::fffe:1/64  dev eth1 
+
+/lib/ifupdown/settle-dad.sh
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
