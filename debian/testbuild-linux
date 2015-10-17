@@ -613,13 +613,17 @@ iface eth1 inet static wrong
 
 iface eth2 inet static inherits eth0
 
-iface eth3 inet static inherits 
+iface eth3 inet inherits eth0
+
+iface eth4 inherits eth0
+
+iface eth5 inet static inherits 
 EOF
 cat >tests/up.14 <<EOF
 ====stdout====
 ====stderr====
 tests/testcase.14:6: extra parameter for the iface line not understood and ignored: wrong
-tests/testcase.14:10: 'inherits' keyword is missing a parameter
+tests/testcase.14:14: 'inherits' keyword is missing a parameter
 ./ifup: couldn't read interfaces file "tests/testcase.14"
 EOF
 
@@ -639,7 +643,7 @@ tests/testcase.15:6: 'inherits' keyword is missing a parameter
 EOF
 
 cat >tests/testcase.16 <<EOF
-auto eth0 eth1
+auto eth0 eth1 eth2 eth3
 
 iface ethernet inet static
     mtu 1500
@@ -658,6 +662,14 @@ iface eth1 inet static inherits ethernet
 iface eth1 inet6 static inherits ethernet
     address 3ffe:ffff:120::fffe:1/64
 
+iface eth2 inet inherits ethernet
+    address 1.2.3.5/24
+
+iface eth2 inet6 inherits ethernet
+    address 3ffe:ffff:120::fffe:1/64
+
+iface eth3 inherits ethernet
+    address 1.2.3.5/24
 EOF
 cat >tests/up.16 <<EOF
 ====stdout====
@@ -689,6 +701,29 @@ ip link set dev eth1 mtu 1492 address 12:34:ff:fe:0a:bc up
 ip -6 addr add 3ffe:ffff:120::fffe:1/64  dev eth1 
 
 /lib/ifupdown/settle-dad.sh
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth2=eth2 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.5/255.255.255.0 broadcast 1.2.3.255 	  dev eth2 label eth2
+ip link set dev eth2 mtu 1500 address 12:34:56:89:0a:bc up
+
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth2=eth2 (inet6)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+modprobe -q net-pf-10 > /dev/null 2>&1 || true # ignore failure.
+
+
+sysctl -q -e -w net.ipv6.conf.eth2.autoconf=0
+ip link set dev eth2 mtu 1492 address 12:34:ff:fe:0a:bc up
+ip -6 addr add 3ffe:ffff:120::fffe:1/64  dev eth2 
+
+/lib/ifupdown/settle-dad.sh
+run-parts --exit-on-error --verbose /etc/network/if-up.d
+Configuring interface eth3=eth3 (inet)
+run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+ip addr add 1.2.3.5/255.255.255.0 broadcast 1.2.3.255 	  dev eth3 label eth3
+ip link set dev eth3 mtu 1500 address 12:34:56:89:0a:bc up
+
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF

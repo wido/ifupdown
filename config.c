@@ -15,6 +15,18 @@
 
 #include "header.h"
 
+typedef enum keyword keyword;
+
+enum keyword {
+	NIL = -1,
+	INHERITS
+};
+
+static const char *keywords[] = {
+	[INHERITS] = "inherits",
+	NULL
+};
+
 static int get_line(char **result, size_t *result_len, FILE *f, int *line) {
 	size_t pos;
 
@@ -136,6 +148,16 @@ static method *get_method(address_family *af, const char *name) {
 			return &af->method[i];
 
 	return NULL;
+}
+
+static keyword get_keyword(const char *word) {
+	for (int i = 0; keywords[i]; i++) {
+		if (strcmp(keywords[i], word) == 0) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 static allowup_defn *get_allowup(allowup_defn **allowups, const char *name) {
@@ -594,6 +616,7 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			char address_family_name[80];
 			char method_name[80];
 			char inherits[80];
+			keyword kw = NIL;
 
 			currif = malloc(sizeof *currif);
 			if (!currif) {
@@ -607,34 +630,71 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			currif->option = NULL;
 
 			rest = next_word(rest, iface_name, 80);
-			rest = next_word(rest, address_family_name, 80);
-			rest = next_word(rest, method_name, 80);
-
 			if (rest == NULL) {
 				fprintf(stderr, "%s:%d: too few parameters for iface line\n", filename, line);
 				free(currif);
 				return NULL;
 			}
 
-			if (rest[0] != '\0') {
-				rest = next_word(rest, inherits, 80);
-				if (strcmp(inherits, "inherits") != 0) {
-					fprintf(stderr, "%s:%d: extra parameter for the iface line not understood and ignored: %s\n", filename, line, inherits);
-				} else {
-					rest = next_word(rest, inherits, 80);
-					if (rest == NULL) {
-						fprintf(stderr, "%s:%d: 'inherits' keyword is missing a parameter\n", filename, line);
-						return NULL;
-					}
+			rest = next_word(rest, address_family_name, 80);
 
-					interface_defn *otherif = get_interface(defn, inherits, address_family_name);
+			if (rest != NULL) {
+				currif->address_family = get_address_family(addr_fams, address_family_name);
+				if (currif->address_family == NULL) {
+					kw = get_keyword(address_family_name);
+				} else {
+					rest = next_word(rest, method_name, 80);
+					if (rest != NULL) {
+						currif->method = get_method(currif->address_family, method_name);
+						if (currif->method == NULL) {
+							kw = get_keyword(method_name);
+						}
+					}
+				}
+			}
+
+			if ((currif->address_family == NULL) && (kw == NIL)) {
+				fprintf(stderr, "%s:%d: unknown or no address type and no inherits keyword specified\n", filename, line);
+				return NULL;
+			}
+
+			if ((currif->method == NULL) && (kw == NIL)) {
+				fprintf(stderr, "%s:%d: unknown or no method and no inherits keyword specified\n", filename, line);
+				return NULL;	/* FIXME */
+			}
+
+			if (kw == NIL) {
+				rest = next_word(rest, inherits, 80);
+				if (rest != NULL) {
+					kw = get_keyword(inherits);
+					if (kw == NIL) {
+						fprintf(stderr, "%s:%d: extra parameter for the iface line not understood and ignored: %s\n", filename, line, inherits);
+					}
+				}
+			}
+
+			if (kw != NIL) {
+				rest = next_word(rest, inherits, 80);
+				if (rest == NULL) {
+					fprintf(stderr, "%s:%d: '%s' keyword is missing a parameter\n", filename, line, keywords[kw]);
+					return NULL;
+				}
+				if (kw == INHERITS) {
+					interface_defn *otherif = get_interface(defn, inherits, currif->address_family ? address_family_name : NULL);
 					if (otherif == NULL) {
-						fprintf(stderr, "%s:%d: unknown iface to inherit from: %s (%s)\n", filename, line, inherits, address_family_name);
+						fprintf(stderr, "%s:%d: unknown iface to inherit from: %s (%s)\n", filename, line, inherits, currif->address_family ? address_family_name : "*");
 						return NULL;
 					}
 
 					if (copy_variables(currif, otherif) == NULL) {
 						return NULL;
+					}
+					if (currif->address_family == NULL) {
+						currif->address_family = otherif->address_family;
+					}
+
+					if (currif->method == NULL) {
+						currif->method = otherif->method;
 					}
 				}
 			}
@@ -643,18 +703,6 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			if (!currif->logical_iface) {
 				perror(filename);
 				return NULL;
-			}
-
-			currif->address_family = get_address_family(addr_fams, address_family_name);
-			if (!currif->address_family) {
-				fprintf(stderr, "%s:%d: unknown address type\n", filename, line);
-				return NULL;
-			}
-
-			currif->method = get_method(currif->address_family, method_name);
-			if (!currif->method) {
-				fprintf(stderr, "%s:%d: unknown method\n", filename, line);
-				return NULL;	/* FIXME */
 			}
 
 			if (((!strcmp(address_family_name, "inet")) || (!strcmp(address_family_name, "inet6"))) && (!strcmp(method_name, "loopback")))
