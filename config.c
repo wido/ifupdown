@@ -624,10 +624,12 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 				return NULL;
 			}
 
-			currif->automatic = true;
-			currif->max_options = 0;
-			currif->n_options = 0;
-			currif->option = NULL;
+			*currif = (interface_defn) {
+				.automatic = true,
+				.max_options = 0,
+				.n_options = 0,
+				.option = NULL,
+			};
 
 			rest = next_word(rest, iface_name, 80);
 			if (rest == NULL) {
