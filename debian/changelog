@@ -2,6 +2,7 @@ ifupdown (0.7.55) UNRELEASED; urgency=medium
 
   [ Guus Sliepen ]
   * Add per-interface state files with locking.
+    - Also detects and aborts on recursion. Closes: #231197
   * Break up main() in smaller functions.
   * Return a non-zero exit code when (de)configuring an interface fails.
     Closes: 773539
