@@ -866,7 +866,9 @@ static bool do_interface(const char *target_iface) {
 				if (verbose)
 					fprintf(stderr, "Running mapping script %s on %s\n", currmap->script, liface);
 
-				run_mapping(iface, liface, sizeof(liface), currmap);
+				if(!run_mapping(iface, liface, sizeof(liface), currmap))
+					goto end;
+
 				break;
 			}
 		}

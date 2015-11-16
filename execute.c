@@ -574,10 +574,13 @@ bool run_mapping(const char *physical, char *logical, int len, mapping_defn *map
 	FILE *in, *out;
 	int status;
 	pid_t pid;
+	bool result = false;
 
 	pid = popen2(&in, &out, map->script, physical, NULL);
-	if (pid == 0)
+	if (pid == 0) {
+		fprintf(stderr, "Could not execute mapping script %s on %s: %s\n", map->script, physical, strerror(errno));
 		return false;
+	}
 
 	for (int i = 0; i < map->n_mappings; i++)
 		fprintf(in, "%s\n", map->mapping[i]);
@@ -591,10 +594,16 @@ bool run_mapping(const char *physical, char *logical, int len, mapping_defn *map
 
 			while (pch >= logical && isspace(*pch))
 				*(pch--) = '\0';
+
+			result = true;
+		} else {
+			fprintf(stderr, "No output from mapping script %s on %s\n", map->script, physical);
 		}
+	} else {
+		fprintf(stderr, "Error trying to executing mapping script %s on %s\n", map->script, physical);
 	}
 
 	fclose(out);
 
-	return true;
+	return result;
 }
