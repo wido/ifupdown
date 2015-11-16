@@ -657,11 +657,13 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 
 			if ((currif->address_family == NULL) && (kw == NIL)) {
 				fprintf(stderr, "%s:%d: unknown or no address type and no inherits keyword specified\n", filename, line);
+				free(currif);
 				return NULL;
 			}
 
 			if ((currif->method == NULL) && (kw == NIL)) {
 				fprintf(stderr, "%s:%d: unknown or no method and no inherits keyword specified\n", filename, line);
+				free(currif);
 				return NULL;	/* FIXME */
 			}
 
@@ -679,18 +681,22 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 				rest = next_word(rest, inherits, 80);
 				if (rest == NULL) {
 					fprintf(stderr, "%s:%d: '%s' keyword is missing a parameter\n", filename, line, keywords[kw]);
+					free(currif);
 					return NULL;
 				}
 				if (kw == INHERITS) {
 					interface_defn *otherif = get_interface(defn, inherits, currif->address_family ? address_family_name : NULL);
 					if (otherif == NULL) {
 						fprintf(stderr, "%s:%d: unknown iface to inherit from: %s (%s)\n", filename, line, inherits, currif->address_family ? address_family_name : "*");
+						free(currif);
 						return NULL;
 					}
 
 					if (copy_variables(currif, otherif) == NULL) {
+						free(currif);
 						return NULL;
 					}
+
 					if (currif->address_family == NULL) {
 						currif->address_family = otherif->address_family;
 					}
@@ -704,6 +710,7 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			currif->logical_iface = strdup(iface_name);
 			if (!currif->logical_iface) {
 				perror(filename);
+				free(currif);
 				return NULL;
 			}
 
