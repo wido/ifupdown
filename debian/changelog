@@ -5,10 +5,24 @@ ifupdown (0.7.55) UNRELEASED; urgency=medium
   * Break up main() in smaller functions.
   * Return a non-zero exit code when (de)configuring an interface fails.
     Closes: 773539
+  * Add blank lines around examples in interfaces(5). Closes: #791444
+  * Enable RFC 4361 DDNS support when using dhclient, as suggested by
+    Nicolas Cuissard. Closes: #799257
+  * Lock parent interface when configuration VLAN interfaces.
+  * Apply fixes for issues found by AddressSanitizer and Clang Static
+    Analyzer.
+  * Drop the versioned dependency on initscripts. Closes: #804978
+  * Check for errors when running mapping scripts. Closes: #246771
+
+  [ Andrew Shadura ]
+  * Implement interface inheritance using the "inherit" keyword.
 
   [ Jérémy Bobbio ]
   * Output methods in stable order when generating C code to make
     builds reproducible. Closes: #762388
+
+  [ Javier Barroso ]
+  * Fix detection of curlftpfs mounts. Closes: #792896
 
  -- Guus Sliepen <guus@debian.org>  Fri, 19 Jun 2015 21:09:27 +0200
 
