@@ -1,0 +1,18 @@
+[Unit]
+Description=Raise network interfaces
+Documentation=man:interfaces(5)
+DefaultDependencies=no
+Wants=network-pre.target
+Wants=systemd-udev-settle.service
+After=network-pre.target systemd-udev-settle.service
+Before=network-online.target shutdown.target
+Conflicts=shutdown.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ifup -a
+ExecStop=/sbin/ifdown -a
+RemainAfterExit=true
