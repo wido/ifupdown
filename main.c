@@ -193,54 +193,6 @@ static FILE *lock_interface(const char *iface, char **state) {
 	return lock_fp;
 }
 
-static const char *read_state(const char *iface) {
-	char *ret = NULL;
-
-	FILE *lock_fp = lock_state(argv0);
-	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
-
-	if (state_fp == NULL) {
-		if (!no_act) {
-			fprintf(stderr, "%s: failed to open statefile %s: %s\n", argv0, statefile, strerror(errno));
-			exit(1);
-		} else {
-			goto end;
-		}
-	}
-
-	if (!no_act) {
-		int flags = fcntl(fileno(state_fp), F_GETFD);
-
-		if (flags < 0 || fcntl(fileno(state_fp), F_SETFD, flags | FD_CLOEXEC) < 0) {
-			fprintf(stderr, "%s: failed to set FD_CLOEXEC on statefile %s: %s\n", argv0, statefile, strerror(errno));
-			exit(1);
-		}
-	}
-
-	char buf[80];
-	char *p;
-
-	while ((p = fgets(buf, sizeof buf, state_fp)) != NULL) {
-		char *pch = strip(buf);
-
-		if (strncmp(iface, pch, strlen(iface)) == 0) {
-			if (pch[strlen(iface)] == '=') {
-				ret = pch + strlen(iface) + 1;
-				break;
-			}
-		}
-	}
-
- end:
-	if (state_fp)
-		fclose(state_fp);
-
-	if (lock_fp)
-		fclose(lock_fp);
-
-	return ret;
-}
-
 static void read_all_state(char ***ifaces, int *n_ifaces) {
 	FILE *lock_fp = lock_state(argv0);
 	FILE *state_fp = fopen(statefile, no_act ? "r" : "a+");
