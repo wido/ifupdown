@@ -166,8 +166,8 @@ but are not required to be.
 .P
 .SH INTERFACE TEMPLATES
 It is possible to define interface definition templates and extend
-them using
-.B inherit
+them using the
+.B inherits
 keyword:
 .P
 .EX

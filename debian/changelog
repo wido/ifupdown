@@ -16,7 +16,7 @@ ifupdown (0.7.55) UNRELEASED; urgency=medium
   * Check for errors when running mapping scripts. Closes: #246771
 
   [ Andrew Shadura ]
-  * Implement interface inheritance using the "inherit" keyword.
+  * Implement interface inheritance using the "inherits" keyword.
 
   [ Jérémy Bobbio ]
   * Output methods in stable order when generating C code to make
