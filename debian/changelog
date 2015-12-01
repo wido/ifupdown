@@ -14,6 +14,8 @@ ifupdown (0.7.55) UNRELEASED; urgency=medium
     Analyzer.
   * Drop the versioned dependency on initscripts. Closes: #804978
   * Check for errors when running mapping scripts. Closes: #246771
+  * Wait for an IPv6 link-local address before starting a DHCPv6 client.
+    Closes: 806673
 
   [ Andrew Shadura ]
   * Implement interface inheritance using the "inherits" keyword.

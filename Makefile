@@ -26,6 +26,7 @@ install :
 	ln -s /sbin/ifup ${BASEDIR}/sbin/ifdown
 	ln -s /sbin/ifup ${BASEDIR}/sbin/ifquery
 	install -D -m 0755 settle-dad.sh $(BASEDIR)/lib/ifupdown/settle-dad.sh
+	install -D -m 0755 wait-for-ll6.sh $(BASEDIR)/lib/ifupdown/wait-for-ll6.sh
 
 clean :
 	rm -f *.o $(patsubst %.defn,%.c,$(DEFNFILES)) *~
