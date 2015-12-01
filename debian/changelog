@@ -1,4 +1,4 @@
-ifupdown (0.7.55) UNRELEASED; urgency=medium
+ifupdown (0.8) unstable; urgency=medium
 
   [ Guus Sliepen ]
   * Add per-interface state files with locking.
@@ -16,6 +16,7 @@ ifupdown (0.7.55) UNRELEASED; urgency=medium
   * Check for errors when running mapping scripts. Closes: #246771
   * Wait for an IPv6 link-local address before starting a DHCPv6 client.
     Closes: 806673
+  * Add a systemd service file.
 
   [ Andrew Shadura ]
   * Implement interface inheritance using the "inherits" keyword.
@@ -27,7 +28,7 @@ ifupdown (0.7.55) UNRELEASED; urgency=medium
   [ Javier Barroso ]
   * Fix detection of curlftpfs mounts. Closes: #792896
 
- -- Guus Sliepen <guus@debian.org>  Fri, 19 Jun 2015 21:09:27 +0200
+ -- Guus Sliepen <guus@debian.org>  Tue, 01 Dec 2015 23:09:54 +0100
 
 ifupdown (0.7.54) unstable; urgency=medium
 

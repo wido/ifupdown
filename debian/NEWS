@@ -1,3 +1,29 @@
+ifupdown (0.8) unstable; urgency=medium
+
+  Ifupdown now comes with a systemd service file. Any options specified in
+  /etc/default/networking will no longer be used. If you are using
+  CONFIGURE_INTERFACES=no, then run "systemctl disable networking" instead.
+  If you are using EXCLUDE_INTERFACES, then edit /etc/network/interfaces and
+  remove those interfaces from any "auto" keywords.
+
+  Ifupdown will now be more strict when errors occur, and will also properly
+  return a non-zero exit code when (de)configuring an interface fails. Please
+  ensure your /etc/network/interfaces is correct and that your interfaces can
+  be brought up and down without errors, especially during system startup.
+
+  Ifupdown now has more fine-grained locking, allowing concurrent calls of
+  ifup and ifdown. It is also allowed to call ifup and ifdown from a (pre-)up
+  or (post-)down line from /etc/network/interfaces, as long as no recursion
+  occurs.
+
+  You can now use the "inherits" keyword to copy settings from another
+  interface stanza.
+
+  RFC 4361 DDNS support is now enabled by default for inet dhcp interfaces if
+  isc-dhcp-client is installed.
+
+ -- Guus Sliepen <guus@debian.org>  Sun, 22 Nov 2015 21:19:44 +0100
+
 ifupdown (0.7~rc1+experimental) experimental; urgency=low
 
     The --all option to ifup and ifquery can now be combined with the
