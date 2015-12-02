@@ -2,6 +2,7 @@ ifupdown (0.8.1) UNRELEASED; urgency=medium
 
   * Allow recursively calling ifup on the same physical interface when --force
     is used. Closes: #806888
+  * Read /etc/default/networking when started from systemd. Closes: #806883
 
  -- Guus Sliepen <guus@debian.org>  Wed, 02 Dec 2015 22:32:19 +0100
 
