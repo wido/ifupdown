@@ -152,7 +152,9 @@ static bool is_locked(const char *iface) {
 	struct flock lock = {.l_type = F_WRLCK, .l_whence = SEEK_SET};
 
 	if (fcntl(fileno(lock_fp), F_GETLK, &lock) < 0)
-		return false;
+		lock.l_type = F_UNLCK;
+
+	fclose(lock_fp);
 
 	return lock.l_type != F_UNLCK;
 }
