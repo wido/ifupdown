@@ -1,4 +1,4 @@
-ifupdown (0.8.1) UNRELEASED; urgency=medium
+ifupdown (0.8.1) unstable; urgency=medium
 
   The /etc/default/networking file is now read even when systemd is used,
   although its use is not recommended.
