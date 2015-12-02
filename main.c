@@ -140,6 +140,23 @@ static char *strip(char *buf) {
 	return buf;
 }
 
+static bool is_locked(const char *iface) {
+	char filename[sizeof statefile + strlen(iface) + 2];
+	snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
+
+	FILE *lock_fp = fopen(filename, "r");
+
+	if (lock_fp == NULL)
+		return false;
+
+	struct flock lock = {.l_type = F_WRLCK, .l_whence = SEEK_SET};
+
+	if (fcntl(fileno(lock_fp), F_GETLK, &lock) < 0)
+		return false;
+
+	return lock.l_type != F_UNLCK;
+}
+
 static FILE *lock_interface(const char *iface, char **state) {
 	char filename[sizeof statefile + strlen(iface) + 2];
 	snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
@@ -734,7 +751,7 @@ static bool do_interface(const char *target_iface) {
 	char envname[160];
 	snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
 	char *envval = getenv(envname);
-	if(envval) {
+	if(envval && is_locked(iface)) {
 		fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv0, iface, envval);
 		return false;
 	}
@@ -748,7 +765,7 @@ static bool do_interface(const char *target_iface) {
 		*pch = '\0';
 		snprintf(envname, sizeof envname, "IFUPDOWN_%s", piface);
 		char *envval = getenv(envname);
-		if(envval) {
+		if(envval && is_locked(piface)) {
 			fprintf(stderr, "%s: recursion detected for parent interface %s in %s phase\n", argv0, piface, envval);
 			return false;
 		}

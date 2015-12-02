@@ -1,3 +1,10 @@
+ifupdown (0.8.1) UNRELEASED; urgency=medium
+
+  * Allow recursively calling ifup on the same physical interface when --force
+    is used. Closes: #806888
+
+ -- Guus Sliepen <guus@debian.org>  Wed, 02 Dec 2015 22:32:19 +0100
+
 ifupdown (0.8) unstable; urgency=medium
 
   [ Guus Sliepen ]
