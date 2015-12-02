@@ -1,3 +1,10 @@
+ifupdown (0.8.1) UNRELEASED; urgency=medium
+
+  The /etc/default/networking file is now read even when systemd is used,
+  although its use is not recommended.
+
+ -- Guus Sliepen <guus@debian.org>  Wed, 02 Dec 2015 23:25:41 +0100
+
 ifupdown (0.8) unstable; urgency=medium
 
   Ifupdown now comes with a systemd service file. Any options specified in

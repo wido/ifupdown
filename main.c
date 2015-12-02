@@ -424,6 +424,30 @@ static int max_options = 0;
 static int n_target_ifaces;
 static char **target_iface;
 
+static void parse_environment_variables(void) {
+	const char *val = getenv("VERBOSE");
+	if(val && !strcmp(val, "yes"))
+		verbose = true;
+
+	val = getenv("CONFIGURE_INTERFACES");
+	if(val && !strcmp(val, "no"))
+		no_act = true;
+
+	val = getenv("EXCLUDE_INTERFACES");
+	if(val) {
+		char *excludes = strdup(val);
+		for(char *tok = strtok(excludes, " \t\n"); tok; tok = strtok(NULL, " \t\n")) {
+			excludeints++;
+			excludeint = realloc(excludeint, excludeints * sizeof *excludeint);
+			if (excludeint == NULL) {
+				perror(argv0);
+				exit(1);
+			}
+			excludeint[excludeints - 1] = tok;
+		}
+	}
+}
+
 static void parse_options(int *argc, char **argv[]) {
 	static const struct option long_opts[] = {
 		{"help", no_argument, NULL, 'h'},
@@ -442,6 +466,7 @@ static void parse_options(int *argc, char **argv[]) {
 		{"option", required_argument, NULL, 'o'},
 		{"list", no_argument, NULL, 'l'},
 		{"state", no_argument, NULL, 6},
+		{"read-environment", no_argument, NULL, 8},
 		{0, 0, 0, 0}
 	};
 
@@ -550,6 +575,10 @@ static void parse_options(int *argc, char **argv[]) {
 				usage();
 
 			state_query = true;
+			break;
+
+		case 8: /* --read-environment */
+			parse_environment_variables();
 			break;
 
 		default:

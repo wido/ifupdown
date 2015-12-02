@@ -13,6 +13,7 @@ WantedBy=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/ifup -a
-ExecStop=/sbin/ifdown -a
+EnvironmentFile=-/etc/default/networking
+ExecStart=/sbin/ifup -a --read-environment
+ExecStop=/sbin/ifdown -a --read-environment
 RemainAfterExit=true
