@@ -3,6 +3,10 @@ ifupdown (0.8.2) UNRELEASED; urgency=medium
   [ Martin Pitt ]
   * Some tweaks to networking.service. Closes: #806949
 
+  [ Guus Sliepen ]
+  * Don't call udevadm settle if configuring interfaces is disabled or all
+    auto interfaces are excluded.
+
  -- Guus Sliepen <guus@debian.org>  Thu, 03 Dec 2015 13:06:01 +0100
 
 ifupdown (0.8.1) unstable; urgency=medium

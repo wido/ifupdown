@@ -13,7 +13,7 @@ WantedBy=multi-user.target
 [Service]
 Type=oneshot
 EnvironmentFile=-/etc/default/networking
-ExecStartPre=-/bin/sh -c '[ -n "$(ifquery --list --exclude=lo)" ] && udevadm settle'
+ExecStartPre=-/bin/sh -c '[ "$CONFIGURE_INTERFACES" != "no" ] && [ -n "$(ifquery --read-environment --list --exclude=lo)" ] && udevadm settle'
 ExecStart=/sbin/ifup -a --read-environment
 ExecStop=/sbin/ifdown -a --read-environment
 RemainAfterExit=true
