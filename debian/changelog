@@ -6,6 +6,7 @@ ifupdown (0.8.2) UNRELEASED; urgency=medium
   [ Guus Sliepen ]
   * Don't call udevadm settle if configuring interfaces is disabled or all
     auto interfaces are excluded.
+  * Start ifupdown after sysctl.conf and modules have been loaded.
 
  -- Guus Sliepen <guus@debian.org>  Thu, 03 Dec 2015 13:06:01 +0100
 
