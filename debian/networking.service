@@ -2,10 +2,9 @@
 Description=Raise network interfaces
 Documentation=man:interfaces(5)
 DefaultDependencies=no
-Wants=network-pre.target
-Wants=systemd-udev-settle.service
-After=network-pre.target systemd-udev-settle.service
-Before=network-online.target shutdown.target
+Wants=network.target
+After=local-fs.target network-pre.target apparmor.service
+Before=network.target shutdown.target
 Conflicts=shutdown.target
 
 [Install]
@@ -14,6 +13,7 @@ WantedBy=multi-user.target
 [Service]
 Type=oneshot
 EnvironmentFile=-/etc/default/networking
+ExecStartPre=-/bin/sh -c '[ -n "$(ifquery --list --exclude=lo)" ] && udevadm settle'
 ExecStart=/sbin/ifup -a --read-environment
 ExecStop=/sbin/ifdown -a --read-environment
 RemainAfterExit=true
