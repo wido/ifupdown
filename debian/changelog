@@ -1,4 +1,4 @@
-ifupdown (0.8.2) UNRELEASED; urgency=medium
+ifupdown (0.8.2) unstable; urgency=medium
 
   [ Martin Pitt ]
   * Some tweaks to networking.service. Closes: #806949
@@ -11,7 +11,7 @@ ifupdown (0.8.2) UNRELEASED; urgency=medium
     don't like it. Closes: #806964
   * Clarify configuration of dual-stack interfaces.
 
- -- Guus Sliepen <guus@debian.org>  Thu, 03 Dec 2015 13:06:01 +0100
+ -- Guus Sliepen <guus@debian.org>  Fri, 04 Dec 2015 23:52:30 +0100
 
 ifupdown (0.8.1) unstable; urgency=medium
 
