@@ -40,19 +40,21 @@ source interfaces.d/machine\-dependent
 
 source-directory interfaces.d
 
-mapping eth0
- 	script /usr/local/sbin/map\-scheme
- 	map HOME eth0\-home
- 	map WORK eth0\-work
+iface eth0 inet dhcp
 
-iface eth0\-home inet static
- 	address 192.168.1.1
- 	netmask 255.255.255.0
- 	up flush\-mail
+iface eth0 inet6 auto
 
-iface eth0\-work inet dhcp
+mapping eth1
+	script /usr/local/sbin/map\-scheme
+	map HOME eth0\-home
+	map WORK eth0\-work
 
-iface eth1 inet dhcp
+iface eth1\-home inet static
+	address 192.168.1.2/24
+	gateway 192.168.1.1
+	up flush\-mail
+
+iface eth1\-work inet dhcp
 .EE
 .P
 Lines beginning with the word "auto" are used to identify the physical
@@ -164,6 +166,14 @@ for details.)
 Options are usually indented for clarity (as in the example above)
 but are not required to be.
 .P
+Multiple "iface" stanzas can be given for the same interface, in which case all
+of the configured addresses and options for that interface will be applied when
+bringing up that interface.  This is useful to configure both IPv4 and IPv6
+addresses on the same interface (although if no inet6 stanza is present, the
+kernel will normally still perform stateless address autoconfiguration if there
+is an IPv6 route advertisement daemon on the network). It can also be used to
+configure multiple addresses of the same type on a single interface.
+.P
 .SH INTERFACE TEMPLATES
 It is possible to define interface definition templates and extend
 them using the
@@ -172,11 +182,11 @@ keyword:
 .P
 .EX
 iface ethernet inet static
-    mtu 1500
-    hwaddress 11:22:33:44:55:66
+	mtu 1500
+	hwaddress 11:22:33:44:55:66
 
 iface eth0 inet static inherits ethernet
-    address 192.168.1.1/24
+	address 192.168.1.2/24
 .EE
 .P
 This may be useful to separate link-level settings shared by multiple
