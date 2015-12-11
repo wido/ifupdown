@@ -700,7 +700,6 @@ sysctl -q -e -w net.ipv6.conf.eth1.autoconf=0
 ip link set dev eth1 mtu 1492 address 12:34:ff:fe:0a:bc up
 ip -6 addr add 3ffe:ffff:120::fffe:1/64  dev eth1 
 
-/lib/ifupdown/settle-dad.sh
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface eth2=eth2 (inet)
 run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
@@ -717,7 +716,6 @@ sysctl -q -e -w net.ipv6.conf.eth2.autoconf=0
 ip link set dev eth2 mtu 1492 address 12:34:ff:fe:0a:bc up
 ip -6 addr add 3ffe:ffff:120::fffe:1/64  dev eth2 
 
-/lib/ifupdown/settle-dad.sh
 run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface eth3=eth3 (inet)
 run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
