@@ -140,9 +140,16 @@ static char *strip(char *buf) {
 	return buf;
 }
 
+static void sanitize_file_name(char *name) {
+  for (; *name; name++)
+    if (*name == '/')
+      *name = '.';
+}
+
 static bool is_locked(const char *iface) {
 	char filename[sizeof statefile + strlen(iface) + 2];
 	snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
+	sanitize_file_name(filename + sizeof statefile);
 
 	FILE *lock_fp = fopen(filename, "r");
 
@@ -161,7 +168,10 @@ static bool is_locked(const char *iface) {
 
 static FILE *lock_interface(const char *iface, char **state) {
 	char filename[sizeof statefile + strlen(iface) + 2];
-	snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
+	char *siface = strdup(iface);
+	sanitize_file_name(siface);
+	snprintf(filename, sizeof filename, "%s.%s", statefile, siface);
+	free(siface);
 
 	FILE *lock_fp = fopen(filename, no_act ? "r" : "a+");
 
@@ -339,12 +349,6 @@ static void update_state(const char *iface, const char *state, FILE *lock_fp) {
 
 	if (lock_fp)
 		fclose(lock_fp);
-}
-
-static void sanitize_file_name(char *name) {
-	for (; *name; name++)
-		if (*name == '/')
-			*name = '.';
 }
 
 bool make_pidfile_name(char *name, size_t size, const char *command, interface_defn * ifd) {
@@ -780,7 +784,10 @@ static bool do_interface(const char *target_iface) {
 	/* Bail out if we are being called recursively on the same interface */
 
 	char envname[160];
-	snprintf(envname, sizeof envname, "IFUPDOWN_%s", iface);
+	char *siface = strdup(iface);
+	sanitize_file_name(siface);
+	snprintf(envname, sizeof envname, "IFUPDOWN_%s", siface);
+	free(siface);
 	char *envval = getenv(envname);
 	if(envval && is_locked(iface)) {
 		fprintf(stderr, "%s: recursion detected for interface %s in %s phase\n", argv0, iface, envval);

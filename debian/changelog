@@ -9,6 +9,8 @@ ifupdown (0.8.3) UNRELEASED; urgency=medium
   * Move the shell script testbuild functions to Makefile
   * Move test files from debian/ to tests/
   * Prevent generated *.c-files from being removed during build
+  * main.c: Convert interfaces in the form of /dev/eth0 to .dev.eth0 to avoid
+    problems with created file names.
 
  -- Guus Sliepen <guus@debian.org>  Fri, 11 Dec 2015 10:53:54 +0100
 
