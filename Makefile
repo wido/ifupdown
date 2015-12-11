@@ -19,6 +19,7 @@ DEFNFILES += meta.defn link.defn
 all : ifup ifdown ifquery ifup.8 ifdown.8 ifquery.8 interfaces.5
 
 .PHONY : all clean distclean
+.SECONDARY: link.c ipx.c can.c meta.c inet6.c inet.c
 
 install :
 	install -m 0755 -d     ${BASEDIR}/sbin
