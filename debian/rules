@@ -29,22 +29,3 @@ override_dh_installifupdown:
 
 override_dh_auto_clean:
 	$(MAKE) clean
-	rm -rf tests/
-
-ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
-ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-override_dh_auto_test:
-	chmod a+rx debian/testbuild
-	@echo running debian/testbuild
-	@if ! debian/testbuild; then \
-	     echo '=================================================='; \
-	     echo 'AUTOMATIC TESTS FAILED -- Something built wrong or'; \
-	     echo 'there is a bug in the code!!! Either way something'; \
-	     echo 'is completely screwed up!!! File a bug!'; \
-	     echo ''; \
-	     echo 'Aborting build.'; \
-	     echo '=================================================='; \
-	     exit 1; \
-	fi
-endif
-endif

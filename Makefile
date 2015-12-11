@@ -32,6 +32,7 @@ clean :
 	rm -f *.o $(patsubst %.defn,%.c,$(DEFNFILES)) *~
 	rm -f $(patsubst %.defn,%.man,$(DEFNFILES))
 	rm -f ifup ifdown ifquery interfaces.5 ifdown.8 ifquery.8
+	-rm -f ./tests/testcase.* ./tests/up*
 
 distclean : clean
 
@@ -43,6 +44,20 @@ ifdown: ifup
 
 ifquery: ifup
 	ln -sf ifup ifquery
+
+ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+check:
+	@echo running ./tests/testbuild-$(ARCH)
+	@if ! exec ./tests/testbuild-$(ARCH); then \
+	     echo '=================================================='; \
+	     echo 'AUTOMATIC TESTS FAILED -- Something built wrong or'; \
+	     echo 'there is a bug in the code!!! Either way something'; \
+	     echo 'is completely screwed up!!! File a bug!'; \
+	     echo ''; \
+	     echo 'Aborting build.'; \
+	     echo '=================================================='; \
+	     exit 1; \
+	fi
 
 interfaces.5: interfaces.5.pre $(MAN)
 	sed $(foreach man,$(MAN),-e '/^##ADDRESSFAM##$$/r $(man)') \

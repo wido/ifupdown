@@ -1,7 +1,13 @@
 ifupdown (0.8.3) UNRELEASED; urgency=medium
 
+  [ Guus Sliepen ]
   * Fix FTBFS while running the testsuite, caused by conditional call to
     settle-dad.sh. Closes: #807617
+
+  [ Svante Signell ]
+  * Move the test target from debian/rules to Makefile
+  * Move the shell script testbuild functions to Makefile
+  * Move test files from debian/ to tests/
 
  -- Guus Sliepen <guus@debian.org>  Fri, 11 Dec 2015 10:53:54 +0100
 

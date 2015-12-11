@@ -1,7 +1,5 @@
 #!/bin/sh -e
 
-rm -rf tests/
-mkdir tests
 cat >tests/testcase.1 <<EOF
 # RUN: -a
 auto eth0
