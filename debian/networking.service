@@ -9,6 +9,7 @@ Conflicts=shutdown.target
 
 [Install]
 WantedBy=multi-user.target
+WantedBy=network-online.target
 
 [Service]
 Type=oneshot

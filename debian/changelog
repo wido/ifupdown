@@ -3,6 +3,7 @@ ifupdown (0.8.3) UNRELEASED; urgency=medium
   [ Guus Sliepen ]
   * Fix FTBFS while running the testsuite, caused by conditional call to
     settle-dad.sh. Closes: #807617
+  * Make networking.service WantedBy=network-online.target.
 
   [ Svante Signell ]
   * Move the test target from debian/rules to Makefile
