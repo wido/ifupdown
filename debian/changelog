@@ -1,4 +1,10 @@
-ifupdown (0.8.3) UNRELEASED; urgency=medium
+ifupdown (0.8.4) UNRELEASED; urgency=medium
+
+  * Schedule networking.service After=network-online.target.
+
+ -- Guus Sliepen <guus@debian.org>  Mon, 21 Dec 2015 22:09:49 +0100
+
+ifupdown (0.8.3) unstable; urgency=medium
 
   [ Guus Sliepen ]
   * Fix FTBFS while running the testsuite, caused by conditional call to
@@ -14,7 +20,7 @@ ifupdown (0.8.3) UNRELEASED; urgency=medium
     problems with created file names.
   * tests/testbuild-hurd: Add more hurd-specific tests.
 
- -- Guus Sliepen <guus@debian.org>  Fri, 11 Dec 2015 10:53:54 +0100
+ -- Guus Sliepen <guus@debian.org>  Mon, 21 Dec 2015 12:09:43 +0100
 
 ifupdown (0.8.2) unstable; urgency=medium
 
