@@ -14,7 +14,7 @@ CFLAGS += -D'LO_IFACE="lo0"'
 endif
 
 %:
-	dh $@ --with systemd
+	dh $@ --parallel --with systemd
 
 override_dh_installinit:
 	dh_installinit --name=networking --no-start
