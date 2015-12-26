@@ -28,13 +28,3 @@ if [ "$1" = "configure" ] ; then
 fi
 
 #DEBHELPER#
-
-# If we are upgrading from before 0.8, we have to explicitly enable networking.service.
-if [ "$1" = configure -a -e /bin/systemctl ]
-then
-	if [ -z "$2" ] || dpkg --compare-versions "$2" lt "0.8"
-	then
-		echo "Enabling networking.service."
-		systemctl enable networking.service
-	fi
-fi

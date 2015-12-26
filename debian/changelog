@@ -1,6 +1,7 @@
 ifupdown (0.8.4) UNRELEASED; urgency=medium
 
   * Schedule networking.service After=network-online.target.
+  * Use dh-systemd.
 
  -- Guus Sliepen <guus@debian.org>  Mon, 21 Dec 2015 22:09:49 +0100
 

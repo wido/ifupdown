@@ -3,7 +3,7 @@ Section: admin
 Priority: important
 Maintainer: Guus Sliepen <guus@debian.org>
 Standards-Version: 3.9.6
-Build-Depends: debhelper (>= 9.20120410~)
+Build-Depends: debhelper (>= 9.20120410~), dh-systemd
 Vcs-Git: https://anonscm.debian.org/git/collab-maint/ifupdown.git
 Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/ifupdown.git
 
