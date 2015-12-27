@@ -94,9 +94,19 @@ method manual
     is done by default.  Such interfaces can be configured manually by
     means of *up* and *down* commands or /etc/network/if-*.d scripts.
 
+  options
+    hwaddress address      -- Hardware address
+    mtu size               -- MTU size
+
+  conversion
+    hwaddress cleanup_hwaddress
+
   up
+    ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
 
   down
+    ip link set dev %iface% down \
+        if (iface_is_link())
 
 method dhcp
   description
