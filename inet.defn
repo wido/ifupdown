@@ -63,7 +63,8 @@ method manual
     hwaddress cleanup_hwaddress
 
   up
-    ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
+    [[ip link set dev %iface% mtu %mtu%]]
+    [[ip link set dev %iface% address %hwaddress%]]
 
   down
     ip link set dev %iface% down \
