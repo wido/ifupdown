@@ -1,1 +1,2 @@
 contrib/* usr/share/doc/ifupdown/contrib
+debian/ifupdown-hotplug lib/udev

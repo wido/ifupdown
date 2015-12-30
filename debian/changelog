@@ -3,6 +3,11 @@ ifupdown (0.8.5) UNRELEASED; urgency=medium
   [ Stéphane Graber ]
   * Allow setting the MTU and HWADDR on manual interfaces. Closes: #809169
 
+  [ Guus Sliepen ]
+  * Remove Depends/Replaces/Breaks for ancient packages.
+  * Move ifupdown related files from the systemd and udev packages to this
+    package. Closes: #809171
+
  -- Guus Sliepen <guus@debian.org>  Mon, 28 Dec 2015 11:49:13 +0100
 
 ifupdown (0.8.4) unstable; urgency=medium

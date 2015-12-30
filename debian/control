@@ -10,12 +10,12 @@ Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/ifupdown.git
 Package: ifupdown
 Architecture: any
 Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends},
- lsb-base (>= 4.1+Debian3), adduser,
+ lsb-base, adduser,
  iproute2 [linux-any], net-tools [kfreebsd-any], inetutils-tools [hurd-any]
 Recommends: isc-dhcp-client | dhcp-client
 Suggests: ppp, rdnssd, ${net:Suggests}
-Replaces: netbase (<< 5.0)
-Breaks: netbase (<< 5.0), dhcp3-client (<< 4.0), freebsd-net-tools (<< 9.0+ds1-2) [kfreebsd-any]
+Replaces: systemd (<< 228-3~)
+Breaks: systemd (<< 228-3~), udev (<< 228-3~)
 Multi-Arch: foreign
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to
