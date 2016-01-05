@@ -1,11 +1,11 @@
-ifupdown (0.8.6) UNRELEASED; urgency=medium
+ifupdown (0.8.6) unstable; urgency=medium
 
   * Remove the Breaks: udev (<< 228-3~) to work around a bug in udev's prerm
     script. Closes: #809658, #809743
   * Run ip link up on manual interfaces, but ignore any errors.
   * Use sysctl to set the IPv6-specific MTU of an interface. Closes: #809714
 
- -- Guus Sliepen <guus@debian.org>  Mon, 04 Jan 2016 14:00:44 +0100
+ -- Guus Sliepen <guus@debian.org>  Tue, 05 Jan 2016 15:57:45 +0100
 
 ifupdown (0.8.5) unstable; urgency=medium
 
