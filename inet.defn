@@ -65,9 +65,10 @@ method manual
   up
     [[ip link set dev %iface% mtu %mtu%]]
     [[ip link set dev %iface% address %hwaddress%]]
+    ip link set dev %iface% up 2>/dev/null || true
 
   down
-    ip link set dev %iface% down \
+    ip link set dev %iface% down 2>/dev/null || true \
         if (iface_is_link())
 
 method dhcp

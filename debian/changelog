@@ -2,6 +2,7 @@ ifupdown (0.8.6) UNRELEASED; urgency=medium
 
   * Remove the Breaks: udev (<< 228-3~) to work around a bug in udev's prerm
     script. Closes: #809658, #809743
+  * Run ip link up on manual interfaces, but ignore any errors.
 
  -- Guus Sliepen <guus@debian.org>  Mon, 04 Jan 2016 14:00:44 +0100
 
