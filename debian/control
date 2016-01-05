@@ -15,7 +15,7 @@ Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends},
 Recommends: isc-dhcp-client | dhcp-client
 Suggests: ppp, rdnssd, ${net:Suggests}
 Replaces: systemd (<< 228-3~)
-Breaks: systemd (<< 228-3~), udev (<< 228-3~)
+Breaks: systemd (<< 228-3~)
 Multi-Arch: foreign
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to
