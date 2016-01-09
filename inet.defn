@@ -97,28 +97,27 @@ method dhcp
     dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases -I -df /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
-    dhclient3 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-	[[-e IF_METRIC=%metric%]] \
-        elsif (execable("/sbin/dhclient3"))
     pump -i %iface% [[-h %hostname%]] [[-l %leasehours%]] \
-        elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
+        elsif (execable("/sbin/pump"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-x hostname:%hostname%]] \
-        elsif (execable("/sbin/udhcpc") && mylinuxver() >= mylinux(2,2,0))
+        elsif (execable("/sbin/udhcpc"))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
            [[-l %leasetime%]] [[-m %metric%]] %iface% \
         elsif (execable("/sbin/dhcpcd"))
+    echo 'No DHCP client software found!' >/dev/stderr; false \
+        elsif (1)
 
   down
     dhclient -v -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases -I -df /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    dhclient3 -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-        elsif (execable("/sbin/dhclient3"))
     pump -i %iface% -r \
-        elsif (execable("/sbin/pump") && mylinuxver() >= mylinux(2,1,100))
+        elsif (execable("/sbin/pump"))
     if test -f /run/udhcpc.%iface%.pid; then kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid); fi \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
+    echo 'No DHCP client software found!' >/dev/stderr; false \
+        elsif (1)
 
     ip link set dev %iface% down \
 		if (iface_is_link())
@@ -285,25 +284,24 @@ method dhcp
     dhclient -v -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases -I -df /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
 	[[-e IF_METRIC=%metric%]] \
         if (execable("/sbin/dhclient"))
-    dhclient3 -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-	[[-e IF_METRIC=%metric%]] \
-        elsif (execable("/sbin/dhclient3"))
     udhcpc -n -p /run/udhcpc.%iface%.pid -i %iface% [[-H %hostname%]] \
            [[-c %client%]] \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
            [[-l %leasetime%]] %iface% \
         elsif (execable("/sbin/dhcpcd"))
+    echo 'No DHCP client software found!' >/dev/stderr; false \
+        elsif (1)
 
   down
     dhclient -v -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp/dhclient.%iface%.leases -I -df /var/lib/dhcp/dhclient6.%iface%.leases %iface% \
         if (execable("/sbin/dhclient"))
-    dhclient3 -r -pf /run/dhclient.%iface%.pid -lf /var/lib/dhcp3/dhclient.%iface%.leases %iface% \
-        elsif (execable("/sbin/dhclient3"))
     if test -f /run/udhcpc.%iface%.pid; then kill -USR2 $(cat /run/udhcpc.%iface%.pid); kill -TERM $(cat /run/udhcpc.%iface%.pid); fi \
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
+    echo 'No DHCP client software found!' >/dev/stderr; false \
+        elsif (1)
 
     ifconfig %iface% down
 
@@ -446,6 +444,8 @@ method dhcp
     dhcpcd [[-h %hostname%]] [[-i %vendor%]] [[-I %client%]] \
            [[-l %leasetime%]] %iface% \
         elsif (execable("/sbin/dhcpcd"))
+    echo 'No DHCP client software found!' >/dev/stderr; false \
+        elsif (1)
 
   down
     dhclient -v -r -pf /run/dhclient.%iface///.%.pid -lf /var/lib/dhcp/dhclient.%iface///.%.leases -I -df /var/lib/dhcp/dhclient6.%iface///.%.leases %iface% \
@@ -454,6 +454,8 @@ method dhcp
         elsif (execable("/sbin/udhcpc"))
     dhcpcd -k %iface% \
         elsif (execable("/sbin/dhcpcd"))
+    echo 'No DHCP client software found!' >/dev/stderr; false \
+        elsif (1)
 
     inetutils-ifconfig --interface %iface% --down
 
