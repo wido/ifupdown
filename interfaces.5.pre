@@ -323,6 +323,14 @@ to interfaces, if calls all the hook scripts (\fIpre-up\fR or \fIdown\fR) with
 parameter (or "auto" if it's not set), \fBADDRFAM\fR="meta" and \fBMETHOD\fR="none".
 After all the interfaces have been brought up or taken down, the appropriate scripts
 (\fIup\fR or \fIpost-down\fR) are executed.
+.SH OPTIONS PROVIDED BY OTHER PACKAGES
+This manual page documents the configuration options provided by the ifupdown package.
+However, other packages can make other options available for use in /etc/network/interfaces.
+Here is a list of packages that provide such extensions:
+.P
+arping, avahi-autoipd, avahi-daemon, bind9, bridge-utils, clamav-freshclam, controlaula, epoptes-client, ethtool, guidedog, hostap-utils, hostapd, htpdate, ifenslave, ifmetric, ifupdown-extra, ifupdown-multi, ifupdown-scripts-zg2, initscripts, isatapd, linux-wlan-ng, lprng, macchanger, miredo, nslcd, ntpdate, openntpd, openresolv, openssh-server, openvpn, openvswitch-switch, postfix, resolvconf, sendmail-base, shorewall-init, slrn, slrnpull, tinc, ucarp, uml-utilities, uruk, vde2, vlan, vzctl, whereami, wide-dhcpv6-client, wireless-tools, wpasupplicant.
+.P
+Please consult the documentation of those packages for information about how they extend ifupdown.
 ##ADDRESSFAM##
 .SH KNOWN BUGS/LIMITATIONS
 The
