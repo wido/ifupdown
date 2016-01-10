@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <fnmatch.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -1159,6 +1160,8 @@ int main(int argc, char *argv[]) {
 	parse_options(&argc, &argv);
 
 	mkdir(RUN_DIR, 0755);
+
+	signal(SIGPIPE, SIG_IGN);
 
 	if (state_query)
 		return do_state(argc, argv);

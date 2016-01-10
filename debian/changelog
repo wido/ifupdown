@@ -8,6 +8,7 @@ ifupdown (0.8.7) UNRELEASED; urgency=medium
   * Use absolute paths to binaries called by ifup/ifdown. Closes: #365114
   * Return an error when trying to ifup/ifdown/ifquery an unknown interface
     (unless it is ignored due to --allow or --exclude).
+  * Ignore SIGPIPE. Closes: #311054
 
  -- Guus Sliepen <guus@debian.org>  Sat, 09 Jan 2016 11:43:15 +0100
 
