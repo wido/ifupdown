@@ -781,6 +781,23 @@ static bool do_interface(const char *target_iface) {
 	if(ignore_interface(iface))
 		return true;
 
+	/* Check if this interface exists */
+
+	bool found = false;
+
+	for (interface_defn *currif = defn->ifaces; currif; currif = currif->next) {
+		if (strcmp(liface, currif->logical_iface) == 0) {
+			found = true;
+			break;
+		}
+	}
+
+	if (!found) {
+		fprintf(stderr, "Unknown interface %s\n", liface);
+		return false;
+	}
+
+
 	/* Bail out if we are being called recursively on the same interface */
 
 	char envname[160];

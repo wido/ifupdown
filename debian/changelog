@@ -6,6 +6,8 @@ ifupdown (0.8.7) UNRELEASED; urgency=medium
   * Add a section in the manual about extensions provided by other packages.
     Closes: #482405
   * Use absolute paths to binaries called by ifup/ifdown. Closes: #365114
+  * Return an error when trying to ifup/ifdown/ifquery an unknown interface
+    (unless it is ignored due to --allow or --exclude).
 
  -- Guus Sliepen <guus@debian.org>  Sat, 09 Jan 2016 11:43:15 +0100
 
