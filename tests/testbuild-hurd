@@ -14,16 +14,16 @@ EOF
 cat >tests/up.1 <<EOF
 ====stdout====
 ====stderr====
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
 echo hi
 echo hello
-run-parts --exit-on-error --verbose /etc/network/if-up.d
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.2 <<EOF
@@ -43,26 +43,26 @@ EOF
 cat >tests/up.2 <<EOF
 ====stdout====
 ====stderr====
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface /dev/eth1=/dev/eth1 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth1 --address 1.3.4.5 --netmask 255.255.255.0           --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface /dev/eth2=/dev/eth2 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth2 --address 1.4.5.6 --netmask 255.255.255.0           --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.3 <<EOF
@@ -78,20 +78,20 @@ EOF
 cat >tests/up.3 <<EOF
 ====stdout====
 ====stderr====
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet6)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 FIXME: Add proper commands here for ipv6
 
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.4 <<EOF
@@ -108,13 +108,13 @@ cat >tests/up.4 <<EOF
 ====stdout====
 ====stderr====
 Configuring interface /dev/eth0=work (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
 echo hi
 echo hello
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.5 <<EOF
@@ -128,14 +128,14 @@ EOF
 cat >tests/up.5 <<EOF
 ====stdout====
 ====stderr====
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Warning: Option hwaddress: 00:DE:AD:00:BE:AF not yet supported
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.6 <<EOF
@@ -149,14 +149,14 @@ EOF
 cat >tests/up.6 <<EOF
 ====stdout====
 ====stderr====
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Warning: Option hwaddress: 00:DE:AD:00:BE:AF not yet supported
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4 --netmask 255.255.255.0           --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 cat >tests/testcase.11 <<EOF
@@ -173,19 +173,19 @@ EOF
 cat >tests/up.11 <<EOF
 ====stdout====
 ====stderr====
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 Configuring interface lo=lo (inet)
 configure lo
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 inetutils-ifconfig --interface lo --address 127.0.0.1 --up
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface /dev/eth0=/dev/eth0 (inet)
-run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
 
 inetutils-ifconfig --interface /dev/eth0 --address 1.2.3.4/24        --up
 
-run-parts --exit-on-error --verbose /etc/network/if-up.d
-run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
+/bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF
 
 # Note: Testcase 7 is not run on GNU/Hurd, tunnel is not yet implemented.

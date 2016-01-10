@@ -13,14 +13,14 @@ method none
     if test -d /sys/class/net/%link% -a \
             ! -d /sys/class/net/%iface0% ; \
     then \
-        ip link set up dev %link%; \
-        ip link add link %link% name %iface0% type vlan id %vlan_id%; \
+        /bin/ip link set up dev %link%; \
+        /bin/ip link add link %link% name %iface0% type vlan id %vlan_id%; \
     fi if (iface_has(".") && (!var_set_anywhere("bridge_ports", ifd)))
-    -ip link set up dev %iface% 2>/dev/null \
+    -/bin/ip link set up dev %iface% 2>/dev/null \
 	if (iface_is_lo())
   down
-    ip link del %iface% if (iface_has(".") && (!iface_has(":")) && (!var_set_anywhere("bridge_ports", ifd)))
-    -ip link set down dev %iface% 2>/dev/null \
+    /bin/ip link del %iface% if (iface_has(".") && (!iface_has(":")) && (!var_set_anywhere("bridge_ports", ifd)))
+    -/bin/ip link set down dev %iface% 2>/dev/null \
 	if (iface_is_lo())
 
 architecture kfreebsd
@@ -28,12 +28,12 @@ architecture kfreebsd
 method none
   description
   up
-    -ifconfig %iface% 127.0.0.1 up \
+    -/sbin/ifconfig %iface% 127.0.0.1 up \
 	if (iface_is_lo())
-    -ifconfig %iface% inet6 ::1 \
+    -/sbin/ifconfig %iface% inet6 ::1 \
 	if (iface_is_lo())
   down
-    -ifconfig %iface% down \
+    -/sbin/ifconfig %iface% down \
 	if (iface_is_lo())
 
 architecture hurd
