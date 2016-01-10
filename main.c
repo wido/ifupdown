@@ -793,6 +793,17 @@ static bool do_interface(const char *target_iface) {
 	}
 
 	if (!found) {
+		for (mapping_defn *currmap = defn->mappings; currmap; currmap = currmap->next) {
+			for (int i = 0; i < currmap->n_matches; i++) {
+				if (fnmatch(currmap->match[i], liface, 0) == 0) {
+					found = true;
+					break;
+				}
+			}
+		}
+	}
+
+	if (!found) {
 		fprintf(stderr, "Unknown interface %s\n", liface);
 		return false;
 	}
