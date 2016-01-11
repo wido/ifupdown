@@ -1,4 +1,4 @@
-ifupdown (0.8.7) UNRELEASED; urgency=medium
+ifupdown (0.8.7) unstable; urgency=medium
 
   * Impose a 5 minute timeout for starting network services.
     Closes: #318577, #810656
@@ -13,9 +13,8 @@ ifupdown (0.8.7) UNRELEASED; urgency=medium
   * Update the bridge example. Closes: #488315
   * Use the onlink option when adding a gateway route. Closes: #378506
   * Also allow the metric option for tunnels and IPv6 interfaces.
-  * 
 
- -- Guus Sliepen <guus@debian.org>  Sat, 09 Jan 2016 11:43:15 +0100
+ -- Guus Sliepen <guus@debian.org>  Mon, 11 Jan 2016 22:58:44 +0100
 
 ifupdown (0.8.6) unstable; urgency=medium
 
