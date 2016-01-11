@@ -83,7 +83,7 @@ method static
     -[[/sbin/sysctl -q -e -w net.ipv6.conf.%iface/.//%.mtu=%mtu%]]
     /bin/ip link set dev %iface% [[address %hwaddress%]] up
     /bin/ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
-    [[ /bin/ip -6 route add default via %gateway% dev %iface% ]]
+    [[ /bin/ip -6 route add default via %gateway% dev %iface% onlink ]]
     /lib/ifupdown/settle-dad.sh if (!no_act && execable("/lib/ifupdown/settle-dad.sh") && (var_true("dad-attempts", ifd)))
 
   down
@@ -177,7 +177,7 @@ method v4tunnel
     /bin/ip link set %iface% up [[mtu %mtu%]]
     [[ /bin/ip addr add %address%[[/%netmask%]] dev %iface% [[preferred_lft %preferred-lifetime%]] ]]
     [[ /bin/ip route add %gateway% dev %iface% ]]
-    [[ /bin/ip route add ::/0 via %gateway% dev %iface% ]]
+    [[ /bin/ip route add ::/0 via %gateway% dev %iface% onlink ]]
 
   down
     /bin/ip tunnel del %iface%

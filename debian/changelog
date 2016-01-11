@@ -11,6 +11,7 @@ ifupdown (0.8.7) UNRELEASED; urgency=medium
     (unless it is ignored due to --allow or --exclude).
   * Ignore SIGPIPE. Closes: #311054
   * Update the bridge example. Closes: #488315
+  * Use the onlink option when adding a gateway route. Closes: #378506
 
  -- Guus Sliepen <guus@debian.org>  Sat, 09 Jan 2016 11:43:15 +0100
 

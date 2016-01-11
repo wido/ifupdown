@@ -40,7 +40,7 @@ method static
 	[[peer %pointopoint%]] [[scope %scope%]] dev %iface% label %iface%
     /bin/ip link set dev %iface% [[mtu %mtu%]] [[address %hwaddress%]] up
 
-    [[ /bin/ip route add default via %gateway% [[metric %metric%]] dev %iface% ]]
+    [[ /bin/ip route add default via %gateway% [[metric %metric%]] dev %iface% onlink ]]
 
   down
     [[ /bin/ip route del default via %gateway% [[metric %metric%]] dev %iface% 2>&1 1>/dev/null || true ]]
@@ -161,7 +161,7 @@ method tunnel
        [[ttl %ttl%]]
     /bin/ip link set %iface% up [[mtu %mtu%]]
     /bin/ip addr add %address%/%netmask% dev %iface% [[peer %dstaddr%]]
-    [[ /bin/ip route add default via %gateway% ]]
+    [[ /bin/ip route add default via %gateway% dev %iface% onlink ]]
   down
     /bin/ip tunnel del %iface%
 
