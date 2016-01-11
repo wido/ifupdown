@@ -55,6 +55,7 @@ method static
   options
     address address        -- Address (colon delimited/netmask) *required*
     netmask mask           -- Netmask (number of bits, eg 64)
+    metric metric          -- Routing metric for default gateway (integer)
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
     hwaddress address      -- Hardware address
@@ -83,11 +84,11 @@ method static
     -[[/sbin/sysctl -q -e -w net.ipv6.conf.%iface/.//%.mtu=%mtu%]]
     /bin/ip link set dev %iface% [[address %hwaddress%]] up
     /bin/ip -6 addr add %address%[[/%netmask%]] [[scope %scope%]] dev %iface% [[preferred_lft %preferred-lifetime%]]
-    [[ /bin/ip -6 route add default via %gateway% dev %iface% onlink ]]
+    [[ /bin/ip -6 route add default via %gateway% [[metric %metric%]] dev %iface% onlink ]]
     /lib/ifupdown/settle-dad.sh if (!no_act && execable("/lib/ifupdown/settle-dad.sh") && (var_true("dad-attempts", ifd)))
 
   down
-    [[ /bin/ip -6 route del default via %gateway% dev %iface% ]]
+    [[ /bin/ip -6 route del default via %gateway% [[metric %metric%]] dev %iface% ]]
     /bin/ip -6 addr del %address%[[/%netmask%]] [[scope %scope%]] dev %iface%
     /bin/ip link set dev %iface% down \
 		if (iface_is_link())
@@ -162,6 +163,7 @@ method v4tunnel
                              dotted quad) *required*
     local address         -- Address of the local endpoint (IPv4 \
                              dotted quad)
+    metric metric         -- Routing metric for default gateway (integer)
     gateway address       -- Default gateway (colon delimited)
     ttl time              -- TTL setting
     mtu size              -- MTU size
@@ -177,7 +179,7 @@ method v4tunnel
     /bin/ip link set %iface% up [[mtu %mtu%]]
     [[ /bin/ip addr add %address%[[/%netmask%]] dev %iface% [[preferred_lft %preferred-lifetime%]] ]]
     [[ /bin/ip route add %gateway% dev %iface% ]]
-    [[ /bin/ip route add ::/0 via %gateway% dev %iface% onlink ]]
+    [[ /bin/ip route add ::/0 via %gateway% [[metric %metric%]] dev %iface% onlink ]]
 
   down
     /bin/ip tunnel del %iface%
@@ -190,6 +192,7 @@ method 6to4
   options
     local address         -- Address of the local endpoint (IPv4 \
                              dotted quad) *required*
+    metric metric         -- Routing metric for default gateway (integer)
     ttl time              -- TTL setting
     mtu size              -- MTU size
     preferred-lifetime int -- Time that address remains preferred []
@@ -204,7 +207,7 @@ method 6to4
        [[ttl %ttl%]]
     /bin/ip link set %iface% up [[mtu %mtu%]]
     /bin/ip addr add 2002:%hexaddress%::1/16 dev %iface% [[preferred_lft %preferred-lifetime%]]
-    /bin/ip route add 2000::/3 via ::192.88.99.1 dev %iface%
+    /bin/ip route add 2000::/3 via ::192.88.99.1 [[metric %metric%]] dev %iface%
 
   down
     /bin/ip -6 route flush dev %iface%

@@ -304,7 +304,7 @@ Configuring interface eth1=eth1 (inet6)
 
 /bin/ip link set dev eth1   up
 /bin/ip -6 addr add 3ffe:ffff:100:f102::1/64  dev eth1 
- /bin/ip -6 route add default via 3ffe:ffff:100:f102::fff dev eth1 
+ /bin/ip -6 route add default via 3ffe:ffff:100:f102::fff  dev eth1 onlink
 /bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 Configuring interface eth1=eth1 (inet6)
 /bin/run-parts --exit-on-error --verbose /etc/network/if-pre-up.d
@@ -315,7 +315,7 @@ Configuring interface eth1=eth1 (inet6)
 
 /bin/ip link set dev eth1   up
 /bin/ip -6 addr add 3ffe:ffff:100:f102::6/64  dev eth1 
- /bin/ip -6 route add default via 3ffe:ffff:100:f102::fff dev eth1 
+ /bin/ip -6 route add default via 3ffe:ffff:100:f102::fff  dev eth1 onlink
 /bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 /bin/run-parts --exit-on-error --verbose /etc/network/if-up.d
 EOF

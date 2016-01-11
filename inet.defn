@@ -153,6 +153,7 @@ method tunnel
     endpoint address      -- Address of other tunnel endpoint *required*
     dstaddr address       -- Remote address (remote address inside tunnel)
     local address         -- Address of the local endpoint
+    metric metric         -- Routing metric for default gateway (integer)
     gateway address       -- Default gateway
     ttl time              -- TTL setting
     mtu size              -- MTU size
@@ -161,7 +162,7 @@ method tunnel
        [[ttl %ttl%]]
     /bin/ip link set %iface% up [[mtu %mtu%]]
     /bin/ip addr add %address%/%netmask% dev %iface% [[peer %dstaddr%]]
-    [[ /bin/ip route add default via %gateway% dev %iface% onlink ]]
+    [[ /bin/ip route add default via %gateway% [[metric %metric%]] dev %iface% onlink ]]
   down
     /bin/ip tunnel del %iface%
 
