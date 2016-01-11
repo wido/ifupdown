@@ -1,6 +1,7 @@
 ifupdown (0.8.7) UNRELEASED; urgency=medium
 
-  * Impose a 5 minute timeout for starting network services. Closes: #318577
+  * Impose a 5 minute timeout for starting network services.
+    Closes: #318577, #810656
   * Give an error when trying to up a dhcp interface when no DHCP client is
     installed. Closes: #471926, #419139
   * Add a section in the manual about extensions provided by other packages.
