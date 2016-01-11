@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 #include "header.h"
 
@@ -582,10 +583,15 @@ bool run_mapping(const char *physical, char *logical, int len, mapping_defn *map
 		return false;
 	}
 
+	signal(SIGPIPE, SIG_IGN);
+
 	for (int i = 0; i < map->n_mappings; i++)
 		fprintf(in, "%s\n", map->mapping[i]);
 
 	fclose(in);
+
+	signal(SIGPIPE, SIG_DFL);
+
 	waitpid(pid, &status, 0);
 
 	if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
