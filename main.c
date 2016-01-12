@@ -843,7 +843,7 @@ static bool do_interface(const char *target_iface) {
 
 	bool success = false;
 	FILE *lock = NULL;
-	char *current_state;
+	char *current_state = NULL;
 
 	lock = lock_interface(iface, &current_state);
 
