@@ -3,6 +3,8 @@ ifupdown (0.8.8) UNRELEASED; urgency=medium
   [ Martin Pitt ]
   * Fix ifquery crash if interface state file does not exist yet.
     (Closes: #810779, LP: #1532722)
+  * ifup@.service: Avoid stopping on shutdown via stopping system-ifup.slice
+    (changed behaviour in systemd 228). (Closes: #761909, LP: #1492546)
 
   [ Guus Sliepen ]
   * Remove quotes around TimeoutStartSec parameter. Closes: #810656
