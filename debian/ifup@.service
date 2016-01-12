@@ -10,4 +10,4 @@ IgnoreOnIsolate=yes
 ExecStart=/bin/sh -ec 'ifup --allow=hotplug %I; ifquery --state %I'
 ExecStop=/sbin/ifdown %I
 RemainAfterExit=true
-TimeoutStartSec="5min"
+TimeoutStartSec=5min
