@@ -1,4 +1,4 @@
-ifupdown (0.8.8) UNRELEASED; urgency=medium
+ifupdown (0.8.8) unstable; urgency=medium
 
   [ Martin Pitt ]
   * Fix ifquery crash if interface state file does not exist yet.
@@ -9,7 +9,7 @@ ifupdown (0.8.8) UNRELEASED; urgency=medium
   [ Guus Sliepen ]
   * Remove quotes around TimeoutStartSec parameter. Closes: #810656
 
- -- Martin Pitt <mpitt@debian.org>  Tue, 12 Jan 2016 08:07:23 +0100
+ -- Guus Sliepen <guus@debian.org>  Tue, 12 Jan 2016 23:50:29 +0100
 
 ifupdown (0.8.7) unstable; urgency=medium
 
