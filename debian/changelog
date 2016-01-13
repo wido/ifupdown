@@ -1,3 +1,9 @@
+ifupdown (0.8.9) UNRELEASED; urgency=medium
+
+  * It's network-online.target, not .service.
+
+ -- Guus Sliepen <guus@debian.org>  Wed, 13 Jan 2016 18:59:15 +0100
+
 ifupdown (0.8.8) unstable; urgency=medium
 
   [ Martin Pitt ]
