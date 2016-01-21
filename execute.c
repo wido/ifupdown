@@ -170,6 +170,9 @@ static int execute_scripts(interface_defn *ifd, execfn *exec, char *opt) {
 	if (!run_scripts)
 		return 1;
 
+	if (no_scripts_ints && match_patterns(ifd->logical_iface, no_scripts_ints, no_scripts_int))
+		return 1;
+
 	char buf[100];
 
 	snprintf(buf, sizeof(buf), "/bin/run-parts %s%s/etc/network/if-%s.d", ignore_failures ? "" : "--exit-on-error ", verbose ? "--verbose " : "", opt);

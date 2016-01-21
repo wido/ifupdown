@@ -109,6 +109,7 @@ variable *set_variable(const char *name, const char *value, variable **var, int 
 void convert_variables(conversion *conversions, interface_defn *ifd);
 interfaces_file *read_interfaces(const char *filename);
 allowup_defn *find_allowup(interfaces_file *defn, const char *name);
+bool match_patterns(const char *string, int argc, char *argv[]);
 int doit(const char *str);
 int iface_preup(interface_defn *iface);
 int iface_postup(interface_defn *iface);
@@ -144,5 +145,10 @@ extern address_family addr_inet6;
 extern address_family addr_ipx;
 extern address_family addr_can;
 extern address_family addr_meta;
+
+extern char **no_auto_down_int;
+extern int no_auto_down_ints;
+extern char **no_scripts_int;
+extern int no_scripts_ints;
 
 #endif				/* HEADER_H */

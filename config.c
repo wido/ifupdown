@@ -388,6 +388,16 @@ static interface_defn *copy_variables(interface_defn *destif, interface_defn *sr
 	return destif;
 }
 
+static void add_to_list(char ***list, int *count, const char *item) {
+	(*count)++;
+	*list = realloc(*list, sizeof **list * *count);
+	if (!*list)
+		perror(argv0);
+	*list[*count - 1] = strdup(item);
+	if (!(*list)[*count - 1])
+		perror(argv0);
+}
+
 static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {
 	FILE *f;
 	int line;
@@ -749,6 +759,16 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			while ((rest = next_word(rest, firstword, 80)))
 				if (!add_allow_up(filename, line, allow_ups, firstword))
 					return NULL;
+
+			currently_processing = NONE;
+		} else if (strcmp(firstword, "no-auto-down") == 0) {
+			while ((rest = next_word(rest, firstword, 80)))
+				add_to_list(&no_auto_down_int, &no_auto_down_ints, firstword);
+
+			currently_processing = NONE;
+		} else if (strcmp(firstword, "no-scripts") == 0) {
+			while ((rest = next_word(rest, firstword, 80)))
+				add_to_list(&no_scripts_int, &no_scripts_ints, firstword);
 
 			currently_processing = NONE;
 		} else {

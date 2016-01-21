@@ -2,6 +2,8 @@ ifupdown (0.8.9) UNRELEASED; urgency=medium
 
   * It's network-online.target, not .service.
   * Do not run "ip link set down" on manual interfaces during "ifdown -a".
+    Closes: #809166
+  * Add the keywords "no-auto-down" and "no-scripts". Closes: #615130
 
  -- Guus Sliepen <guus@debian.org>  Wed, 13 Jan 2016 18:59:15 +0100
 

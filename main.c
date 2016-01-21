@@ -422,6 +422,10 @@ static bool list = false;
 static bool state_query = false;
 static char *allow_class = NULL;
 static char *interfaces = "/etc/network/interfaces";
+char **no_auto_down_int = NULL;
+int no_auto_down_ints = 0;
+char **no_scripts_int = NULL;
+int no_scripts_ints = 0;
 static char **excludeint = NULL;
 static int excludeints = 0;
 static variable *option = NULL;
@@ -715,7 +719,7 @@ static void do_post_all(void) {
 	}
 }
 
-static bool match_patterns(const char *string, int argc, char *argv[]) {
+bool match_patterns(const char *string, int argc, char *argv[]) {
 	if (!argc || !argv || !string)
 		return false;
 
@@ -751,6 +755,12 @@ static bool ignore_interface(const char *iface) {
 	/* Ignore interfaces specified with --exclude */
 	if ((excludeints != 0 && match_patterns(iface, excludeints, excludeint)))
 		return true;
+
+	/* Ignore no-auto-down interfaces during ifdown -a */
+	if(do_all && cmds == iface_down) {
+		if (no_auto_down_ints && match_patterns(iface, no_auto_down_ints, no_auto_down_int))
+			return true;
+	}
 
 	return false;
 }
