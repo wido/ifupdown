@@ -134,6 +134,7 @@ bool make_pidfile_name(char *name, size_t size, const char *command, interface_d
 
 extern const char *argv0;
 extern bool no_act;
+extern bool do_all;
 extern bool verbose;
 extern bool run_scripts;
 extern bool no_loopback;

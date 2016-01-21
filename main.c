@@ -415,7 +415,7 @@ static cmds_t determine_command(void) {
 }
 
 static cmds_t cmds = NULL;
-static bool do_all = false;
+bool do_all = false;
 static bool run_mappings = true;
 static bool force = false;
 static bool list = false;

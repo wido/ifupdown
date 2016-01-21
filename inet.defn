@@ -69,7 +69,7 @@ method manual
 
   down
     /bin/ip link set dev %iface% down 2>/dev/null || true \
-        if (iface_is_link())
+        if (iface_is_link() && !do_all)
 
 method dhcp
   description

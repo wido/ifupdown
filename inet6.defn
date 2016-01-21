@@ -112,8 +112,8 @@ method manual
     /bin/ip link set dev %iface% up 2>/dev/null || true
 
   down
-    /bin/ip link set dev %iface% down 2>/dev/null \
-        if (iface_is_link())
+    /bin/ip link set dev %iface% down 2>/dev/null || true \
+        if (iface_is_link() || !do_all)
 
 method dhcp
   description
