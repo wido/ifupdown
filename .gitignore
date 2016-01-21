@@ -1,0 +1,34 @@
+# Intermediate files
+/*.o
+
+# Other cruft
+*.swp
+*~
+
+# Generated C sources
+/can.c
+/inet.c
+/inet6.c
+/ipx.c
+/link.c
+/meta.c
+
+# Generated manual
+/*.man
+/interfaces.5
+
+# Generated testcase output
+/tests/testcase.*
+/tests/*.*
+
+# Binaries
+/ifup
+/ifdown*
+/ifquery*
+
+# Debuild generated
+/debian/files
+/debian/ifupdown/
+/debian/*.debhelper
+/debian/*.log
+/debian/*.substvars
