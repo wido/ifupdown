@@ -675,7 +675,6 @@ static interface_defn meta_iface = {
 	.next = NULL,
 	.real_iface = "--all",
 	.address_family = &addr_meta,
-	.automatic = true,
 	.max_options = 0,
 	.n_options = 0,
 	.option = NULL

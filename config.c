@@ -625,7 +625,6 @@ static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *
 			}
 
 			*currif = (interface_defn) {
-				.automatic = true,
 				.max_options = 0,
 				.n_options = 0,
 				.option = NULL,

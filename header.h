@@ -66,8 +66,6 @@ struct interface_defn {
 	address_family *address_family;
 	method *method;
 
-	bool automatic;
-
 	int max_options;
 	int n_options;
 	variable *option;
