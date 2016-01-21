@@ -24,7 +24,7 @@ method static
     gateway address             -- Default gateway (dotted quad)
     pointopoint address         -- Address of other end point (dotted quad). \
                                    Note the spelling of "point-to".
-    hwaddress address           -- Link local address.
+    hwaddress address           -- Link local address or "random".
     mtu size                    -- MTU size
     scope                       -- Address validity scope. Possible values: \
                                    global, link, host
@@ -56,7 +56,7 @@ method manual
     means of *up* and *down* commands or /etc/network/if-*.d scripts.
 
   options
-    hwaddress address           -- Link local address.
+    hwaddress address           -- Link local address or "random".
     mtu size                    -- MTU size
 
   conversion
@@ -231,7 +231,7 @@ method static
     gateway address             -- Default gateway (dotted quad)
     pointopoint address         -- Address of other end point (dotted quad). \
                                    Note the spelling of "point-to".
-    hwaddress address           -- Link local address.
+    hwaddress address           -- Link local address or "random".
     mtu size                    -- MTU size
 
   conversion

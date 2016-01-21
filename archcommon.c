@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <arpa/inet.h>
 
 #include "archcommon.h"
@@ -30,6 +33,23 @@ bool execable(const char *program) {
 }
 
 void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char **argv) {
+	/* replace "random" with a random MAC address */
+	if (strcmp(*pparam, "random") == 0) {
+		uint8_t mac[6];
+		int fd = open("/dev/urandom", O_RDONLY);
+		if(!fd)
+			perror("/dev/urandom");
+		read(fd, mac, sizeof mac);
+		close(fd);
+		mac[0] |= 0x2; // locally administered
+		mac[0] &= ~0x1; // unicast
+		*pparam = realloc(*pparam, 18);
+		if (!*pparam)
+			perror("realloc");
+		snprintf(*pparam, 18, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+		return;
+	}
+
 	char *rest = *pparam;
 
 	/* we're shrinking the text, so no realloc needed */

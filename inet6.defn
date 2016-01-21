@@ -58,7 +58,7 @@ method static
     metric metric          -- Routing metric for default gateway (integer)
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
-    hwaddress address      -- Hardware address
+    hwaddress address      -- Hardware address or "random"
     mtu size               -- MTU size
     accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding)
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on) [0]
@@ -100,7 +100,7 @@ method manual
     means of *up* and *down* commands or /etc/network/if-*.d scripts.
 
   options
-    hwaddress address      -- Hardware address
+    hwaddress address      -- Hardware address or "random"
     mtu size               -- MTU size
 
   conversion
@@ -122,7 +122,7 @@ method dhcp
     responsible for assigning addresses to clients.
 
   options
-    hwaddress address      -- Hardware address
+    hwaddress address      -- Hardware address or "random"
     accept_ra int          -- Accept router advertisements (0=off, 1=on, 2=on+forwarding) [1]
     autoconf int           -- Perform stateless autoconfiguration (0=off, 1=on)
     ll-attempts            -- Number of attempts to wait for a link-local address [60]
@@ -237,7 +237,7 @@ method static
     netmask mask           -- Netmask (number of bits, eg 64) *required*
     gateway address        -- Default gateway (colon delimited)
     media type             -- Medium type, driver dependent
-    hwaddress address      -- Hardware address
+    hwaddress address      -- Hardware address or "random"
     mtu size               -- MTU size
 
   conversion
@@ -299,7 +299,7 @@ method dhcp
     responsible for assigning addresses to clients.
 
   options
-    hwaddress address      -- Hardware address
+    hwaddress address      -- Hardware address or "random"
 
   conversion
     hwaddress cleanup_hwaddress
