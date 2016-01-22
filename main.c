@@ -812,6 +812,14 @@ static bool do_interface(const char *target_iface) {
 		}
 	}
 
+	if (cmds != iface_up) {
+		char filename[sizeof statefile + strlen(iface) + 2];
+		snprintf(filename, sizeof filename, "%s.%s", statefile, iface);
+		sanitize_file_name(filename + sizeof statefile);
+		if (access(filename, R_OK) == 0)
+			found = true;
+	}
+
 	if (!found) {
 		fprintf(stderr, "Unknown interface %s\n", liface);
 		return false;
