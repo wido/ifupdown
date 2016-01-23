@@ -455,6 +455,7 @@ static void parse_environment_variables(void) {
 			}
 			excludeint[excludeints - 1] = tok;
 		}
+		free(excludes);
 	}
 }
 
