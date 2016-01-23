@@ -391,11 +391,15 @@ static interface_defn *copy_variables(interface_defn *destif, interface_defn *sr
 static void add_to_list(char ***list, int *count, const char *item) {
 	(*count)++;
 	*list = realloc(*list, sizeof **list * *count);
-	if (!*list)
-		perror(argv0);
+	if (!*list) {
+		perror("realloc");
+		exit(1);
+	}
 	*list[*count - 1] = strdup(item);
-	if (!(*list)[*count - 1])
-		perror(argv0);
+	if (!(*list)[*count - 1]) {
+		perror("strdup");
+		exit(1);
+	}
 }
 
 static interfaces_file *read_interfaces_defn(interfaces_file *defn, const char *filename) {

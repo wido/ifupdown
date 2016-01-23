@@ -37,15 +37,22 @@ void cleanup_hwaddress(interface_defn *ifd, char **pparam, int argc, char **argv
 	if (strcmp(*pparam, "random") == 0) {
 		uint8_t mac[6];
 		int fd = open("/dev/urandom", O_RDONLY);
-		if(!fd)
+		if(!fd) {
 			perror("/dev/urandom");
-		read(fd, mac, sizeof mac);
+			return;
+		}
+		if(read(fd, mac, sizeof mac) != sizeof mac) {
+			perror("/dev/urandom");
+			return;
+		}
 		close(fd);
 		mac[0] |= 0x2; // locally administered
 		mac[0] &= ~0x1; // unicast
 		*pparam = realloc(*pparam, 18);
-		if (!*pparam)
+		if (!*pparam) {
 			perror("realloc");
+			exit(1);
+		}
 		snprintf(*pparam, 18, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 		return;
 	}
