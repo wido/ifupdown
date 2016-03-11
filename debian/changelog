@@ -1,3 +1,10 @@
+ifupdown (0.8.11) UNRELEASED; urgency=medium
+
+  [ Wido den Hollander ]
+  * Wait properly for Link-Local Address to go through DAD.
+
+ -- Guus Sliepen <guus@debian.org>  Sat, 12 Mar 2016 00:02:27 +0100
+
 ifupdown (0.8.10) unstable; urgency=medium
 
   * Allow "hwaddress random" to generate a random MAC address.
